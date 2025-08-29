@@ -17,6 +17,7 @@
 5. **Configure Project Settings:**
    - **Framework Preset:** `Other`
    - **Root Directory:** `. ` (root/current directory)
+   - **Node.js Version:** `18.x` (IMPORTANT!)
    - **Build Command:** Leave empty (vercel.json handles this)
    - **Output Directory:** Leave empty (vercel.json handles this)
    - **Install Command:** `npm install --legacy-peer-deps && cd backend && npm install --legacy-peer-deps && cd ../frontend && npm install --legacy-peer-deps`
