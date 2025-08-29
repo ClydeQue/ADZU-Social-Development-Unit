@@ -4,7 +4,7 @@
   "description": "AdZU Social Development Unit - Full Stack Application",
   "private": true,
   "scripts": {
-    "build": "npm run build:frontend",
+    "build": "cd frontend && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",

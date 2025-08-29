@@ -17,8 +17,8 @@
 5. **Configure Project Settings:**
    - **Framework Preset:** `Other`
    - **Root Directory:** `. ` (root/current directory)
-   - **Build Command:** `cd frontend && npm run build`
-   - **Output Directory:** `frontend/dist`
+   - **Build Command:** Leave empty (vercel.json handles this)
+   - **Output Directory:** Leave empty (vercel.json handles this)
    - **Install Command:** `npm install --legacy-peer-deps && cd backend && npm install --legacy-peer-deps && cd ../frontend && npm install --legacy-peer-deps`
 
 ### Step 2: Configure Environment Variables
