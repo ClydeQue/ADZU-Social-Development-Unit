@@ -17,10 +17,10 @@
 5. **Configure Project Settings:**
    - **Framework Preset:** `Other`
    - **Root Directory:** `. ` (root/current directory)
-   - **Node.js Version:** `18.x` (IMPORTANT!)
+   - **Node.js Version:** `22.x` (Latest!)
    - **Build Command:** Leave empty (vercel.json handles this)
    - **Output Directory:** Leave empty (vercel.json handles this)
-   - **Install Command:** `npm install --legacy-peer-deps && cd backend && npm install --legacy-peer-deps && cd ../frontend && npm install --legacy-peer-deps`
+   - **Install Command:** `npm install && cd backend && npm install && cd ../frontend && npm install`
 
 ### Step 2: Configure Environment Variables
 
