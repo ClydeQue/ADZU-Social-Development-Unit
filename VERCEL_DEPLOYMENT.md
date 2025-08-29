@@ -18,9 +18,9 @@
    - **Framework Preset:** `Other`
    - **Root Directory:** `. ` (root/current directory)
    - **Node.js Version:** `22.x` (Latest!)
-   - **Build Command:** Leave empty (vercel.json handles this)
-   - **Output Directory:** Leave empty (vercel.json handles this)
-   - **Install Command:** `npm install && cd backend && npm install && cd ../frontend && npm install`
+   - **Build Command:** `cd frontend && npm install && npm run build`
+   - **Output Directory:** Leave empty
+   - **Install Command:** `cd backend && npm install`
 
 ### Step 2: Configure Environment Variables
 
