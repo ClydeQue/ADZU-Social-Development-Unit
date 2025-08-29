@@ -1,8 +1,8 @@
-# Simple Login Credentials
+# Login Credentials
 
 ## Office Users
 
-Each office has simple credentials following the pattern:
+Each Officers may unique creds mag login, for now hardcoded muna siya
 
 ### Social Development Office (SDO)
 

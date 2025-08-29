@@ -284,14 +284,7 @@ const statsQuery = `
 
 ### 1. Database Setup
 
-```bash
-# Install PostgreSQL (macOS with Homebrew)
-brew install postgresql@15
-brew services start postgresql@15
-
-# Create database
-createdb adzu_sdu
-```
+Naka setup na sa Supabase via .env
 
 ### 2. Backend Setup
 
@@ -324,58 +317,13 @@ npm run dev          # Start development server on port 5173
 - **Password**: admin123
 - **Access**: All offices, reports, dashboard overview
 
-### Office Users
-
-| Office                 | Email                 | Password    |
-| ---------------------- | --------------------- | ----------- |
-| Community Extension    | community@adzu.edu.ph | password123 |
-| Research & Development | research@adzu.edu.ph  | password123 |
-| Student Affairs        | student@adzu.edu.ph   | password123 |
-| Academic Affairs       | academic@adzu.edu.ph  | password123 |
-| Financial Aid          | financial@adzu.edu.ph | password123 |
-| Alumni Relations       | alumni@adzu.edu.ph    | password123 |
-
-## Environment Variables
-
-### Backend (.env)
-
-```env
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=adzu_sdu
-DB_USER=clyde
-DB_PASSWORD=
-
-# JWT Configuration
-JWT_SECRET=your_jwt_secret_key_here_make_it_very_secure
-JWT_EXPIRES_IN=24h
-
-# Server Configuration
-PORT=3001
-NODE_ENV=development
-
-# CORS Configuration
-CORS_ORIGIN=http://localhost:5173
-```
-
 ## Common Issues & Solutions
-
-### Port 5000 Conflict (macOS AirPlay)
-
-- Backend now uses port **3001** instead of 5000
-- Frontend API calls updated to use `localhost:3001`
 
 ### Database Connection Issues
 
 1. Ensure PostgreSQL is running: `brew services start postgresql@15`
 2. Check database exists: `psql -l | grep adzu_sdu`
 3. Verify credentials in `.env` file
-
-### CORS Issues
-
-- Ensure `CORS_ORIGIN` in `.env` matches your frontend URL
-- Frontend runs on port 5173 by default
 
 ## Development Workflow
 
