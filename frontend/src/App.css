@@ -8,6 +8,10 @@
 html {
   font-size: 16px; /* Base font size - prevents scaling issues */
   line-height: 1.5;
+  /* Prevent zoom on mobile devices */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -19,6 +23,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 1rem; /* Consistent base font size */
+  /* Prevent accidental zoom */
+  touch-action: manipulation;
 }
 
 #root {
@@ -44,6 +50,7 @@ body {
   min-height: 36px !important;
 }
 
+/* Typography consistency - using rem units for better scaling */
 .MuiTypography-h3 {
   font-size: 2.5rem !important;
 }
@@ -66,4 +73,27 @@ body {
 
 .MuiTypography-body2 {
   font-size: 0.875rem !important;
+}
+
+/* Prevent text zoom on form inputs */
+input, select, textarea {
+  font-size: 16px !important; /* Prevents zoom on iOS */
+}
+
+/* Ensure icons scale properly */
+.MuiSvgIcon-root {
+  font-size: inherit !important;
+}
+
+/* Media queries for responsive design consistency */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px; /* Smaller base size on mobile */
+  }
+}
+
+@media (min-width: 1200px) {
+  html {
+    font-size: 16px; /* Standard size on desktop */
+  }
 }
