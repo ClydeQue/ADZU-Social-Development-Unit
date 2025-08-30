@@ -22,15 +22,12 @@ const WelcomePage = () => {
         }}
         className="bg-gradient-to-br from-blue-600 to-purple-600"
       >
-        <Typography 
-          variant="h2" 
-          component="h1" 
-          gutterBottom 
-          align="center"
-          className="text-white font-bold mb-8"
+        <p 
+        
+          className="text-white text-[3.75rem] font-bold mb-8"
         >
           Welcome to AdZU Social Development Unit System
-        </Typography>
+        </p>
 
         <Typography 
           variant="h6" 
