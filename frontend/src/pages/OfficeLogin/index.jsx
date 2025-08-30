@@ -11,19 +11,17 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Business, ArrowBack } from '@mui/icons-material';
-import { useAuthHook } from '@/utils/hooks';
+import { useOfficeLogin } from '../../hooks/useAuthQuery';
 
 const OfficeLoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { officeId } = useParams();
   const location = useLocation();
-  const { login } = useAuthHook();
+  const officeLoginMutation = useOfficeLogin();
   
   const officeName = location.state?.officeName || 'Office';
 
@@ -36,21 +34,16 @@ const OfficeLoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      await login({
-        ...formData,
-        role: 'office',
-        office_id: officeId
-      });
-      navigate('/office/dashboard');
-    } catch (err) {
-      setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
+    
+    officeLoginMutation.mutate({
+      office: officeId,
+      email: formData.email,
+      password: formData.password
+    }, {
+      onSuccess: () => {
+        navigate('/office/dashboard');
+      }
+    });
   };
 
   return (
@@ -92,7 +85,11 @@ const OfficeLoginPage = () => {
             </Typography>
           </Box>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {officeLoginMutation.error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {officeLoginMutation.error.message || 'Login failed'}
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit}>
             <TextField
@@ -104,7 +101,7 @@ const OfficeLoginPage = () => {
               onChange={handleChange}
               required
               margin="normal"
-              disabled={loading}
+              disabled={officeLoginMutation.isPending}
             />
             <TextField
               fullWidth
@@ -115,17 +112,17 @@ const OfficeLoginPage = () => {
               onChange={handleChange}
               required
               margin="normal"
-              disabled={loading}
+              disabled={officeLoginMutation.isPending}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
+              disabled={officeLoginMutation.isPending}
               size="large"
             >
-              {loading ? <CircularProgress size={24} /> : 'Login'}
+              {officeLoginMutation.isPending ? <CircularProgress size={24} /> : 'Login'}
             </Button>
           </form>
 

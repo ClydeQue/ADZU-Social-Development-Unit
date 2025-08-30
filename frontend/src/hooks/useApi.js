@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../lib/supabase";
 
 // Query keys for consistent caching
 export const QUERY_KEYS = {
@@ -27,7 +27,7 @@ export const useOffices = () => {
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime in v4)
   });
 };
 

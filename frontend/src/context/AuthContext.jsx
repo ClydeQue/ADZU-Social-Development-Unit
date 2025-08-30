@@ -1,102 +1,70 @@
-import React, { useReducer, useEffect } from 'react';
+import { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { AuthContext } from './Context';
-import { authService } from '@/services/authService';
-
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case 'LOGIN_START':
-      return { ...state, loading: true, error: null };
-    case 'LOGIN_SUCCESS':
-      return { 
-        ...state, 
-        loading: false, 
-        error: null, 
-        isAuthenticated: true, 
-        user: action.payload 
-      };
-    case 'LOGIN_FAILURE':
-      return { 
-        ...state, 
-        loading: false, 
-        error: action.payload, 
-        isAuthenticated: false, 
-        user: null 
-      };
-    case 'LOGOUT':
-      return { 
-        ...state, 
-        isAuthenticated: false, 
-        user: null, 
-        error: null 
-      };
-    case 'SET_USER':
-      return { 
-        ...state, 
-        isAuthenticated: true, 
-        user: action.payload, 
-        loading: false 
-      };
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
-    default:
-      return state;
-  }
-};
+import { useAuthSession, useLogout } from '../hooks/useAuthQuery';
 
 const initialState = {
   user: null,
+  userType: null,
+  token: null,
   isAuthenticated: false,
   loading: true,
-  error: null
+  error: null,
 };
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const logoutMutation = useLogout();
+  
+  // Use React Query for session management - this replaces useEffect
+  const { data: session, isLoading, error } = useAuthSession();
 
-  useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        const userData = await authService.verifyToken();
-        dispatch({ type: 'SET_USER', payload: userData.user });
-      } catch {
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
+  // Compute auth state from React Query data instead of using useEffect
+  const value = useMemo(() => {
+    if (isLoading) {
+      return { ...initialState, loading: true };
+    }
+    
+    if (error) {
+      return { 
+        ...initialState, 
+        loading: false, 
+        error: error.message,
+        isAuthenticated: false,
+        logout: () => logoutMutation.mutate()
+      };
+    }
+    
+    if (session) {
+      return {
+        user: session.user,
+        userType: session.userType,
+        token: session.token,
+        isAuthenticated: true,
+        loading: false,
+        error: null,
+        logout: () => logoutMutation.mutate()
+      };
+    }
+    
+    // No session
+    return {
+      user: null,
+      userType: null,
+      token: null,
+      isAuthenticated: false,
+      loading: false,
+      error: null,
+      logout: () => logoutMutation.mutate()
     };
-
-    verifyToken();
-  }, []);
-
-  const login = async (credentials) => {
-    dispatch({ type: 'LOGIN_START' });
-    try {
-      const response = await authService.login(credentials);
-      dispatch({ type: 'LOGIN_SUCCESS', payload: response.user });
-      return response;
-    } catch (error) {
-      dispatch({ type: 'LOGIN_FAILURE', payload: error.message });
-      throw error;
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await authService.logout();
-      dispatch({ type: 'LOGOUT' });
-    } catch (error) {
-      console.error('Logout error:', error);
-      dispatch({ type: 'LOGOUT' });
-    }
-  };
+  }, [session, isLoading, error, logoutMutation]);
 
   return (
-    <AuthContext.Provider 
-      value={{
-        ...state,
-        login,
-        logout
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

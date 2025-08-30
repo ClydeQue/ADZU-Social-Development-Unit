@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   Box, 
   Typography, 
@@ -10,42 +9,42 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { ArrowBack } from '@mui/icons-material';
 
+// Constant offices data - using simple integer IDs that match database
+const OFFICES = [
+  {
+    id: 1,
+    name: 'Social Development Office (SDO)',
+    description: 'Student welfare and development programs'
+  },
+  {
+    id: 2,
+    name: 'Center for Community Extension Services (CCES)',
+    description: 'Community outreach and extension services'
+  },
+  {
+    id: 3,
+    name: 'Ateneo Peace Institute (API)',
+    description: 'Peace building and intervention programs'
+  },
+  {
+    id: 4,
+    name: 'Social Awareness and Community Service Involvement (SACSI)',
+    description: 'Social action and community involvement initiatives'
+  },
+  {
+    id: 5,
+    name: 'Ateneo Center for Leadership and Governance (ACLG)',
+    description: 'Leadership development and governance programs'
+  },
+  {
+    id: 6,
+    name: 'Ateneo Center for Culture and the Arts (ACCA)',
+    description: 'Cultural and artistic development programs'
+  }
+];
+
 const OfficeSelectionPage = () => {
   const navigate = useNavigate();
-  
-  // Fixed list of 6 Ateneo offices
-  const offices = [
-    {
-      id: 'sdo',
-      name: 'Social Development Office',
-      description: 'Community development and social welfare programs'
-    },
-    {
-      id: 'cces',
-      name: 'Center for Community Extension Services (CCES)',
-      description: 'Community outreach and extension programs'
-    },
-    {
-      id: 'api',
-      name: 'Ateneo Peace Institute (API)',
-      description: 'Peace building and conflict resolution initiatives'
-    },
-    {
-      id: 'sacsi',
-      name: 'Social Awareness and Community Service Involvement (SACSI)',
-      description: 'Student community service and social awareness programs'
-    },
-    {
-      id: 'aclg',
-      name: 'Ateneo Center for Leadership and Governance (ACLG)',
-      description: 'Leadership development and governance training'
-    },
-    {
-      id: 'acca',
-      name: 'Ateneo Center for Culture and the Arts (ACCA)',
-      description: 'Cultural and arts programs for community development'
-    }
-  ];
 
   const handleOfficeClick = (officeId, officeName) => {
     navigate(`/office/login/${officeId}`, { state: { officeName } });
@@ -80,7 +79,7 @@ const OfficeSelectionPage = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {offices.map((office) => (
+          {OFFICES.map((office) => (
             <Grid item xs={12} md={6} lg={4} key={office.id}>
               <Paper
                 elevation={3}

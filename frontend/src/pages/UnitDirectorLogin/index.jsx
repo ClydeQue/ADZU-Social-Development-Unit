@@ -11,17 +11,15 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AdminPanelSettings, ArrowBack } from '@mui/icons-material';
-import { useAuthHook } from '@/utils/hooks';
+import { useUnitDirectorLogin } from '../../hooks/useAuthQuery';
 
 const UnitDirectorLoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuthHook();
+  const unitDirectorLoginMutation = useUnitDirectorLogin();
 
   const handleChange = (e) => {
     setFormData({
@@ -32,20 +30,15 @@ const UnitDirectorLoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      await login({
-        ...formData,
-        role: 'unit_director'
-      });
-      navigate('/unit-director/dashboard');
-    } catch (err) {
-      setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
+    
+    unitDirectorLoginMutation.mutate({
+      email: formData.email,
+      password: formData.password
+    }, {
+      onSuccess: () => {
+        navigate('/unit-director/dashboard');
+      }
+    });
   };
 
   return (
@@ -84,7 +77,11 @@ const UnitDirectorLoginPage = () => {
             </Typography>
           </Box>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {unitDirectorLoginMutation.error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {unitDirectorLoginMutation.error.message || 'Login failed'}
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit}>
             <TextField
@@ -96,7 +93,7 @@ const UnitDirectorLoginPage = () => {
               onChange={handleChange}
               required
               margin="normal"
-              disabled={loading}
+              disabled={unitDirectorLoginMutation.isPending}
             />
             <TextField
               fullWidth
@@ -107,17 +104,17 @@ const UnitDirectorLoginPage = () => {
               onChange={handleChange}
               required
               margin="normal"
-              disabled={loading}
+              disabled={unitDirectorLoginMutation.isPending}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
+              disabled={unitDirectorLoginMutation.isPending}
               size="large"
             >
-              {loading ? <CircularProgress size={24} /> : 'Login'}
+              {unitDirectorLoginMutation.isPending ? <CircularProgress size={24} /> : 'Login'}
             </Button>
           </form>
 
