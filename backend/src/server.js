@@ -10,6 +10,7 @@ require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 // Import routes
 const authRoutes = require("./routes/auth");
+const secureAuthRoutes = require("./routes/secureAuth"); // New secure auth system
 const unitDirectorRoutes = require("./routes/unitDirector");
 const officeRoutes = require("./routes/office");
 const programRoutes = require("./routes/program");
@@ -61,7 +62,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes); // Legacy auth routes
+app.use("/api/secure-auth", secureAuthRoutes); // New secure auth with JWT tokens
 app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/program", programRoutes);

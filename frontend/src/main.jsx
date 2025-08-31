@@ -28,14 +28,10 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <div className='flex justify-center items-center h-screen w-screen'>
-      <div className='rounded-full  w-200 flex justify-center items-center h-200 bg-black'>
-        <p className='text-white text-8xl'>Test</p>
-      </div>
-    </div>
-    {/* <QueryClientProvider client={queryClient}>
+    
+    <QueryClientProvider client={queryClient}>
       <App />
       <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider> */}
+    </QueryClientProvider>
   </StrictMode>,
 );

@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AdminPanelSettings, ArrowBack } from '@mui/icons-material';
-import { useAuthHook } from '@/utils/hooks';
+import { useAuth } from '@/context/AuthContext.jsx';
 
 const UnitDirectorLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -19,9 +19,9 @@ const UnitDirectorLoginPage = () => {
     password: ''
   });
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuthHook();
+  
+  const { login, loading } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -32,19 +32,19 @@ const UnitDirectorLoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
     try {
-      await login({
-        ...formData,
-        role: 'unit_director'
-      });
+      console.log('� Unit Director Login Attempt:', formData.email);
+      
+      await login(formData.email, formData.password, 'unit_director');
+      
+      console.log('✅ Unit Director login successful - navigating to dashboard');
       navigate('/unit-director/dashboard');
+      
     } catch (err) {
+      console.error('❌ Unit Director login error:', err);
       setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
     }
   };
 

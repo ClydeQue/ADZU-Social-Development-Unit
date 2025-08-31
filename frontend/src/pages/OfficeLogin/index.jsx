@@ -9,9 +9,9 @@ import {
   Container,
   CircularProgress
 } from '@mui/material';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Business, ArrowBack } from '@mui/icons-material';
-import { useAuthHook } from '@/utils/hooks';
+import { useAuth } from '@/context/AuthContext.jsx';
 
 const OfficeLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -19,12 +19,10 @@ const OfficeLoginPage = () => {
     password: ''
   });
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { officeId } = useParams();
   const location = useLocation();
-  const { login } = useAuthHook();
   
+  const { login, loading } = useAuth();
   const officeName = location.state?.officeName || 'Office';
 
   const handleChange = (e) => {
@@ -36,20 +34,19 @@ const OfficeLoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
     try {
-      await login({
-        ...formData,
-        role: 'office',
-        office_id: officeId
-      });
+      console.log('� Office Login Attempt:', formData.email);
+      
+      await login(formData.email, formData.password, 'office');
+      
+      console.log('✅ Office login successful - navigating to dashboard');
       navigate('/office/dashboard');
+      
     } catch (err) {
+      console.error('❌ Office login error:', err);
       setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
     }
   };
 

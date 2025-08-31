@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Test</title>
+</head>
+<body>
+    <h1>Testing Database Connection</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        // Import Supabase
+        const { createClient } = await import('https://cdn.skypack.dev/@supabase/supabase-js');
+        
+        const supabase = createClient(
+            'https://hanrnoqvzkqwvotcexva.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhbnJub3F2emtxd3ZvdGNleHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NzIzMjAsImV4cCI6MjA3MjA0ODMyMH0.WaX7r0SfqmOwQAtrDcG1UBc_Pdyb_wqJgilkOmmEp38'
+        );
+        
+        const results = document.getElementById('results');
+        
+        try {
+            results.innerHTML += '<p>Testing database connection...</p>';
+            
+            // Test office_users table
+            const { data: offices, error: officeError } = await supabase
+                .from('office_users')
+                .select('id, name, email, office_id')
+                .limit(5);
+            
+            if (officeError) {
+                results.innerHTML += `<p>Office users error: ${officeError.message}</p>`;
+            } else {
+                results.innerHTML += `<p>Office users found: ${offices ? offices.length : 0}</p>`;
+                if (offices && offices.length > 0) {
+                    results.innerHTML += '<ul>';
+                    offices.forEach(user => {
+                        results.innerHTML += `<li>${user.email} (${user.name})</li>`;
+                    });
+                    results.innerHTML += '</ul>';
+                }
+            }
+            
+            // Test unit_directors table
+            const { data: directors, error: directorError } = await supabase
+                .from('unit_directors')
+                .select('id, name, email')
+                .limit(5);
+                
+            if (directorError) {
+                results.innerHTML += `<p>Unit directors error: ${directorError.message}</p>`;
+            } else {
+                results.innerHTML += `<p>Unit directors found: ${directors ? directors.length : 0}</p>`;
+                if (directors && directors.length > 0) {
+                    results.innerHTML += '<ul>';
+                    directors.forEach(user => {
+                        results.innerHTML += `<li>${user.email} (${user.name})</li>`;
+                    });
+                    results.innerHTML += '</ul>';
+                }
+            }
+            
+            // Test offices table
+            const { data: officeList, error: officeListError } = await supabase
+                .from('offices')
+                .select('id, name')
+                .limit(5);
+                
+            if (officeListError) {
+                results.innerHTML += `<p>Offices error: ${officeListError.message}</p>`;
+            } else {
+                results.innerHTML += `<p>Offices found: ${officeList ? officeList.length : 0}</p>`;
+                if (officeList && officeList.length > 0) {
+                    results.innerHTML += '<ul>';
+                    officeList.forEach(office => {
+                        results.innerHTML += `<li>${office.name}</li>`;
+                    });
+                    results.innerHTML += '</ul>';
+                }
+            }
+            
+        } catch (error) {
+            results.innerHTML += `<p>Error: ${error.message}</p>`;
+        }
+    </script>
+</body>
+</html>

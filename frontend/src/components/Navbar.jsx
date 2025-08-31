@@ -1,22 +1,14 @@
-import React from 'react';
 import { 
   AppBar, 
   Toolbar, 
   Typography, 
-  Button, 
   Box 
 } from '@mui/material';
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import LogoutButton from './LogoutButton';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
+  const { user } = useAuth();
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -26,12 +18,21 @@ const Navbar = () => {
         </Typography>
         {user && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2">
-              Welcome, {user.name || user.email}
+            <Typography variant="body2" sx={{ color: 'white' }}>
+              Welcome, {user.name}
             </Typography>
-            <Button color="inherit" onClick={handleLogout}>
-              Logout
-            </Button>
+            <LogoutButton 
+              variant="outlined" 
+              size="small" 
+              sx={{ 
+                color: 'white', 
+                borderColor: 'white',
+                '&:hover': {
+                  borderColor: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            />
           </Box>
         )}
       </Toolbar>

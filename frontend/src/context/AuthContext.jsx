@@ -1,102 +1,72 @@
-import React, { useReducer, useEffect } from 'react';
-import { AuthContext } from './Context';
-import { authService } from '@/services/authService';
+import { createContext, useContext, useState, useEffect } from 'react';
+import SecureAuth from '../auth/SecureAuth.js';
 
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case 'LOGIN_START':
-      return { ...state, loading: true, error: null };
-    case 'LOGIN_SUCCESS':
-      return { 
-        ...state, 
-        loading: false, 
-        error: null, 
-        isAuthenticated: true, 
-        user: action.payload 
-      };
-    case 'LOGIN_FAILURE':
-      return { 
-        ...state, 
-        loading: false, 
-        error: action.payload, 
-        isAuthenticated: false, 
-        user: null 
-      };
-    case 'LOGOUT':
-      return { 
-        ...state, 
-        isAuthenticated: false, 
-        user: null, 
-        error: null 
-      };
-    case 'SET_USER':
-      return { 
-        ...state, 
-        isAuthenticated: true, 
-        user: action.payload, 
-        loading: false 
-      };
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
-    default:
-      return state;
-  }
-};
-
-const initialState = {
-  user: null,
-  isAuthenticated: false,
-  loading: true,
-  error: null
-};
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Check for existing session on app start
   useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        const userData = await authService.verifyToken();
-        dispatch({ type: 'SET_USER', payload: userData.user });
-      } catch {
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
-    };
-
-    verifyToken();
+    console.log('🚀 Checking for existing session...');
+    const existingSession = SecureAuth.getSession();
+    setSession(existingSession);
+    setLoading(false);
+    console.log('✅ Session check complete:', existingSession ? 'Authenticated' : 'Not authenticated');
   }, []);
 
-  const login = async (credentials) => {
-    dispatch({ type: 'LOGIN_START' });
+  const login = async (email, password, userType) => {
+    setLoading(true);
     try {
-      const response = await authService.login(credentials);
-      dispatch({ type: 'LOGIN_SUCCESS', payload: response.user });
-      return response;
-    } catch (error) {
-      dispatch({ type: 'LOGIN_FAILURE', payload: error.message });
-      throw error;
+      let newSession;
+      
+      if (userType === 'office') {
+        newSession = await SecureAuth.loginOffice(email, password);
+      } else if (userType === 'unit_director') {
+        newSession = await SecureAuth.loginUnitDirector(email, password);
+      } else {
+        throw new Error('Invalid user type');
+      }
+      
+      setSession(newSession);
+      return newSession;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const logout = async () => {
-    try {
-      await authService.logout();
-      dispatch({ type: 'LOGOUT' });
-    } catch (error) {
-      console.error('Logout error:', error);
-      dispatch({ type: 'LOGOUT' });
-    }
+  const logout = () => {
+    SecureAuth.logout();
+    setSession(null);
+  };
+
+  const value = {
+    // Session data
+    user: session?.user || null,
+    userType: session?.userType || null,
+    token: session?.token || null,
+    isAuthenticated: !!session,
+    
+    // Loading state
+    loading,
+    
+    // Actions
+    login,
+    logout
   };
 
   return (
-    <AuthContext.Provider 
-      value={{
-        ...state,
-        login,
-        logout
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
