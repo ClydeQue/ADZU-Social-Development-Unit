@@ -6,13 +6,13 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 
 // Load environment variables with explicit path
-require("dotenv").config({ path: path.join(__dirname, "../.env") });
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 // Import routes
-const authRoutes = require("./routes/auth"); // Professional JWT authentication
-const unitDirectorRoutes = require("./routes/unitDirector");
-const officeRoutes = require("./routes/office");
-const programRoutes = require("./routes/program");
+const authRoutes = require("./src/routes/auth"); // Professional JWT authentication
+const unitDirectorRoutes = require("./src/routes/unitDirector");
+const officeRoutes = require("./src/routes/office");
+const programRoutes = require("./src/routes/program");
 
 const app = express();
 
