@@ -26,12 +26,11 @@ export default defineConfig({
     },
   },
   server: {
-    host: true, // Allow external connections for development
+    host: true, // Allow ngrok muna for test dev
     allowedHosts: ["localhost", "127.0.0.1", "be4357f6b0b6.ngrok-free.app"],
   },
   build: {
     chunkSizeWarningLimit: 1000,
-    assetsDir: "assets", // Ensure assets are in the correct directory
     rollupOptions: {
       output: {
         manualChunks: {
@@ -43,6 +42,4 @@ export default defineConfig({
       },
     },
   },
-  // Ensure public assets are handled correctly
-  publicDir: "public",
 });

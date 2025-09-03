@@ -3,13 +3,16 @@
 ## Image Loading Issues Fixed
 
 ### Problem
+
 Images in `/public/` folder weren't loading on Vercel deployment due to:
+
 1. Missing Vercel configuration for static assets
 2. Incorrect asset importing in React components
 
 ### Solution
 
 #### 1. Created `vercel.json` Configuration
+
 ```json
 {
   "buildCommand": "npm run build",
@@ -25,29 +28,34 @@ Images in `/public/` folder weren't loading on Vercel deployment due to:
 ```
 
 #### 2. Updated Vite Configuration
+
 - Added `assetsDir: 'assets'`
 - Specified `publicDir: 'public'`
 - Proper asset handling for production
 
 #### 3. Fixed Image Imports
+
 **Before (Problematic):**
+
 ```jsx
-<img src="/logos/adzuSeal.png" alt="AdZU Seal" />
-backgroundImage: "url('/images/login.webp')"
+<img src="/logos/adzuSeal.png" alt="AdZU Seal" />;
+backgroundImage: "url('/images/login.webp')";
 ```
 
 **After (Fixed):**
-```jsx
-import adzuSeal from '/logos/adzuSeal.png';
-import loginBg from '/images/login.webp';
 
-<img src={adzuSeal} alt="AdZU Seal" />
-backgroundImage: `url(${loginBg})`
+```jsx
+import adzuSeal from "/logos/adzuSeal.png";
+import loginBg from "/images/login.webp";
+
+<img src={adzuSeal} alt="AdZU Seal" />;
+backgroundImage: `url(${loginBg})`;
 ```
 
 ## Deployment Steps
 
 1. **Build locally to test:**
+
    ```bash
    cd frontend
    npm run build
@@ -55,6 +63,7 @@ backgroundImage: `url(${loginBg})`
    ```
 
 2. **Deploy to Vercel:**
+
    ```bash
    vercel  # Deploy from frontend folder
    ```

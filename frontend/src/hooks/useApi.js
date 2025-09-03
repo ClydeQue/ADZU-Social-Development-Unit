@@ -202,8 +202,6 @@ export const useUnitDirectorReports = (filters = {}) => {
 // ============= PROGRAM SUBSCRIPTIONS =============
 
 export const useOfficePrograms_WithSubscription = (officeId) => {
-  const queryClient = useQueryClient();
-
   return useQuery({
     queryKey: QUERY_KEYS.officePrograms(officeId),
     queryFn: async () => {
