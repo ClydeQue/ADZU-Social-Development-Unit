@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Typography } from "@mui/material";
-
+import loginBgImage from '/images/login.webp';
+import adzuSealImage from '/logos/adzuSeal.png';
 
 const WelcomePage = () => {
   const Navigate = useNavigate();
@@ -9,7 +10,7 @@ const WelcomePage = () => {
     <div className='w-screen h-screen flex bg-amber-500 bg-no-repeat bg-cover'> 
       <div className='w-screen h-screen justify-center flex items-center bg-no-repeat bg-cover bg-center'
        style={{
-        backgroundImage: "url('/images/login.webp')", 
+        backgroundImage: `url(${loginBgImage})`, 
         backgroundSize: 'cover',
               }}>
        {/* Center Container */}
@@ -20,7 +21,7 @@ const WelcomePage = () => {
         border border-white backdrop-blur-lg"> 
       {/* Placeholder logo - top center */}
       <div className="mt-6 flex justify-center">
-          <img src="/logos/adzuSeal.png" alt="AdZU Seal" className="w-24 sm:w-20 md:w-28 xl:w-50 h-auto object-contain" />            </div>
+          <img src={adzuSealImage} alt="AdZU Seal" className="w-24 sm:w-20 md:w-28 xl:w-50 h-auto object-contain" />            </div>
         <p className="text-white text-[1.75rem] text-center font-bold mb-8"
         >
           SOCIAL DEVELOPMENT UNIT
