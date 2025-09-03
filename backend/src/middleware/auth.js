@@ -1,40 +1,5 @@
 // JWT Authentication Middleware with Access/Refresh Token System
-const tokenService = require("../services/tokenService");
-
-// Legacy middleware (keeping for backward compatibility)
-const jwt = require("jsonwebtoken");
-
-const authMiddleware = (req, res, next) => {
-  const token =
-    req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.status(401).json({ error: "Access denied. No token provided." });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Invalid token." });
-  }
-};
-
-const adminAuthMiddleware = (req, res, next) => {
-  authMiddleware(req, res, (err) => {
-    if (err) return next(err);
-
-    if (req.user.role !== "unit_director") {
-      return res
-        .status(403)
-        .json({ error: "Access denied. Admin privileges required." });
-    }
-    next();
-  });
-};
-
-// New JWT middleware with proper access/refresh token system
+const jwtService = require("../services/jwtService");
 // Middleware to verify access token
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -47,7 +12,7 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
-  const verification = tokenService.verifyAccessToken(token);
+  const verification = jwtService.verifyAccessToken(token);
 
   if (!verification.valid) {
     if (verification.expired) {
@@ -141,7 +106,7 @@ const optionalAuth = (req, res, next) => {
     return next();
   }
 
-  const verification = tokenService.verifyAccessToken(token);
+  const verification = jwtService.verifyAccessToken(token);
 
   if (verification.valid) {
     req.user = {
@@ -157,8 +122,6 @@ const optionalAuth = (req, res, next) => {
 };
 
 module.exports = {
-  authMiddleware,
-  adminAuthMiddleware,
   authenticateToken,
   requireRole,
   requireOwnership,

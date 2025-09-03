@@ -9,8 +9,7 @@ const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 // Import routes
-const authRoutes = require("./routes/auth");
-const secureAuthRoutes = require("./routes/secureAuth"); // New secure auth system
+const authRoutes = require("./routes/auth"); // Professional JWT authentication
 const unitDirectorRoutes = require("./routes/unitDirector");
 const officeRoutes = require("./routes/office");
 const programRoutes = require("./routes/program");
@@ -18,16 +17,21 @@ const programRoutes = require("./routes/program");
 const app = express();
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
-// Rate limiting
+// Rate limiting - more generous for production
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === "production" ? 1000 : 100, // Higher limit for production
+  message: { error: "Too many requests, please try again later" },
 });
 app.use(limiter);
 
-// CORS configuration
+// CORS configuration for production
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -38,14 +42,14 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    // In production, check against allowed origins
+    // In production, get allowed origins from environment
     const allowedOrigins = [
       process.env.CORS_ORIGIN,
-      "https://localhost:3000",
-      "https://localhost:5173",
+      process.env.FRONTEND_URL,
+      "https://your-frontend-domain.vercel.app", // Replace with your actual frontend domain
     ].filter(Boolean);
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -62,35 +66,108 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Routes
-app.use("/api/auth", authRoutes); // Legacy auth routes
-app.use("/api/secure-auth", secureAuthRoutes); // New secure auth with JWT tokens
+app.use("/api/auth", authRoutes); // Professional JWT authentication
 app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/program", programRoutes);
 
 // Health check endpoint
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "AdZU SDU API Server is running",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", message: "AdZU SDU API Server is running" });
+  res.json({
+    status: "OK",
+    message: "AdZU SDU API Server is running",
+    environment: process.env.NODE_ENV || "development",
+    version: "1.0.0",
+  });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Something went wrong!" });
+  console.error("Error:", err.message);
+  console.error("Stack:", err.stack);
+
+  const isDevelopment = process.env.NODE_ENV !== "production";
+
+  res.status(err.status || 500).json({
+    error: isDevelopment ? err.message : "Internal Server Error",
+    ...(isDevelopment && { stack: err.stack }),
+  });
 });
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({
+    error: "Route not found",
+    path: req.path,
+    method: req.method,
+  });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
-// For Vercel deployment
+// For local development only - Vercel handles this in production
 if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
-    console.log(`AdZU SDU API Server running on port ${PORT}`);
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 AdZU SDU API Server running on port ${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
   });
+
+  // Graceful shutdown for local development
+  process.on("SIGTERM", () => {
+    console.log("SIGTERM received, shutting down gracefully");
+    server.close(() => {
+      console.log("Process terminated");
+    });
+  });
+
+  process.on("SIGINT", () => {
+    console.log("SIGINT received, shutting down gracefully");
+    server.close(() => {
+      console.log("Process terminated");
+    });
+  });
+
+  // Test database connection for local development
+  setTimeout(testDatabaseConnection, 1000);
+}
+
+// Database connection check
+const { createClient } = require("@supabase/supabase-js");
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: false,
+    },
+  }
+);
+
+// Test database connection function
+async function testDatabaseConnection() {
+  try {
+    const { data, error } = await supabase
+      .from("office_users")
+      .select("count", { count: "exact", head: true });
+
+    if (error) throw error;
+
+    console.log("✅ Connected to Supabase database");
+  } catch (error) {
+    console.error("❌ Database connection error:", error.message);
+  }
 }
 
 // Export for Vercel serverless functions

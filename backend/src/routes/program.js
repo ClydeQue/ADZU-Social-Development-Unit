@@ -1,11 +1,46 @@
 const express = require("express");
-const { authMiddleware } = require("../middleware/auth");
+const { authenticateToken, requireRole } = require("../middleware/auth");
 const supabase = require("../config/database");
 
 const router = express.Router();
 
+// Get all programs (with optional filters)
+router.get("/all", authenticateToken, async (req, res) => {
+  try {
+    const { status, office_id, year } = req.query;
+
+    let query = supabase
+      .from("programs")
+      .select(
+        `
+        *,
+        offices(name)
+      `
+      )
+      .order("created_at", { ascending: false });
+
+    // Apply filters
+    if (status) query = query.eq("status", status);
+    if (office_id) query = query.eq("office_id", office_id);
+    if (year) {
+      const startDate = `${year}-01-01`;
+      const endDate = `${year}-12-31`;
+      query = query.gte("start_date", startDate).lte("start_date", endDate);
+    }
+
+    const { data: programs, error } = await query;
+
+    if (error) throw error;
+
+    res.json({ programs });
+  } catch (error) {
+    console.error("Get all programs error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Create new program
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", authenticateToken, async (req, res) => {
   try {
     const {
       title,
@@ -16,26 +51,39 @@ router.post("/", authMiddleware, async (req, res) => {
       start_date,
       end_date,
       office_id,
+      target_participants,
+      sdg_goals,
+      adzu_goals,
     } = req.body;
 
-    // Check if user has access to this office
-    if (req.user.role !== "unit_director" && req.user.office_id != office_id) {
-      return res.status(403).json({ error: "Access denied to this office" });
+    // Check if user has permission to create program for this office
+    if (
+      req.user.userType !== "unit_director" &&
+      req.user.office_id != office_id
+    ) {
+      return res.status(403).json({
+        error: "Access denied. You can only create programs for your office.",
+      });
     }
 
     const { data: program, error } = await supabase
       .from("programs")
-      .insert({
-        title,
-        description,
-        status,
-        funding_source,
-        participants_count,
-        start_date,
-        end_date,
-        office_id,
-        created_by: req.user.id,
-      })
+      .insert([
+        {
+          title,
+          description,
+          target_participants,
+          start_date,
+          end_date,
+          status,
+          office_id,
+          sdg_goals,
+          adzu_goals,
+          funding_source,
+          participants_count,
+          created_by: req.user.userId,
+        },
+      ])
       .select()
       .single();
 
@@ -49,7 +97,7 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 // Update program
-router.put("/:id", authMiddleware, async (req, res) => {
+router.put("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -60,6 +108,9 @@ router.put("/:id", authMiddleware, async (req, res) => {
       participants_count,
       start_date,
       end_date,
+      target_participants,
+      sdg_goals,
+      adzu_goals,
     } = req.body;
 
     // Check if program exists and user has access
@@ -78,7 +129,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     const programOfficeId = programs[0].office_id;
 
     if (
-      req.user.role !== "unit_director" &&
+      req.user.userType !== "unit_director" &&
       req.user.office_id != programOfficeId
     ) {
       return res.status(403).json({ error: "Access denied" });
@@ -94,6 +145,9 @@ router.put("/:id", authMiddleware, async (req, res) => {
         participants_count,
         start_date,
         end_date,
+        target_participants,
+        sdg_goals,
+        adzu_goals,
       })
       .eq("id", id)
       .select()
@@ -109,7 +163,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 });
 
 // Delete program
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -129,7 +183,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     const programOfficeId = programs[0].office_id;
 
     if (
-      req.user.role !== "unit_director" &&
+      req.user.userType !== "unit_director" &&
       req.user.office_id != programOfficeId
     ) {
       return res.status(403).json({ error: "Access denied" });

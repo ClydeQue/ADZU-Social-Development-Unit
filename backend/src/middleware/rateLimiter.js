@@ -1,7 +1,6 @@
 // Rate Limiter Middleware
 // Protects against brute force attacks
 const rateLimit = require("express-rate-limit");
-const MongoStore = require("rate-limit-mongo");
 
 // In-memory store for development (replace with Redis in production)
 class MemoryStore {
