@@ -33,31 +33,7 @@ app.use(limiter);
 
 // CORS configuration for production
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // In development, allow localhost and any Vercel app
-    if (process.env.NODE_ENV !== "production") {
-      return callback(null, true);
-    }
-
-    // In production, allow Vercel apps and configured origins
-    const allowedOrigins = [
-      process.env.CORS_ORIGIN,
-      process.env.FRONTEND_URL,
-      "https://social-develepoment-unit.vercel.app", // Your actual frontend domain
-      "https://social-development-unit.vercel.app", // Alternative spelling
-    ].filter(Boolean);
-
-    // Allow any vercel.app domain for now (you can restrict this later)
-    if (origin && (origin.includes('.vercel.app') || allowedOrigins.includes(origin))) {
-      callback(null, true);
-    } else {
-      console.log(`CORS blocked origin: ${origin}`);
-      callback(null, true); // Temporarily allow all origins for debugging
-    }
-  },
+  origin: true, // Allow all origins for now
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
