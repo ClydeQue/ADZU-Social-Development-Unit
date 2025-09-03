@@ -1,16 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { Typography } from "@mui/material";
+import loginBg from '/images/login.webp';
+import adzuSeal from '/logos/adzuSeal.png';
+
 const WelcomePage = () => {
-
-
-
   const Navigate = useNavigate();
 
   return (  
     <div className='w-screen h-screen flex bg-amber-500 bg-no-repeat bg-cover'> 
       <div className='w-screen h-screen justify-center flex items-center bg-no-repeat bg-cover bg-center'
        style={{
-        backgroundImage: "url('/images/login.webp')",
+        backgroundImage: `url(${loginBg})`,
         backgroundSize: 'cover',
               }}>
        {/* Center Container */}
@@ -21,8 +21,7 @@ const WelcomePage = () => {
         border border-white backdrop-blur-lg"> 
       {/* Placeholder logo - top center */}
       <div className="mt-6 flex justify-center">
-        <img src="/logos/adzuSeal.png" alt="AdZU Seal"  className="w-24 sm:w-20 md:w-28 xl:w-50 h-auto object-contain"  />
-
+        <img src={adzuSeal} alt="AdZU Seal" className="w-24 sm:w-20 md:w-28 xl:w-50 h-auto object-contain" />
       </div>
 
 
