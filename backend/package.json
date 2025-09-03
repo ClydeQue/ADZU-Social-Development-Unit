@@ -2,7 +2,7 @@
   "name": "adzu-sdu-backend",
   "version": "1.0.0",
   "description": "AdZU Social Development Unit Backend API",
-  "main": "src/server.js",
+  "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
