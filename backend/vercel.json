@@ -1,14 +1,19 @@
 {
   "version": 2,
-  "name": "adzu-sdu-backend",
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/index.js"
     }
   ],
   "functions": {
-    "api/index.js": {
+    "index.js": {
       "maxDuration": 30
     }
   }

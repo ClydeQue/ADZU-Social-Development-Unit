@@ -6,8 +6,6 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "vercel-build": "echo 'No build step needed for Express.js'",
-    "build": "echo 'No build step needed for Express.js'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
