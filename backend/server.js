@@ -16,6 +16,9 @@ const programRoutes = require("./src/routes/program");
 
 const app = express();
 
+// Trust proxy for Vercel deployment
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(
   helmet({
