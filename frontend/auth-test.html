@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADZU SDU - Complete Authentication Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .test-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        .test-section { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .office-tests { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .office-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .office-card {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #fafafa;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; color: #856404; }
+        button { 
+            padding: 12px 24px; 
+            margin: 10px 0; 
+            font-size: 16px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover { background-color: #0056b3; }
+        button.office-btn { font-size: 14px; padding: 8px 16px; }
+        pre { 
+            background-color: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 4px; 
+            overflow-x: auto; 
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .token-info { 
+            font-family: monospace; 
+            font-size: 12px; 
+            background: #f1f3f4; 
+            padding: 8px; 
+            border-radius: 4px; 
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 ADZU Social Development Unit</h1>
+        <h2>Complete Frontend-Backend Authentication Test</h2>
+        <p>Testing JWT authentication for all 6 Ateneo offices + Unit Director</p>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-section">
+            <h2>👔 Unit Director Login Test</h2>
+            <p><strong>Credentials:</strong> director@adzu.edu.ph / admin123</p>
+            <button onclick="testDirectorLogin()">Test Unit Director Login</button>
+            <div id="director-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 Token Verification Test</h2>
+            <p>Verify the last successful login token</p>
+            <button onclick="testTokenVerification()">Verify Last Token</button>
+            <div id="verify-result"></div>
+        </div>
+    </div>
+    
+    <div class="office-tests">
+        <h2>🏢 All 6 Ateneo Offices Authentication Test</h2>
+        <p>Testing login for each of the 6 Social Development Unit offices</p>
+        
+        <div class="office-grid">
+            <div class="office-card">
+                <h3>1. 🏢 SDO</h3>
+                <p><strong>Social Development Office</strong></p>
+                <p>Email: sdo@adzu.edu.ph</p>
+                <button class="office-btn" onclick="testOfficeLogin('sdo@adzu.edu.ph', 'sdo123', 'sdo')">Test SDO Login</button>
+                <div id="sdo-result"></div>
+            </div>
+            
+            <div class="office-card">
+                <h3>2. 🌱 CCES</h3>
+                <p><strong>Center for Community Extension Services</strong></p>
+                <p>Email: cces@adzu.edu.ph</p>
+                <button class="office-btn" onclick="testOfficeLogin('cces@adzu.edu.ph', 'cces123', 'cces')">Test CCES Login</button>
+                <div id="cces-result"></div>
+            </div>
+            
+            <div class="office-card">
+                <h3>3. ☮️ API</h3>
+                <p><strong>Ateneo Peace Institute</strong></p>
+                <p>Email: api@adzu.edu.ph</p>
+                <button class="office-btn" onclick="testOfficeLogin('api@adzu.edu.ph', 'api123', 'api')">Test API Login</button>
+                <div id="api-result"></div>
+            </div>
+            
+            <div class="office-card">
+                <h3>4. 🤝 SACSI</h3>
+                <p><strong>Social Awareness & Community Service Involvement</strong></p>
+                <p>Email: sacsi@adzu.edu.ph</p>
+                <button class="office-btn" onclick="testOfficeLogin('sacsi@adzu.edu.ph', 'sacsi123', 'sacsi')">Test SACSI Login</button>
+                <div id="sacsi-result"></div>
+            </div>
+            
+            <div class="office-card">
+                <h3>5. 🎯 ACLG</h3>
+                <p><strong>Ateneo Center for Leadership & Governance</strong></p>
+                <p>Email: aclg@adzu.edu.ph</p>
+                <button class="office-btn" onclick="testOfficeLogin('aclg@adzu.edu.ph', 'aclg123', 'aclg')">Test ACLG Login</button>
+                <div id="aclg-result"></div>
+            </div>
+            
+            <div class="office-card">
+                <h3>6. 🎨 ACCA</h3>
+                <p><strong>Ateneo Center for Culture & Arts</strong></p>
+                <p>Email: acca@adzu.edu.ph</p>
+                <button class="office-btn" onclick="testOfficeLogin('acca@adzu.edu.ph', 'acca123', 'acca')">Test ACCA Login</button>
+                <div id="acca-result"></div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button onclick="testAllOffices()" style="background-color: #28a745; font-size: 18px; padding: 15px 30px;">
+                🚀 Test All 6 Offices at Once
+            </button>
+            <button onclick="clearAllResults()" style="background-color: #6c757d; margin-left: 10px;">
+                🧹 Clear All Results
+            </button>
+        </div>
+    </div>
+
+    <div class="test-section" style="margin-top: 30px;">
+        <h2>📊 Test Summary</h2>
+        <div id="test-summary">
+            <p>Click "Test All 6 Offices at Once" to see a complete summary</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001';
+        let lastToken = null;
+        let testResults = {};
+
+        // Office login test function
+        async function testOfficeLogin(email, password, officeKey) {
+            const resultDiv = document.getElementById(`${officeKey}-result`);
+            resultDiv.innerHTML = '<p>⏳ Testing...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login/office`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    lastToken = data.data.accessToken;
+                    testResults[officeKey] = { success: true, user: data.data.user };
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success" style="padding: 10px; margin-top: 10px; border-radius: 4px;">
+                            <strong>✅ Success!</strong><br>
+                            User: ${data.data.user.name}<br>
+                            Office ID: ${data.data.user.office_id}
+                            <div class="token-info">Token: ${data.data.accessToken.substring(0, 50)}...</div>
+                        </div>
+                    `;
+                } else {
+                    testResults[officeKey] = { success: false, error: data.message };
+                    resultDiv.innerHTML = `
+                        <div class="error" style="padding: 10px; margin-top: 10px; border-radius: 4px;">
+                            <strong>❌ Failed:</strong> ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults[officeKey] = { success: false, error: error.message };
+                resultDiv.innerHTML = `
+                    <div class="error" style="padding: 10px; margin-top: 10px; border-radius: 4px;">
+                        <strong>❌ Network Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+            
+            updateTestSummary();
+        }
+
+        // Unit Director login test
+        async function testDirectorLogin() {
+            const resultDiv = document.getElementById('director-result');
+            resultDiv.innerHTML = '<p>⏳ Testing unit director login...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login/unit-director`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'director@adzu.edu.ph',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    lastToken = data.data.accessToken;
+                    testResults['director'] = { success: true, user: data.data.user };
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Unit Director Login Successful!</h4>
+                            <p><strong>Name:</strong> ${data.data.user.name}</p>
+                            <p><strong>Email:</strong> ${data.data.user.email}</p>
+                            <p><strong>Role:</strong> ${data.data.user.userType}</p>
+                            <p><strong>Token Length:</strong> ${data.data.accessToken.length} characters</p>
+                        </div>
+                    `;
+                } else {
+                    testResults['director'] = { success: false, error: data.message };
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Unit Director Login Failed</h4>
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults['director'] = { success: false, error: error.message };
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Network Error</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            updateTestSummary();
+        }
+
+        // Token verification test
+        async function testTokenVerification() {
+            const resultDiv = document.getElementById('verify-result');
+            
+            if (!lastToken) {
+                resultDiv.innerHTML = '<div class="warning"><p>⚠️ No token available. Please login first.</p></div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>⏳ Verifying token...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/verify`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${lastToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Token Valid!</h4>
+                            <p><strong>User:</strong> ${data.data.user.name || data.data.user.userId}</p>
+                            <p><strong>Type:</strong> ${data.data.user.userType}</p>
+                            <p><strong>Expires:</strong> ${new Date(data.data.user.exp * 1000).toLocaleString()}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Token Invalid</h4>
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Network Error</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Test all offices at once
+        async function testAllOffices() {
+            const offices = [
+                { key: 'sdo', email: 'sdo@adzu.edu.ph', password: 'sdo123' },
+                { key: 'cces', email: 'cces@adzu.edu.ph', password: 'cces123' },
+                { key: 'api', email: 'api@adzu.edu.ph', password: 'api123' },
+                { key: 'sacsi', email: 'sacsi@adzu.edu.ph', password: 'sacsi123' },
+                { key: 'aclg', email: 'aclg@adzu.edu.ph', password: 'aclg123' },
+                { key: 'acca', email: 'acca@adzu.edu.ph', password: 'acca123' }
+            ];
+
+            for (const office of offices) {
+                await testOfficeLogin(office.email, office.password, office.key);
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+
+        // Clear all results
+        function clearAllResults() {
+            const offices = ['sdo', 'cces', 'api', 'sacsi', 'aclg', 'acca'];
+            offices.forEach(office => {
+                document.getElementById(`${office}-result`).innerHTML = '';
+            });
+            document.getElementById('director-result').innerHTML = '';
+            document.getElementById('verify-result').innerHTML = '';
+            document.getElementById('test-summary').innerHTML = '<p>Results cleared. Run tests to see summary.</p>';
+            testResults = {};
+        }
+
+        // Update test summary
+        function updateTestSummary() {
+            const summaryDiv = document.getElementById('test-summary');
+            const totalTests = Object.keys(testResults).length;
+            const successfulTests = Object.values(testResults).filter(r => r.success).length;
+            const failedTests = totalTests - successfulTests;
+
+            if (totalTests === 0) {
+                summaryDiv.innerHTML = '<p>No tests run yet.</p>';
+                return;
+            }
+
+            let summaryHTML = `
+                <h3>📊 Test Results Summary</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
+                    <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #007bff;">${totalTests}</div>
+                        <div>Total Tests</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #d4edda; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #155724;">${successfulTests}</div>
+                        <div>Successful</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8d7da; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #721c24;">${failedTests}</div>
+                        <div>Failed</div>
+                    </div>
+                </div>
+            `;
+
+            if (totalTests === 7 && successfulTests === 7) {
+                summaryHTML += `
+                    <div style="background: #d4edda; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px;">
+                        <h2 style="color: #155724; margin: 0;">🎉 ALL TESTS PASSED! 🎉</h2>
+                        <p style="margin: 10px 0 0 0;">Complete authentication system is working perfectly!</p>
+                    </div>
+                `;
+            }
+
+            summaryDiv.innerHTML = summaryHTML;
+        }
+
+        // Show API status on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+                if (data.status === 'OK') {
+                    console.log('✅ Backend API is running');
+                }
+            } catch (error) {
+                console.error('❌ Backend API not available:', error);
+                alert('⚠️ Backend API is not running! Please start the backend server on port 5001');
+            }
+        });
+    </script>
+</body>
+</html>

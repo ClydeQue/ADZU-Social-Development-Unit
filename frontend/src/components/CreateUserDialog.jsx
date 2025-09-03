@@ -13,8 +13,32 @@ import {
   InputAdornment
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import SecureAuth from '../auth/SecureAuth.js';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOffices } from '../hooks/useApi';
+import PropTypes from 'prop-types';
+
+// API helper
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+
+const apiCall = async (endpoint, options = {}) => {
+  const token = localStorage.getItem("auth_token");
+  
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: "Network error" }));
+    throw new Error(error.error || error.message || "API call failed");
+  }
+
+  return response.json();
+};
 
 const CreateUserDialog = ({ open, onClose, userType = 'office_user' }) => {
   const [formData, setFormData] = useState({
@@ -33,15 +57,14 @@ const CreateUserDialog = ({ open, onClose, userType = 'office_user' }) => {
   const queryClient = useQueryClient();
 
   // Fetch offices for dropdown
-  const { data: offices = [] } = useQuery({
-    queryKey: ['offices'],
-    queryFn: () => SecureAuth.getOffices(),
-    enabled: userType === 'office_user'
-  });
+  const { data: offices = [] } = useOffices();
 
   const createUserMutation = useMutation({
     mutationFn: async (userData) => {
-      return await SecureAuth.createUser(userData);
+      return await apiCall("/auth/create-user", {
+        method: "POST",
+        body: JSON.stringify(userData),
+      });
     },
     onSuccess: () => {
       onClose();
@@ -262,6 +285,12 @@ const CreateUserDialog = ({ open, onClose, userType = 'office_user' }) => {
       </form>
     </Dialog>
   );
+};
+
+CreateUserDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  userType: PropTypes.oneOf(['office_user', 'unit_director'])
 };
 
 export default CreateUserDialog;

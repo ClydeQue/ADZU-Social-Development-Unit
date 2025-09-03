@@ -25,6 +25,10 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  server: {
+    host: true, // Allow ngrok muna for test dev
+    allowedHosts: ["localhost", "127.0.0.1", "be4357f6b0b6.ngrok-free.app"],
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {

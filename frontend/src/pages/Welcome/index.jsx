@@ -1,53 +1,48 @@
-import React from 'react';
-import { Box, Typography, Paper, Button, Container } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { AdminPanelSettings, Business } from '@mui/icons-material';
-
+import { useNavigate } from "react-router-dom";
+import { Typography } from "@mui/material";
 const WelcomePage = () => {
-  const navigate = useNavigate();
 
-  return (
-    <Container maxWidth="lg">
 
-      {/* Temporary muna */}
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: 4,
-        }}
-        className="bg-gradient-to-br from-blue-600 to-purple-600"
-      >
-        <p 
-        
-          className="text-white text-[3.75rem] font-bold mb-8"
+
+  const Navigate = useNavigate();
+
+  return (  
+    <div className='w-screen h-screen flex bg-amber-500 bg-no-repeat bg-cover'> 
+      <div className='w-screen h-screen justify-center flex items-center bg-no-repeat bg-cover bg-center'
+       style={{
+        backgroundImage: "url('/images/login.webp')",
+        backgroundSize: 'cover',
+              }}>
+       {/* Center Container */}
+        <div data-layer="Container" 
+        className="Container flex flex-col sm:w-[240px] sm:h-[400px] md:w-[420px] md:h-[550px] 2xl:w-[630px] 
+        2xl:h-[750px] bg-white/50 rounded-[30px] 
+        shadow-[0px_4px_35.70000076293945px_16px_rgba(0,0,0,0.11)] 
+        border border-white backdrop-blur-lg"> 
+      {/* Placeholder logo - top center */}
+      <div className="mt-6 flex justify-center">
+        <img src="/logos/adzuSeal.png" alt="AdZU Seal"  className="w-24 sm:w-20 md:w-28 xl:w-50 h-auto object-contain"  />
+
+      </div>
+
+
+              
+        <p className="text-white text-[1.75rem] text-center font-bold mb-8"
         >
-          Welcome to AdZU Social Development Unit System
+          SOCIAL DEVELOPMENT UNIT
         </p>
 
         <Typography 
-          variant="h6" 
+          variant="h5" 
           align="center" 
           className="text-white mb-12 max-w-2xl"
         >
           Manage and track programs across all offices efficiently
         </Typography>
 
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 4,
-            flexDirection: { xs: 'column', md: 'row' },
-            width: '100%',
-            maxWidth: 800,
-          }}
-        >
+       
           {/* Unit Director Login */}
-          <Paper
+          {/* <Paper
             elevation={8}
             sx={{ 
               p: 4, 
@@ -72,10 +67,10 @@ const WelcomePage = () => {
                 Access comprehensive overview of all offices and their programs
               </Typography>
             </Box>
-          </Paper>
+          </Paper> */}
 
           {/* Office Login */}
-          <Paper
+          {/* <Paper
             elevation={8}
             sx={{ 
               p: 4, 
@@ -100,10 +95,13 @@ const WelcomePage = () => {
                 Access your office dashboard to manage programs and activities
               </Typography>
             </Box>
-          </Paper>
-        </Box>
-      </Box>
-    </Container>
+          </Paper> */}
+
+
+       </div> 
+    </div>
+    </div>
+    
   );
 };
 

@@ -155,7 +155,7 @@ VALUES (
         'Unit Director',
         'director@adzu.edu.ph',
         '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'
-    ), -- password: director123
+    ), -- password: admin123
     (
         'System Administrator',
         'admin@adzu.edu.ph',

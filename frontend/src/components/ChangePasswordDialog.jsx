@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -12,8 +12,31 @@ import {
   InputAdornment
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import SecureAuth from '../auth/SecureAuth.js';
+import { useMutation } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
+
+// API helper
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+
+const apiCall = async (endpoint, options = {}) => {
+  const token = localStorage.getItem("auth_token");
+  
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: "Network error" }));
+    throw new Error(error.error || error.message || "API call failed");
+  }
+
+  return response.json();
+};
 
 const ChangePasswordDialog = ({ open, onClose, userType = 'office_user' }) => {
   const [formData, setFormData] = useState({
@@ -28,24 +51,30 @@ const ChangePasswordDialog = ({ open, onClose, userType = 'office_user' }) => {
   });
   const [errors, setErrors] = useState({});
 
-  const queryClient = useQueryClient();
+
 
   const changePasswordMutation = useMutation({
     mutationFn: async ({ currentPassword, newPassword }) => {
-      return await SecureAuth.changePassword({
-        currentPassword,
-        newPassword,
-        userType
+      return await apiCall('/secure-auth/change-password', {
+        method: 'PUT',
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          userType
+        })
       });
     },
-    onSuccess: () => {
-      onClose();
-      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setErrors({});
-      // Could show success toast here
+    onSuccess: (data) => {
+      if (data.success) {
+        setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setErrors({});
+        onClose();
+      } else {
+        setErrors({ general: data.error || 'Failed to change password' });
+      }
     },
     onError: (error) => {
-      setErrors({ general: error.message });
+      setErrors({ general: error.message || 'Failed to change password' });
     }
   });
 
@@ -202,6 +231,12 @@ const ChangePasswordDialog = ({ open, onClose, userType = 'office_user' }) => {
       </form>
     </Dialog>
   );
+};
+
+ChangePasswordDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  userType: PropTypes.oneOf(['office_user', 'unit_director'])
 };
 
 export default ChangePasswordDialog;

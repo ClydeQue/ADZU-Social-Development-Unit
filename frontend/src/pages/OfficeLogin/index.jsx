@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import{ useState } from 'react';
 import { 
   Box, 
   Paper, 
@@ -19,7 +19,7 @@ const OfficeLoginPage = () => {
     password: ''
   });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const location = useLocation();
   
   const { login, loading } = useAuth();
@@ -32,6 +32,10 @@ const OfficeLoginPage = () => {
     });
   };
 
+  
+
+
+   
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
