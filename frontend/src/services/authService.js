@@ -18,29 +18,37 @@ class AuthService {
   async apiCall(endpoint, options = {}) {
     const url = `${API_BASE}/api/${endpoint.replace(/^\/+/, "")}`;
 
-    // Add authorization header if we have a token
-    if (this.accessToken || localStorage.getItem("accessToken")) {
-      const token = this.accessToken || localStorage.getItem("accessToken");
+    // Add authorization header if we have a token in memory
+    if (this.accessToken) {
       options.headers = {
         ...options.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${this.accessToken}`,
       };
     }
 
-    // Add credentials for cookies
+    // Add credentials for cookies (refresh token)
     options.credentials = "include";
 
     let response = await fetch(url, options);
 
-    // If token expired, try to refresh
+    // If token expired, try to refresh using HttpOnly cookie
     if (response.status === 401 && !endpoint.includes("auth/")) {
-      console.log("🔄 Access token expired, refreshing...");
+      console.log("🔄 Access token expired, requesting new one...");
 
-      const refreshed = await this.refreshAccessToken();
-      if (refreshed) {
-        // Retry original request with new token
-        options.headers.Authorization = `Bearer ${this.accessToken}`;
-        response = await fetch(url, options);
+      try {
+        const refreshResult = await this.refreshToken();
+        if (refreshResult?.accessToken) {
+          // Update memory token and retry request
+          this.accessToken = refreshResult.accessToken;
+          options.headers = {
+            ...options.headers,
+            Authorization: `Bearer ${this.accessToken}`,
+          };
+          response = await fetch(url, options);
+        }
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+        // Let the 401 response pass through
       }
     }
 
@@ -68,12 +76,12 @@ class AuthService {
       }
 
       if (data.success) {
-        // Store access token
+        // Store access token in memory only (no localStorage!)
         this.accessToken = data.data.accessToken;
-        localStorage.setItem("accessToken", data.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
 
-        console.log("✅ Office login successful");
+        console.log(
+          "✅ Office login successful, refresh token set in HttpOnly cookie"
+        );
         return {
           success: true,
           user: data.data.user,
@@ -109,12 +117,12 @@ class AuthService {
       }
 
       if (data.success) {
-        // Store access token
+        // Store access token in memory only (no localStorage!)
         this.accessToken = data.data.accessToken;
-        localStorage.setItem("accessToken", data.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
 
-        console.log("✅ Unit Director login successful");
+        console.log(
+          "✅ Unit Director login successful, refresh token set in HttpOnly cookie"
+        );
         return {
           success: true,
           user: data.data.user,
@@ -129,7 +137,35 @@ class AuthService {
     }
   }
 
-  // Refresh Access Token
+  // Refresh Access Token (returns new token + user data)
+  async refreshToken() {
+    try {
+      console.log("🔄 Requesting new access token using refresh cookie...");
+
+      const response = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: "POST",
+        credentials: "include", // This sends the HttpOnly refresh cookie
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        console.log("❌ Token refresh failed - user needs to login again");
+        throw new Error(data.message || "Token refresh failed");
+      }
+
+      console.log("✅ New access token received");
+      return {
+        accessToken: data.data.accessToken,
+        user: data.data.user,
+      };
+    } catch (error) {
+      console.error("❌ Token refresh error:", error);
+      throw error;
+    }
+  }
+
+  // Legacy method for backwards compatibility
   async refreshAccessToken() {
     // Prevent multiple refresh requests
     if (this.refreshPromise) {
@@ -144,7 +180,7 @@ class AuthService {
 
   async _doRefresh() {
     try {
-      console.log("🔄 Refreshing access token...");
+      console.log("🔄 Legacy refresh method...");
 
       const response = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: "POST",
@@ -154,16 +190,15 @@ class AuthService {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        console.log("❌ Token refresh failed, logging out");
+        console.log("❌ Token refresh failed");
         this.logout();
         return false;
       }
 
-      // Update access token
+      // Update access token in memory only
       this.accessToken = data.data.accessToken;
-      localStorage.setItem("accessToken", data.data.accessToken);
 
-      console.log("✅ Access token refreshed");
+      console.log("✅ Access token refreshed (memory only)");
       return true;
     } catch (error) {
       console.error("❌ Token refresh error:", error);
@@ -175,33 +210,33 @@ class AuthService {
   // Logout
   async logout() {
     try {
-      // Call logout endpoint to revoke refresh token
+      // Call logout endpoint to clear HttpOnly refresh cookie
       await fetch(`${API_BASE}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
+      console.log("✅ HttpOnly refresh cookie cleared on server");
     } catch (error) {
       console.error("Logout API call failed:", error);
     }
 
-    // Clear local data
+    // Clear access token from memory only
     this.accessToken = null;
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-
-    console.log("✅ Logged out");
+    console.log("✅ Access token cleared from memory");
   }
 
-  // Verify Token
+  // Verify Token (memory only)
   async verifyToken() {
     try {
-      const token = this.accessToken || localStorage.getItem("accessToken");
-      if (!token) return false;
+      if (!this.accessToken) {
+        console.log("🚫 No access token in memory");
+        return false;
+      }
 
       const response = await fetch(`${API_BASE}/api/auth/verify`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${this.accessToken}`,
         },
         credentials: "include",
       });
@@ -214,49 +249,33 @@ class AuthService {
     }
   }
 
-  // Get current session
+  // Get current session (memory only, no localStorage)
   getSession() {
-    const token = this.accessToken || localStorage.getItem("accessToken");
-    const userStr = localStorage.getItem("user");
+    // Only return session if we have access token in memory
+    if (!this.accessToken) return null;
 
-    if (!token || !userStr) return null;
-
-    try {
-      const user = JSON.parse(userStr);
-      return {
-        accessToken: token,
-        user,
-      };
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      this.logout();
-      return null;
-    }
+    // Note: We don't store user data in AuthService anymore
+    // The AuthContext manages user data persistence
+    return {
+      accessToken: this.accessToken,
+      // User data should come from AuthContext
+    };
   }
 
-  // Check if authenticated
+  // Check if authenticated (memory-based)
   isAuthenticated() {
-    return !!this.getSession();
+    return !!this.accessToken;
   }
 
-  // Get current user
-  getCurrentUser() {
-    const session = this.getSession();
-    return session ? session.user : null;
+  // Get access token (memory only)
+  getAccessToken() {
+    return this.accessToken;
   }
 
-  // Get user type
-  getUserType() {
-    const user = this.getCurrentUser();
-    return user ? user.userType : null;
-  }
-
-  // Initialize - load token from storage
+  // Initialize - no localStorage loading
   init() {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      this.accessToken = token;
-    }
+    // No initialization needed - tokens are memory-only
+    console.log("🚀 AuthService initialized (memory-only mode)");
   }
 }
 

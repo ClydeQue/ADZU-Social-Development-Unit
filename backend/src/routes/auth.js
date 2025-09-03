@@ -13,6 +13,9 @@ router.post("/login/unit-director", AuthController.loginUnitDirector);
 // Logout
 router.post("/logout", AuthController.logout);
 
+// Refresh access token using HttpOnly cookie
+router.post("/refresh", AuthController.refreshToken);
+
 // Verify session (for protected routes)
 router.get("/verify", (req, res) => {
   const authHeader = req.headers.authorization;
