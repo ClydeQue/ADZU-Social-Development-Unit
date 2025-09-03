@@ -37,12 +37,12 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    // In development, allow localhost
+    // In development, allow localhost and any Vercel app
     if (process.env.NODE_ENV !== "production") {
       return callback(null, true);
     }
 
-    // In production, get allowed origins from environment
+    // In production, allow Vercel apps and configured origins
     const allowedOrigins = [
       process.env.CORS_ORIGIN,
       process.env.FRONTEND_URL,
@@ -50,7 +50,8 @@ const corsOptions = {
       "https://social-development-unit.vercel.app", // Alternative spelling
     ].filter(Boolean);
 
-    if (allowedOrigins.includes(origin)) {
+    // Allow any vercel.app domain for now (you can restrict this later)
+    if (origin && (origin.includes('.vercel.app') || allowedOrigins.includes(origin))) {
       callback(null, true);
     } else {
       console.log(`CORS blocked origin: ${origin}`);
@@ -58,8 +59,8 @@ const corsOptions = {
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 app.use(cors(corsOptions));
