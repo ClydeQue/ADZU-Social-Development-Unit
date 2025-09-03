@@ -24,8 +24,14 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Test database connection
+// Test database connection (only in development)
 const testConnection = async () => {
+  // Skip database test in serverless environment
+  if (process.env.NODE_ENV === 'production') {
+    console.log("Skipping database connection test in production");
+    return;
+  }
+  
   try {
     const { data, error } = await supabase
       .from("offices")
@@ -35,10 +41,12 @@ const testConnection = async () => {
     console.log("Connected to Supabase database");
   } catch (error) {
     console.error("Database connection error:", error);
-    process.exit(-1);
   }
 };
 
-testConnection();
+// Only test connection in development
+if (process.env.NODE_ENV !== 'production') {
+  testConnection();
+}
 
 module.exports = supabase;
