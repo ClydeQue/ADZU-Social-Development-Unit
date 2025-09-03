@@ -17,7 +17,7 @@ const programRoutes = require("./src/routes/program");
 const app = express();
 
 // Trust proxy for Vercel deployment
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // Security middleware
 app.use(
@@ -38,8 +38,8 @@ app.use(limiter);
 const corsOptions = {
   origin: true, // Allow all origins for now
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 };
 
 app.use(cors(corsOptions));
