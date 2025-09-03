@@ -46,16 +46,20 @@ const corsOptions = {
     const allowedOrigins = [
       process.env.CORS_ORIGIN,
       process.env.FRONTEND_URL,
-      "https://your-frontend-domain.vercel.app", // Replace with your actual frontend domain
+      "https://social-develepoment-unit.vercel.app", // Your actual frontend domain
+      "https://social-development-unit.vercel.app", // Alternative spelling
     ].filter(Boolean);
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      console.log(`CORS blocked origin: ${origin}`);
+      callback(null, true); // Temporarily allow all origins for debugging
     }
   },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 };
 
 app.use(cors(corsOptions));
