@@ -186,27 +186,27 @@ BEGIN
     INSERT INTO office_users (office_id, name, email, password) VALUES
         -- Social Development Office users
         (sdo_id, 'SDO Officer 1', 'sdo@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- sdo123
-        (sdo_id, 'SDO Officer 2', 'sdo2@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- sdo123
+        
         
         -- CCES users
         (cces_id, 'CCES Officer 1', 'cces@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- cces123
-        (cces_id, 'CCES Officer 2', 'cces2@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- cces123
+        
         
         -- API users
         (api_id, 'API Officer 1', 'api@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- api123
-        (api_id, 'API Officer 2', 'api2@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- api123
+        
         
         -- SACSI users
         (sacsi_id, 'SACSI Officer 1', 'sacsi@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- sacsi123
-        (sacsi_id, 'SACSI Officer 2', 'sacsi2@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- sacsi123
+        
         
         -- ACLG users
         (aclg_id, 'ACLG Officer 1', 'aclg@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- aclg123
-        (aclg_id, 'ACLG Officer 2', 'aclg2@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- aclg123
+        
         
         -- ACCA users
         (acca_id, 'ACCA Officer 1', 'acca@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa'), -- acca123
-        (acca_id, 'ACCA Officer 2', 'acca2@adzu.edu.ph', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LesTRGWMoFNpbGKsa') -- acca123
+        
     ON CONFLICT (email) DO NOTHING;
     
     -- Insert sample programs
