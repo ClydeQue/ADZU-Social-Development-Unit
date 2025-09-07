@@ -6,43 +6,34 @@ const WelcomePage = () => {
   return (  
     <div 
       className='w-screen h-screen flex justify-center items-center bg-no-repeat bg-cover bg-center p-4 sm:p-6'
-      style={{
-        backgroundImage: "url('/images/login.webp')", 
-        backgroundSize: 'cover',
-      }}
+        style={{
+          backgroundImage: "linear-gradient(to top, rgba(1,0,60,0.9), transparent), linear-gradient(rgba(0,0,50,0.6), rgba(0,0,80,0.1)), url('/images/login.webp')",
+          backgroundSize: 'cover',
+          backgroundPosition: "center top",
+        }}
     >
-      {/* Center Container */}
-      <div 
-        data-layer="Container" 
-        className="Container w-full max-w-sm sm:max-w-md md:w-96 h-auto min-h-[500px] sm:h-[569px] bg-white/50 rounded-[20px] sm:rounded-[30px] shadow-[0px_4px_35.70000076293945px_16px_rgba(0,0,0,0.11)] border border-white backdrop-blur-lg flex flex-col p-4 sm:p-6"
-      >
-        
-        {/* Logo */}
-        <div className="flex justify-center mb-2 sm:mb-4">
+      {/* Logo */ }
+        <div className="absolute top-6 left-4">
           <img 
-            src="/logos/adzuSeal.png" 
+            src="/logos/adzu-header.webp" 
             alt="AdZU Seal" 
-            className="w-24 h-24  sm:w-32 sm:h-32 md:w-auto md:h-40"
+            className="h-14 w-auto drop-shadow-lg"  
           />
         </div>
 
+    <div className="flex flex-col items-center justify-center text-center space-y-8">
         {/* Title */}
-        <div className="text-center mb-4 sm:mb-8">
-          <h1 className="text-white text-xs sm:text-sm font-bold mb-2 tracking-widest uppercase font-display drop-shadow-sm">
+        <div className="text-center">
+          <h1 className="text-white text-5xl sm:text-6xl md:text-7xl font-bold mb-4 tracking-wide uppercase font-display drop-shadow-lg ">
             SOCIAL DEVELOPMENT UNIT
           </h1>
-          <h2 className="text-white text-[10px] sm:text-xs font-medium tracking-wider uppercase font-display drop-shadow-sm">
+          <h2 className="text-white text-3xl sm:text-4xl md:text-5xl font-semibold tracking-wide uppercase font-display drop-shadow-sm">
             MANAGEMENT SYSTEM
           </h2>
         </div>
 
-        {/* Login Title */}
-        <h3 className="text-white text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 tracking-wide drop-shadow-md">
-          WELCOME
-        </h3>
-
         {/* Login Buttons */}
-        <div className="flex flex-col items-center space-y-3 sm:space-y-4">
+        <div className="flex flex-col items-center space-y-4 sm:space-y-10 mt-6">
           {/* Unit Director Button */}
           <div 
             data-layer="Unit Director_Button" 
@@ -79,9 +70,9 @@ const WelcomePage = () => {
             </div>
           </div>
         </div>
+      </div>
 
       </div>
-    </div>
   );
 };
 
