@@ -5,11 +5,9 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 
-// Load environment variables with explicit path
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
-// Import routes
-const authRoutes = require("./routes/auth"); // Professional JWT authentication
+const authRoutes = require("./routes/auth"); //JWT authentication
 const unitDirectorRoutes = require("./routes/unitDirector");
 const officeRoutes = require("./routes/office");
 const programRoutes = require("./routes/program");
@@ -23,7 +21,7 @@ app.use(
   })
 );
 
-// Rate limiting - more generous for production
+// Rate limiting - for production to
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: process.env.NODE_ENV === "production" ? 1000 : 100, // Higher limit for production
