@@ -4,7 +4,15 @@
   FONTS NATIN
    ======================================== */
 
-/* Poppins ExtraLight (200) */
+
+/* Inter VariableFont (100-900) */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/Inter-VariableFont.ttf") format("truetype");
+}
 @font-face {
   font-family: "Poppins";
   font-style: normal;
@@ -99,6 +107,6 @@
    ======================================== */
 @theme {
   /* Font Families  */
-  --font-sans: "Poppins", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Poppins", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    --font-inter: "Inter", "Poppins", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    --font-poppins:  "Poppins", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
 }

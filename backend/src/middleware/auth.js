@@ -42,7 +42,7 @@ const authenticateToken = (req, res, next) => {
 
 // Middleware to check user role
 const requireRole = (allowedRoles) => {
-  return (req, res, next) => {
+   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
         error: "Authentication required",

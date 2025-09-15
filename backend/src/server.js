@@ -3,7 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
-const path = require("path");
+const path = require("path"); 
 
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
