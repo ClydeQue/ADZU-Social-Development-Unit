@@ -9,7 +9,8 @@ import {
   letterVariants, 
   imageVariants, 
   containerVariants, 
-  layoutVariants 
+  layoutVariants,
+  textScaleVariants
 } from "../../utils/animations";
 
 
@@ -24,16 +25,14 @@ const WelcomePage = () => {
         {/* background of the page */}
         <div className="fixed inset-0 w-full h-full overflow-hidden z-10 bg-[#040195]">
       {/* Header with logo */}
-      <div className="absolute top-15  left-20 z-20">
+      <div className="absolute top-15 left-10 md:left-20 z-40">
         <div className="flex items-center text-white">
-          <img src="/logos/logoLeftHeader.webp" alt="Logo Header" className="w-40 mr-3" />
+          <img src="/logos/logoLeftHeader.webp" alt="Logo Header" className="w-30 md:w-40 md:mr-3" />
         </div>
       </div>
 
       {/* Main content container */}
       <div className="absolute inset-0 w-full h-full">
-            <div data-layer="Gradient_Blue" className="GradientBlue -bottom-80 z-30 w-full  absolute 
-            h-full bg-linear-360 from-[#020052] up to-[blue-900/0]" />
 
         
         {/* Desktop layout: flex row, hidden on mobile */}
@@ -94,10 +93,19 @@ const WelcomePage = () => {
                 className="text-white leading-none font-inter text-[10rem] font-black 
                    lg:text-[14rem] xl:text-[15rem] 2xl:text-[14rem]"
                 style={{ letterSpacing: "-0.5rem" }}
+                variants={textScaleVariants}
+                initial="hidden"
+                animate="visible"
               >
-                <m.span variants={letterVariants}>SD</m.span>
+                <m.span 
+                  variants={letterVariants}
+                  initial="hidden"
+                  animate="visible"
+                >SD</m.span>
                 <m.span
                   variants={letterVariants}
+                  initial="hidden"
+                  animate="visible"
                   className="font-extrabold text-[8rem] ml-3 font-poppins italic tracking-widest text-transparent
                   lg:text-[9.5rem] xl:text-[11rem] 2xl:text-[10.5rem]"
                   style={{ WebkitTextStroke: "3px white" }}>
@@ -154,7 +162,7 @@ const WelcomePage = () => {
         >
           {/* Mobile content box */}
           <m.div 
-            className="absolute inset-0 max-h-90 flex justify-center items-end"
+            className="absolute  top-0 left-0 right-0 h-3/5 flex justify-center items-end z-50 pb-25"
             variants={containerVariants}
             layout
             transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -165,18 +173,26 @@ const WelcomePage = () => {
             >
               {/* SDu Title */}
               <m.div 
-                className="flex-5"
                 variants={titleVariants}
                 initial="hidden"
                 animate="visible"
               >
                 <m.h1 
-                  className="text-white leading-none font-inter widest text-[11rem] font-black"
+                  className="text-white leading-none font-inter widest text-[10rem] font-black"
                   style={{ letterSpacing: "-0.7rem" }}
+                  variants={textScaleVariants}
+                  initial="hidden"
+                  animate="visible"
                 >
-                  <m.span variants={letterVariants}>SD</m.span>
+                  <m.span 
+                    variants={letterVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >SD</m.span>
                   <m.span
                     variants={letterVariants}
+                    initial="hidden"
+                    animate="visible"
                     className="font-extrabold text-[8rem] ml-2 font-poppins italic tracking-widest text-transparent"
                     style={{ WebkitTextStroke: "3px white" }}>
                     u
@@ -186,32 +202,32 @@ const WelcomePage = () => {
 
               {/* Action Buttons d2 */}
               <m.div 
-                className="inline-flex self-end text-center flex-row space-x-3 max-w-[20rem]"
+                className="inline-flex self-end text-center flex-row space-x-3 max-w-[18rem] z-60 relative"
                 variants={buttonVariants}
                 initial="hidden"
                 animate="visible"
               >
                 <m.button 
                   onClick={()=> navigate('/unit-director/login')}
-                  className="px-4 py-1 max-h-8 border-2 border-white text-white text-sm font-medium rounded-full hover:cursor-pointer bg-transparent hover:bg-white hover:text-[#040195] active:bg-gray-200 active:text-[#040195] transition-all duration-300"
+                  className="px-4 py-1   max-h-8 border-2 border-white text-white text-xs font-medium rounded-full hover:cursor-pointer bg-transparent hover:bg-white hover:text-[#040195] active:bg-gray-200 active:text-[#040195] transition-all duration-300"
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
                   initial="rest"
                   animate="rest"
                 >
-                  <p className="text-[12px] font-bold">UNIT DIRECTOR</p>
+                  <p className="text-[8px] font-bold">UNIT DIRECTOR</p>
                 </m.button>
                 <m.button 
                   onClick={()=> {navigate("/office-selection")}}
-                  className="px-4 py-1 max-h-8 border-2 border-white text-white text-sm font-medium rounded-full hover:cursor-pointer bg-transparent hover:bg-white hover:text-[#040195] active:bg-gray-200 active:text-[#040195] transition-all duration-300"
+                  className="px-4 py-1 max-h-8 border-2 border-white text-white  font-medium rounded-full hover:cursor-pointer bg-transparent hover:bg-white hover:text-[#040195] active:bg-gray-200 active:text-[#040195] transition-all duration-300"
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
                   initial="rest"
                   animate="rest"
                 >
-                  <p className="text-[12px] font-bold">OFFICE LOGIN</p>
+                  <p className="text-[8px] font-bold">OFFICE LOGIN</p>
                 </m.button>
               </m.div>
             </m.div>
@@ -219,17 +235,16 @@ const WelcomePage = () => {
           
           {/* Mobile image section */}
           <m.div 
-            className="absolute -bottom-25 left-0 right-0 flex justify-center items-end"
+            className="absolute -bottom-40 w-full  z-10  h-[100%] max-h-[32rem] "
             variants={imageVariants}
             initial="hidden"
             animate="visible"
+            exit="hidden"
           >
-            <div data-layer="Gradient_Blue" className="GradientBlue z-10 w-full -bottom-[3000px] absolute 
-            h-full bg-linear-360 from-[#020052] up to-[blue-900/0]" />
             <LazyLoadImage
               src="/images/high.png" 
               alt="Students working" 
-              className="max-h-120 scale-110 w-full object-contain"
+              className="h-full  w-full object-center  object-contain scale-125 "
               effect="blur"
               wrapperProps={{
                 style: { display: 'inline-block', width: '100%', height: '100%' }
@@ -237,6 +252,11 @@ const WelcomePage = () => {
             />
           </m.div>
         </m.div>
+        
+        {/* Bottom Gradient Overlay - Highest Z-Index sa lahat ng Screens */}
+        <div data-layer="Gradient_Blue" className="GradientBlue z-[100] w-full fixed bottom-0 left-0 right-0 
+            h-[20vh] bg-gradient-to-t from-[#020052] via-[#020052]/60 to-transparent pointer-events-none" />
+            
       </div>
         </div>
       </Suspense>

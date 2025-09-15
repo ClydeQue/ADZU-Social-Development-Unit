@@ -4,16 +4,16 @@ export const titleVariants = {
   hidden: {
     opacity: 0,
     y: 50,
-    scale: 0.8,
+    scale: 0.6,
   },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.8,
-      ease: "easeOut",
-      staggerChildren: 0.2,
+      duration: 1.2,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      staggerChildren: 0.3,
     },
   },
 };
@@ -22,14 +22,19 @@ export const buttonVariants = {
   hidden: {
     opacity: 0,
     y: 30,
+    scale: 0.8,
   },
   visible: {
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: {
-      duration: 0.6,
-      ease: "easeOut",
-      delay: 0.5,
+      duration: 0.8,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      delay: 0.8,
+      type: "spring",
+      stiffness: 60,
+      damping: 15,
     },
   },
   hover: {
@@ -45,13 +50,21 @@ export const buttonVariants = {
 };
 
 export const letterVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { 
+    opacity: 0, 
+    y: 30,
+    scale: 0.5,
+  },
   visible: {
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: {
-      duration: 0.5,
-      ease: "easeOut",
+      duration: 0.8,
+      ease: [0.68, -0.55, 0.265, 1.55],
+      type: "spring",
+      stiffness: 100,
+      damping: 15,
     },
   },
 };
@@ -81,6 +94,26 @@ export const containerVariants = {
     transition: {
       duration: 0.5,
       staggerChildren: 0.1,
+    },
+  },
+};
+
+export const textScaleVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.3,
+    y: 20,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 1.0,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      type: "spring",
+      stiffness: 80,
+      damping: 12,
     },
   },
 };
