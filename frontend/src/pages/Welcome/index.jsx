@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Suspense } from "react";
-import { LazyMotion, domAnimation, m } from "framer-motion";
-import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { Suspense } from "react"; //
+import { LazyMotion, domAnimation, m } from "framer-motion"; //animation libray, you guys can check docs at motion.dev
+import { LazyLoadImage } from 'react-lazy-load-image-component'; // recommended to for all components to reduce memory load
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { 
   titleVariants, 
@@ -57,7 +57,7 @@ const WelcomePage = () => {
             
             {/* Image */}
             <m.div 
-              className="relative z-20 md:-bottom-50 lg:-bottom-35 -left-2 flex items-end justify-center h-full"
+              className="relative z-20 md:-bottom-50 lg:-bottom-35 left-12 flex items-end justify-center h-full"
               variants={imageVariants}
               initial="hidden"
               animate="visible"
@@ -124,7 +124,7 @@ const WelcomePage = () => {
               <m.button 
                 onClick={()=> {navigate("/office-selection")}}
                 className="border-2 border-white text-white px-4 py-1 text-sm font-bold rounded-full text-[8px] 
-                md:text-[12px] cursor-pointer bg-transparent hover:bg-white hover:text-[#040195]
+                md:text-[14px] cursor-pointer bg-transparent hover:bg-white hover:text-[#040195]
                  active:bg-gray-200 active:text-[#040195] transition-all duration-300"
                 variants={buttonVariants}
                 whileHover="hover"
@@ -137,7 +137,7 @@ const WelcomePage = () => {
               <m.button 
                 onClick={()=> navigate('/unit-director/login')}
                 className="border-2 border-white text-white px-4 py-1 text-sm font-bold 
-                rounded-full text-[8px] md:text-[12px]  cursor-pointer bg-transparent 
+                rounded-full text-[8px] md:text-[14px]  cursor-pointer bg-transparent 
                 hover:bg-white hover:text-[#040195] active:bg-gray-200 active:text-[#040195] transition-all duration-300"
                 variants={buttonVariants}
                 whileHover="hover"
@@ -244,6 +244,7 @@ const WelcomePage = () => {
             <LazyLoadImage
               src="/images/high.png" 
               alt="Students working" 
+              draggable= 'false'
               className="h-full  w-full object-center  object-contain scale-125 "
               effect="blur"
               wrapperProps={{
