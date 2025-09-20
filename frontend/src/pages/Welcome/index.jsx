@@ -51,13 +51,13 @@ const WelcomePage = () => {
             className="w-1/2 h-full flex items-center justify-center relative overflow-visible"
             variants={containerVariants}
             layout
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
            
             
             {/* Image */}
             <m.div 
-              className="relative z-20 md:-bottom-50 lg:-bottom-35 left-12 flex items-end justify-center h-full"
+              className="relative z-20 md:-bottom-50 lg:-bottom-20 left-12 flex items-end justify-center h-full"
               variants={imageVariants}
               initial="hidden"
               animate="visible"
@@ -65,7 +65,7 @@ const WelcomePage = () => {
               <LazyLoadImage
                 src="/images/high.png"
                 alt="Students working"
-                className="w-auto object-contain max-w-none md:h-[80%] lg:h-[90%]"
+                className="w-auto object-contain max-w-none md:h-[80%] lg:h-[99%]"
                 effect="blur"
                 wrapperProps={{
                   style: { display: 'inline-block', width: '100%', height: '100%' }
@@ -80,7 +80,7 @@ const WelcomePage = () => {
             className="w-1/2 h-full flex flex-col relative z-30 px-8 md:items-center md:justify-center xl:items-start"
             variants={containerVariants}
             layout
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             {/* SDU Title */}
             <m.div 
@@ -165,7 +165,7 @@ const WelcomePage = () => {
             className="absolute  top-0 left-0 right-0 h-3/5 flex justify-center items-end z-50 pb-25"
             variants={containerVariants}
             layout
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <m.div 
               className="flex flex-col items-center"
