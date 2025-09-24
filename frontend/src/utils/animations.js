@@ -11,9 +11,9 @@ export const titleVariants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 1.2,
+      duration: 0.6,
       ease: [0.25, 0.46, 0.45, 0.94],
-      staggerChildren: 0.3,
+      staggerChildren: 0.15,
     },
   },
 };
@@ -29,9 +29,9 @@ export const buttonVariants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.8,
+      duration: 0.4,
       ease: [0.25, 0.46, 0.45, 0.94],
-      delay: 0.8,
+      delay: 0.3,
       type: "spring",
       stiffness: 60,
       damping: 15,
@@ -40,7 +40,7 @@ export const buttonVariants = {
   hover: {
     scale: 1.05,
     transition: {
-      duration: 0.2,
+      duration: 0.15,
       ease: "easeInOut",
     },
   },
@@ -60,7 +60,7 @@ export const letterVariants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.8,
+      duration: 0.4,
       ease: [0.68, -0.55, 0.265, 1.55],
       type: "spring",
       stiffness: 100,
@@ -80,9 +80,9 @@ export const imageVariants = {
     scale: 1,
     y: 0,
     transition: {
-      duration: 1.2,
+      duration: 0.6,
       ease: "easeOut",
-      delay: 0.3,
+      delay: 0.15,
     },
   },
 };
@@ -92,8 +92,8 @@ export const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      duration: 0.5,
-      staggerChildren: 0.1,
+      duration: 0.3,
+      staggerChildren: 0.05,
     },
   },
 };
@@ -109,7 +109,7 @@ export const textScaleVariants = {
     scale: 1,
     y: 0,
     transition: {
-      duration: 1.0,
+      duration: 0.5,
       ease: [0.25, 0.46, 0.45, 0.94],
       type: "spring",
       stiffness: 80,
@@ -121,13 +121,13 @@ export const textScaleVariants = {
 export const layoutVariants = {
   desktop: {
     transition: {
-      duration: 0.6,
+      duration: 0.3,
       ease: "easeInOut",
     },
   },
   mobile: {
     transition: {
-      duration: 0.6,
+      duration: 0.3,
       ease: "easeInOut",
     },
   },

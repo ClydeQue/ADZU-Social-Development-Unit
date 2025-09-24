@@ -1,49 +1,46 @@
-import React from 'react';
 import { 
   Box, 
   Typography, 
   Paper, 
-  Grid, 
-  Container, 
+  Grid,
   Button
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { ArrowBack } from '@mui/icons-material';
 
 const OfficeSelectionPage = () => {
   const navigate = useNavigate();
   
-  // Fixed list of 6 Ateneo offices
+  // Inarray ko nalang para clean - clyde
   const offices = [
     {
       id: 'sdo',
+      acronym: 'SDO',
       name: 'Social Development Office',
-      description: 'Community development and social welfare programs'
     },
     {
       id: 'cces',
-      name: 'Center for Community Extension Services (CCES)',
-      description: 'Community outreach and extension programs'
+      acronym: 'CCES',
+      name: 'Center for Community Extension Services ',
     },
     {
       id: 'api',
-      name: 'Ateneo Peace Institute (API)',
-      description: 'Peace building and conflict resolution initiatives'
+      acronym: 'API',
+      name: 'Ateneo Peace Institute ',
     },
     {
       id: 'sacsi',
-      name: 'Social Awareness and Community Service Involvement (SACSI)',
-      description: 'Student community service and social awareness programs'
+      acronym: 'SACSI',
+      name: 'Social Awareness and Community Service Involvement ',
     },
     {
       id: 'aclg',
-      name: 'Ateneo Center for Leadership and Governance (ACLG)',
-      description: 'Leadership development and governance training'
+      acronym: 'ACLG',
+      name: 'Ateneo Center for Leadership and Governance ',
     },
     {
       id: 'acca',
-      name: 'Ateneo Center for Culture and the Arts (ACCA)',
-      description: 'Cultural and arts programs for community development'
+      acronym: 'ACCA',
+      name: 'Ateneo Center for Culture and the Arts',
     }
   ];
 
@@ -52,45 +49,95 @@ const OfficeSelectionPage = () => {
   };
 
   return (
-    <Container maxWidth="lg">
+    <div>
       <Box
         sx={{
           minHeight: '100vh',
-          py: 4,
+          maxHeight: '100vh',
+          width: '100%',
+          px: { xs: 2, sm: 25 },
+          py: { xs: 2 },
+          overflow: 'auto',
+          backgroundImage: {
+            xs: 'url(/images/office-phone-bg.png)',
+            md: 'url(/images/office-login-bg.png)',
+          },
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
         }}
       >
-        <Box display="flex" justifyContent="flex-start" alignItems="center" sx={{ mb: 4 }}>
-          <Button
-            startIcon={<ArrowBack />}
+        {/* Header w */}
+        <Box 
+          display="flex" 
+          justifyContent="space-between" 
+          alignItems="center" 
+          mb={10}
+          sx={{ p: 2 }}
+        >
+          {/* Left arrow */}
+          <Box
             onClick={() => navigate('/')}
-            variant="outlined"
+            sx={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '8px',
+              '&:hover': {
+                opacity: 0.7,
+              }
+            }}
           >
-            Back to Home
-          </Button>
+            <img 
+              src="/icons/arrow left.svg" 
+              alt="Back" 
+              style={{
+                width: '24px',
+                height: '24px',
+
+              }}
+            />
+          </Box>
+
+          {/* ADZU left logo upper right conrer*/}
+          <Box
+            sx={{
+              height: { xs: '35px', md: '45px' },
+            }}
+          >
+            <img 
+              src="/logos/logoLeftHeader.webp" 
+              alt="ADZU Logo" 
+              style={{
+                height: '100%',
+                width: 'auto',
+                objectFit: 'contain'
+              }}
+            />
+          </Box>
         </Box>
 
-        <Typography 
-          variant="h3" 
-          component="h1" 
-          gutterBottom 
-          align="center"
-          sx={{ mb: 6, fontWeight: 'bold', color: 'primary.main' }}
-        >
-          Select Your Office
-        </Typography>
 
-        <Grid container spacing={3}>
+
+        <Grid 
+          container 
+          spacing={3} 
+          justifyContent="center"
+          alignItems="center"
+          sx={{ minHeight: '60vh' }}
+        >
           {offices.map((office) => (
-            <Grid item xs={12} md={6} lg={4} key={office.id}>
+            <Grid item xs={11} sm={12} md={6} lg={4} key={office.id}>
               <Paper
-                elevation={3}
+                elevation={4}
                 sx={{ 
-                  p: 4, 
-                  cursor: 'pointer',
+                  p: 3, 
+                  borderRadius: 2,
                   height: '200px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center',
+                  justifyContent: 'space-between',
                   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
@@ -100,35 +147,59 @@ const OfficeSelectionPage = () => {
                   border: '1px solid',
                   borderColor: 'divider'
                 }}
-                onClick={() => handleOfficeClick(office.id, office.name)}
               >
-                <Typography 
-                  variant="h6" 
-                  component="h2" 
-                  gutterBottom 
-                  align="center"
-                  sx={{ 
-                    fontWeight: 'semibold', 
-                    color: 'primary.main',
-                    mb: 2
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 'bold',
+                      fontFamily: 'Inter',
+                      color: '#4D49FC',
+                      mb: 1
+                    }}
+                  >
+                    {office.acronym}
+                  </Typography>
+                  <Typography 
+                    variant="h6"
+
+                    component="h1" 
+                    fontFamily={"Inter"}
+                    align="start"
+                    sx={{ 
+                      fontWeight: 'bold', 
+                      color: '#040195',
+                      mb: 2,
+                      lineHeight: 1.3
+                    }}
+                  >
+                    {office.name}
+                  </Typography>
+                </Box>
+                
+                <Button
+                  variant="contained"
+                  onClick={() => handleOfficeClick(office.id, office.name)}
+                  sx={{
+                    backgroundColor: '#4D49FC',
+                    color: 'white',
+                    borderRadius: 3,
+                    paddingX: 3,
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      backgroundColor: '#030180'
+                    },
+                    alignSelf: 'flex-start'
                   }}
                 >
-                  {office.name}
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  align="center" 
-                  color="text.secondary"
-                  sx={{ lineHeight: 1.5 }}
-                >
-                  {office.description}
-                </Typography>
+                  Login
+                </Button>
               </Paper>
             </Grid>
           ))}
         </Grid>
       </Box>
-    </Container>
+    </div>
   );
 };
 
