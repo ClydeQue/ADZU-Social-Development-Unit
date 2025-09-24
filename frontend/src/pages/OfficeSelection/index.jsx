@@ -8,6 +8,13 @@ import {
   Link
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { LazyMotion, domAnimation, m } from "framer-motion";
+import { 
+  containerVariants, 
+  buttonVariants,
+  titleVariants,
+  imageVariants
+} from "../../utils/animations";
 import SDUTitle from '../../utils/SDUTitle';
 
 const OfficeSelectionPage = () => {
@@ -58,26 +65,36 @@ const OfficeSelectionPage = () => {
   };
 
   return (
-    <div className='relative overflow-hidden'>
-      <Box
-        sx={{
-          minHeight: '100vh',
-          maxHeight: '100vh',
-          width: '100%',
-          px: { xs: 2, sm: 10 },
-          py: { xs: 2 },
-          overflow: 'auto',
-          position: 'relative',
-          backgroundImage: {
-            xs: 'url(/images/office-phone-bg.png)',
-            md: 'url(/images/office-login-bg.png)',
-          },
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed',
-        }}
+    <LazyMotion features={domAnimation}>
+      <m.div 
+        className='relative overflow-hidden'
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
+        <m.div
+          style={{
+            minHeight: '100vh',
+            maxHeight: '100vh',
+            width: '100%',
+            paddingLeft: window.innerWidth < 600 ? '16px' : '80px',
+            paddingRight: window.innerWidth < 600 ? '16px' : '80px',
+            paddingTop: '16px',
+            paddingBottom: '16px',
+            overflow: 'auto',
+            position: 'relative',
+            backgroundImage: window.innerWidth < 768 
+              ? 'url(/images/office-phone-bg.png)' 
+              : 'url(/images/office-login-bg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed',
+          }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
         {/* SDU Title to inexport ko galing utils   */}
         <Box
           sx={{
@@ -93,12 +110,17 @@ const OfficeSelectionPage = () => {
         </Box>
 
         {/* Header */}
-        <Box 
-          display="flex" 
-          justifyContent="space-between" 
-          alignItems="center" 
-          mb={10}
-          sx={{ p: 2 }}
+        <m.div 
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '80px',
+            padding: '16px'
+          }}
+          variants={titleVariants}
+          initial="hidden"
+          animate="visible"
         >
           {/* Mobile: Arrow button | Desktop: Breadcrumbs */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -176,7 +198,7 @@ const OfficeSelectionPage = () => {
               }}
             />
           </Box>
-        </Box>
+        </m.div>
 
 
 
@@ -187,9 +209,19 @@ const OfficeSelectionPage = () => {
           alignItems="center"
           sx={{ minHeight: '60vh' }}
         >
-          {offices.map((office) => (
-            <Grid item xs={10} sm={10} md={6} lg={4} xl={4} key={office.id}>
-              <Paper
+          {offices.map((office, index) => (
+            <Grid item xs={10} sm={6} md={6} lg={4} xl={4} key={office.id}>
+              <m.div
+                variants={imageVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ 
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
+                }}
+              >
+                <Paper
                 elevation={3}
                 sx={{ 
                   p: 4, 
@@ -270,7 +302,13 @@ const OfficeSelectionPage = () => {
                   </Typography>
                 </Box>
                 
-                <Button
+                <m.div
+                  variants={buttonVariants}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: index * 0.1 + 0.3 }}
+                >
+                  <Button
                   variant="contained"
                   onClick={() => handleOfficeClick(office.id, office.name)}
                   sx={{
@@ -290,12 +328,15 @@ const OfficeSelectionPage = () => {
                 >
                   Login
                 </Button>
+                </m.div>
               </Paper>
+            </m.div>
             </Grid>
           ))}
         </Grid>
-      </Box>
-    </div>
+        </m.div>
+      </m.div>
+    </LazyMotion>
   );
 };
 
