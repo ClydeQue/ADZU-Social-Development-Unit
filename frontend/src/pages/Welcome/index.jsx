@@ -3,7 +3,6 @@ import { Suspense } from "react"; //
 import { LazyMotion, domAnimation, m } from "framer-motion"; //animation libray, you guys can check docs at motion.dev
 import { LazyLoadImage } from 'react-lazy-load-image-component'; // recommended to for all components to reduce memory load
 import 'react-lazy-load-image-component/src/effects/blur.css';
-
 import { 
   titleVariants, 
   buttonVariants, 
@@ -52,7 +51,7 @@ const WelcomePage = () => {
             className="w-1/2 h-full flex items-center justify-center relative overflow-visible"
             variants={containerVariants}
             layout
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 4, ease: "easeut" }}
           >
            
             
