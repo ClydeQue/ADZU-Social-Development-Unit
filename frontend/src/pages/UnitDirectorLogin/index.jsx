@@ -57,7 +57,7 @@ const UnitDirectorLoginPage = () => {
       >
       {/*Login Box*/}
       <div className="absolute bottom-0 left-24 right-0 flex">
-        <div className="w-full max-w-lg bg-white rounded-t-3xl shadow-lg p-10 flex flex-col items-center">
+        <div className="w-full max-w-xl bg-white rounded-t-3xl shadow-lg p-10 flex flex-col items-center">
       
       {/*Back Icon*/}
       <div className="absolute" style={{ top: 20, left: 20 }}>
