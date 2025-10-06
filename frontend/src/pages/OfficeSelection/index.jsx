@@ -23,40 +23,40 @@ const OfficeSelectionPage = () => {
   // arrayed na sya para cleaner
   const offices = [
     {
-      id: 'sdo',
-      acronym: 'SDO',
-      name: 'Social Development Office',
-      logo: null, // lagyan niyo lang logo here if meron na change niyo lang si "null"
+      id: 'acca',
+      acronym: 'ACCA',
+      name: 'Ateneo Center for Culture and the Arts',
+      logo: '/logos/accaLogo.png',
     },
     {
-      id: 'cces',
-      acronym: 'CCES',
-      name: 'Center for Community Extension Services',
-      logo: null, // lagyan niyo lang logo here if meron na change niyo lang si "null"
-    },
-    {
-      id: 'apc',
-      acronym: 'APC',
-      name: 'Ateneo Peace Institute',
-      logo: '/logos/apcLogo.png',
-    },
-    {
-      id: 'sacsi',
-      acronym: 'SACSI',
-      name: 'Social Awareness and Community Service Involvement',
-      logo: null, // lagyan niyo lang logo here if meron na change niyo lang si "null"
+      id: 'aces',
+      acronym: 'ACES',
+      name: 'Ateneo Center for Environment and Sustainability',
+      logo: '/logos/acesLogo.png',
     },
     {
       id: 'aclg',
       acronym: 'ACLG',
       name: 'Ateneo Center for Leadership and Governance',
-      logo: null, // lagyan niyo lang logo here if meron na change niyo lang si "null"
+      logo: '/logos/aclgLogo.png',
     },
     {
-      id: 'acca',
-      acronym: 'ACCA',
-      name: 'Ateneo Center for Culture and the Arts',
-      logo: null, // lagyan niyo lang logo here if meron na change niyo lang si "null"
+      id: 'altec',
+      acronym: 'ALTEC',
+      name: 'Ateneo Learning and Teaching Excellence Center',
+      logo: '/logos/altecLogo.png',
+    },
+    {
+      id: 'apc',
+      acronym: 'APC',
+      name: 'Ateneo Peace Center',
+      logo: '/logos/apcLogo.png',
+    },
+    {
+      id: 'cces',
+      acronym: 'CCES',
+      name: 'Center for Community Extension and Services',
+      logo: '/logos/ccesLogo.png',
     }
   ];
 
@@ -261,7 +261,7 @@ const OfficeSelectionPage = () => {
                         sm: '160px', 
                         md: '150px', 
                         lg: '180px', 
-                        xl: '160px' 
+                        xl: '200px' 
                       },
                       backgroundImage: `url(${office.logo})`,
                       backgroundSize: 'contain',
