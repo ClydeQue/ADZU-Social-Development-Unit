@@ -11,6 +11,7 @@ const authRoutes = require("./routes/auth"); //JWT authentication
 const unitDirectorRoutes = require("./routes/unitDirector");
 const officeRoutes = require("./routes/office");
 const programRoutes = require("./routes/program");
+const programsRoutes = require("./routes/programs"); // Programs & Activities routes
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use("/api/auth", authRoutes); // Professional JWT authentication
 app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/program", programRoutes);
+app.use("/api/programs", programsRoutes); // Programs & Activities API
 
 // Health check endpoint
 app.get("/", (req, res) => {

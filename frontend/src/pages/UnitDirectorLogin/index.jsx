@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
-import { ArrowBack } from '@mui/icons-material';
+
 import { Alert, Button } from '@mui/material';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { motion } from "framer-motion";
@@ -28,15 +28,15 @@ const UnitDirectorLoginPage = () => {
     setError('');
 
     try {
-      console.log('� Unit Director Login Attempt:', formData.email);
+      console.log('Unit Director Login Attempt:', formData.email);
       
       await login(formData.email, formData.password, 'unit_director');
       
-      console.log('✅ Unit Director login successful - navigating to dashboard');
+      console.log('Unit Director login successful - navigating to dashboard');
       navigate('/unit-director/dashboard');
       
     } catch (err) {
-      console.error('❌ Unit Director login error:', err);
+      console.error('Unit Director login error:', err);
       setError(err.message || 'Login failed');
     }
   };

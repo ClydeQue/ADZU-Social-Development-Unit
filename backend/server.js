@@ -12,7 +12,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 const authRoutes = require("./src/routes/auth"); // Professional JWT authentication
 const unitDirectorRoutes = require("./src/routes/unitDirector");
 const officeRoutes = require("./src/routes/office");
-const programRoutes = require("./src/routes/program");
+const programsRoutes = require("./src/routes/programs"); // New programs & activities routes
 
 const app = express();
 
@@ -53,7 +53,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes); // Professional JWT authentication
 app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
-app.use("/api/program", programRoutes);
+app.use("/api/programs", programsRoutes); // Programs & Activities API
 
 // Health check endpoint
 app.get("/", (req, res) => {

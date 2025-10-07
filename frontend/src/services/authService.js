@@ -8,17 +8,39 @@
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
+const ACCESS_TOKEN_KEY = 'adzu_sdu_access_token';
+
 class AuthService {
   constructor() {
-    this.accessToken = null;
+    // Try to restore access token from localStorage on initialization
+    this.accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
     this.refreshPromise = null;
+    
+    if (this.accessToken) {
+      console.log('🔑 Access token restored from localStorage');
+    }
+  }
+
+  // Store access token in localStorage
+  setAccessToken(token) {
+    this.accessToken = token;
+    if (token) {
+      localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+    }
+  }
+
+  // Get current access token
+  getAccessToken() {
+    return this.accessToken;
   }
 
   // Make authenticated API request with auto-refresh
   async apiCall(endpoint, options = {}) {
     const url = `${API_BASE}/api/${endpoint.replace(/^\/+/, "")}`;
 
-    // Add authorization header if we have a token in memory
+    // Add authorization header if we have a token
     if (this.accessToken) {
       options.headers = {
         ...options.headers,
@@ -38,8 +60,8 @@ class AuthService {
       try {
         const refreshResult = await this.refreshToken();
         if (refreshResult?.accessToken) {
-          // Update memory token and retry request
-          this.accessToken = refreshResult.accessToken;
+          // Update token and retry request
+          this.setAccessToken(refreshResult.accessToken);
           options.headers = {
             ...options.headers,
             Authorization: `Bearer ${this.accessToken}`,
@@ -76,11 +98,11 @@ class AuthService {
       }
 
       if (data.success) {
-        // Store access token in memory only (no localStorage!)
-        this.accessToken = data.data.accessToken;
+        // Store access token in localStorage for persistence
+        this.setAccessToken(data.data.accessToken);
 
         console.log(
-          "✅ Office login successful, refresh token set in HttpOnly cookie"
+          "✅ Office login successful, tokens stored"
         );
         return {
           success: true,
@@ -117,11 +139,11 @@ class AuthService {
       }
 
       if (data.success) {
-        // Store access token in memory only (no localStorage!)
-        this.accessToken = data.data.accessToken;
+        // Store access token in localStorage for persistence
+        this.setAccessToken(data.data.accessToken);
 
         console.log(
-          "✅ Unit Director login successful, refresh token set in HttpOnly cookie"
+          "✅ Unit Director login successful, tokens stored"
         );
         return {
           success: true,
@@ -154,7 +176,10 @@ class AuthService {
         throw new Error(data.message || "Token refresh failed");
       }
 
-      console.log("✅ New access token received");
+      // Store new access token in localStorage
+      this.setAccessToken(data.data.accessToken);
+
+      console.log("✅ New access token received and stored");
       return {
         accessToken: data.data.accessToken,
         user: data.data.user,
@@ -195,10 +220,10 @@ class AuthService {
         return false;
       }
 
-      // Update access token in memory only
-      this.accessToken = data.data.accessToken;
+      // Update access token in localStorage
+      this.setAccessToken(data.data.accessToken);
 
-      console.log("✅ Access token refreshed (memory only)");
+      console.log("✅ Access token refreshed and stored");
       return true;
     } catch (error) {
       console.error("❌ Token refresh error:", error);
@@ -220,9 +245,9 @@ class AuthService {
       console.error("Logout API call failed:", error);
     }
 
-    // Clear access token from memory only
-    this.accessToken = null;
-    console.log("✅ Access token cleared from memory");
+    // Clear access token from localStorage
+    this.setAccessToken(null);
+    console.log("✅ Access token cleared from storage");
   }
 
   // Verify Token (memory only)
@@ -262,20 +287,19 @@ class AuthService {
     };
   }
 
-  // Check if authenticated (memory-based)
+  // Check if authenticated
   isAuthenticated() {
     return !!this.accessToken;
   }
 
-  // Get access token (memory only)
-  getAccessToken() {
-    return this.accessToken;
-  }
-
-  // Initialize - no localStorage loading
+  // Initialize - restore token from localStorage
   init() {
-    // No initialization needed - tokens are memory-only
-    console.log("🚀 AuthService initialized (memory-only mode)");
+    // Token is already restored in constructor
+    if (this.accessToken) {
+      console.log("🚀 AuthService initialized with stored access token");
+    } else {
+      console.log("🚀 AuthService initialized (no stored token)");
+    }
   }
 }
 

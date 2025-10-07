@@ -1,6 +1,9 @@
-// JWT Authentication Middleware with Access/Refresh Token System
+
 const jwtService = require("../services/jwtService");
-// Middleware to verify access token
+
+// ========================================
+// AUTHENTICATE TOKEN - Verify JWT
+// ========================================
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
@@ -29,18 +32,26 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
-  // Add user info to request
+  // Add user info to request (includes office_id for office users)
+  // Note: jwtService returns 'payload' not 'decoded'
+  const decoded = verification.payload || verification.decoded;
   req.user = {
-    userId: verification.decoded.userId,
-    userType: verification.decoded.userType,
-    tokenExp: verification.decoded.exp,
+    userId: decoded.userId,
+    userType: decoded.userType,
+    email: decoded.email,
+    name: decoded.name,
+    office_id: decoded.office_id || null, // CRITICAL: Office ID for access control
+    office: decoded.office || null,
+    tokenExp: decoded.exp,
   };
 
-  console.log(`✅ Authenticated: ${req.user.userType} ${req.user.userId}`);
+  console.log(`✅ Authenticated: ${req.user.userType} - ${req.user.name} ${req.user.office_id ? `(Office: ${req.user.office_id})` : '(All Offices)'}`);
   next();
 };
 
-// Middleware to check user role
+// ========================================
+// REQUIRE ROLE - Check user type
+// ========================================
 const requireRole = (allowedRoles) => {
    return (req, res, next) => {
     if (!req.user) {
@@ -71,7 +82,82 @@ const requireRole = (allowedRoles) => {
   };
 };
 
-// Middleware to check if user owns resource
+// ========================================
+// STRICT OFFICE ACCESS CONTROL
+// Office users can ONLY access their own office data
+// Unit Director can access ALL offices
+// ========================================
+const requireOfficeAccess = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      error: "Authentication required",
+      message: "Please authenticate first",
+    });
+  }
+
+  const { userType, office_id: userOfficeId } = req.user;
+
+  // Unit Director has access to ALL offices
+  if (userType === "unit_director") {
+    console.log("✅ Unit Director: Access granted to all offices");
+    req.canAccessAllOffices = true;
+    return next();
+  }
+
+  // Office user: Check office_id in params or body
+  const requestedOfficeId = req.params.office_id || req.body.office_id;
+
+  if (requestedOfficeId && requestedOfficeId !== userOfficeId) {
+    console.log(
+      `🚫 Access denied: Office user ${userOfficeId} cannot access office ${requestedOfficeId}`
+    );
+    return res.status(403).json({
+      error: "Access denied",
+      message: "You can only access your own office data",
+      userOffice: userOfficeId,
+      requestedOffice: requestedOfficeId,
+    });
+  }
+
+  console.log(`✅ Office user: Access granted to office ${userOfficeId}`);
+  req.canAccessAllOffices = false;
+  req.userOfficeId = userOfficeId;
+  next();
+};
+
+// ========================================
+// FILTER BY OFFICE - Automatically filter queries by office
+// Adds office_id filter for office users, no filter for Unit Director
+// ========================================
+const filterByOffice = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      error: "Authentication required",
+    });
+  }
+
+  const { userType, office_id: userOfficeId } = req.user;
+
+  if (userType === "office_user") {
+    // Force office_id filter for office users
+    req.officeFilter = userOfficeId;
+    // Also set in body for create/update operations
+    if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH") {
+      req.body.office_id = userOfficeId;
+    }
+    console.log(`🔒 Query filtered to office: ${userOfficeId}`);
+  } else if (userType === "unit_director") {
+    // No filter for Unit Director (access all offices)
+    req.officeFilter = null;
+    console.log("🔓 No office filter (Unit Director)");
+  }
+
+  next();
+};
+
+// ========================================
+// REQUIRE OWNERSHIP - Check resource ownership
+// ========================================
 const requireOwnership = (userIdField = "userId") => {
   return (req, res, next) => {
     if (!req.user) {
@@ -96,7 +182,10 @@ const requireOwnership = (userIdField = "userId") => {
   };
 };
 
-// Optional authentication (for public endpoints that benefit from user context)
+// ========================================
+// OPTIONAL AUTHENTICATION
+// For public endpoints that benefit from user context
+// ========================================
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -109,10 +198,15 @@ const optionalAuth = (req, res, next) => {
   const verification = jwtService.verifyAccessToken(token);
 
   if (verification.valid) {
+    const decoded = verification.payload || verification.decoded;
     req.user = {
-      userId: verification.decoded.userId,
-      userType: verification.decoded.userType,
-      tokenExp: verification.decoded.exp,
+      userId: decoded.userId,
+      userType: decoded.userType,
+      email: decoded.email,
+      name: decoded.name,
+      office_id: decoded.office_id || null,
+      office: decoded.office || null,
+      tokenExp: decoded.exp,
     };
   } else {
     req.user = null;
@@ -121,9 +215,25 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
+// ========================================
+// REQUIRE UNIT DIRECTOR
+// Shorthand for requireRole(["unit_director"])
+// ========================================
+const requireUnitDirector = requireRole(["unit_director"]);
+
+// ========================================
+// REQUIRE OFFICE USER
+// Shorthand for requireRole(["office_user"])
+// ========================================
+const requireOfficeUser = requireRole(["office_user"]);
+
 module.exports = {
   authenticateToken,
   requireRole,
+  requireOfficeAccess,
+  filterByOffice,
   requireOwnership,
   optionalAuth,
+  requireUnitDirector,
+  requireOfficeUser,
 };

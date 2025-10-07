@@ -76,30 +76,43 @@ export const AuthProvider = ({ children }) => {
     console.log('🚀 Checking for existing session...');
     
     const initializeSession = async () => {
-      // First check if we have user data in storage
-      const userData = loadUserFromStorage();
+      // First check if AuthService has an access token (from localStorage)
+      const existingToken = AuthService.getAccessToken();
       
-      if (userData?.user) {
-        console.log('👤 Found user data in storage, attempting token refresh...');
+      if (existingToken) {
+        console.log('� Found existing access token, attempting to refresh...');
         
-        // Try to refresh token using secure cookie
-        const refreshedSession = await refreshAccessToken();
-        
-        if (refreshedSession) {
-          setLoading(false);
-          return;
+        // Try to refresh token to get fresh user data
+        try {
+          const refreshedSession = await AuthService.refreshToken();
+          
+          if (refreshedSession?.accessToken && refreshedSession?.user) {
+            const newSession = {
+              user: refreshedSession.user,
+              accessToken: refreshedSession.accessToken,
+              loginTime: new Date().toISOString()
+            };
+            
+            setSession(newSession);
+            saveUserToStorage(refreshedSession.user);
+            console.log('✅ Session restored successfully');
+            setLoading(false);
+            return;
+          }
+        } catch (refreshError) {
+          console.log('❌ Token refresh failed:', refreshError.message);
+          AuthService.setAccessToken(null);
+          clearUserFromStorage();
         }
       }
       
-      // No stored user or refresh failed - check AuthService
-      try {
-        const existingSession = AuthService.getSession();
-        if (existingSession) {
-          setSession(existingSession);
-          saveUserToStorage(existingSession.user);
-        }
-      } catch (error) {
-        console.error('Session check error:', error);
+      // If no token or refresh failed, check for stored user data
+      const userData = loadUserFromStorage();
+      
+      if (userData?.user) {
+        console.log('👤 Found user data in storage, but no valid token');
+        // Clear stale data
+        clearUserFromStorage();
       }
       
       setLoading(false);
@@ -143,12 +156,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await AuthService.logout(); // This clears the HttpOnly cookie
-      console.log('🍪 HttpOnly refresh cookie cleared');
+      await AuthService.logout(); // This clears the HttpOnly cookie and localStorage token
+      console.log('🍪 HttpOnly refresh cookie and access token cleared');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      setSession(null); // Clear access token from memory
+      setSession(null); // Clear session from memory
       clearUserFromStorage(); // Clear user data from storage
       console.log('🗑️ Session cleared from memory and storage');
     }

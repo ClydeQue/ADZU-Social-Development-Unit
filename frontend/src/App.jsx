@@ -11,7 +11,7 @@ import UnitDirectorLoginPage from '@/pages/UnitDirectorLogin';
 import OfficeLoginPage from '@/pages/OfficeLogin';
 import UnitDirectorDashboard from '@/pages/UnitDirectorDashboard';
 import UnitDirectorReports from '@/pages/UnitDirectorReports';
-import OfficeDashboard from '@/pages/OfficeDashboard';
+import OfficeDashboard from '@/pages/OfficeDashboard/OfficeDashboard';
 
 import './App.css';
 

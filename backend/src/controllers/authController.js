@@ -1,10 +1,17 @@
-// Professional Authentication Controller with JWT
+// ========================================
+// UNIFIED AUTHENTICATION CONTROLLER
+// One credential per office (6 offices) + 1 Unit Director = 7 total credentials
+// Strict access control: Each office can ONLY access their own data
+// ========================================
 const bcrypt = require("bcryptjs");
 const supabase = require("../config/database");
 const jwtService = require("../services/jwtService");
 
 class AuthController {
-  // Office User Login
+  // ========================================
+  // UNIFIED LOGIN - Handles both Office Users and Unit Director
+  // Uses office_credentials table
+  // ========================================
   static async loginOffice(req, res) {
     try {
       const { email, password } = req.body;
@@ -17,25 +24,37 @@ class AuthController {
         });
       }
 
-      console.log(`🔐 Office login attempt: ${email}`);
+      console.log(`🔐 Login attempt: ${email}`);
 
-      // Get user from database
+      // Get user from unified office_credentials table
+      // Note: offices join is LEFT JOIN (office_id can be NULL for unit_director)
       const { data: users, error } = await supabase
-        .from("office_users")
-        .select("*")
+        .from("office_credentials")
+        .select(`
+          *,
+          offices (
+            id,
+            name,
+            acronym,
+            description
+          )
+        `)
         .eq("email", email.trim().toLowerCase())
+        .eq("is_active", true)
         .limit(1);
 
       if (error) {
-        console.error("Database error:", error);
+        console.error("❌ Database error:", error);
+        console.error("   Error details:", JSON.stringify(error, null, 2));
         return res.status(500).json({
           success: false,
           message: "Database error",
+          error: process.env.NODE_ENV === "development" ? error.message : undefined,
         });
       }
 
       if (!users || users.length === 0) {
-        console.log(`❌ Office user not found: ${email}`);
+        console.log(`❌ User not found: ${email}`);
         return res.status(401).json({
           success: false,
           message: "Invalid credentials",
@@ -43,9 +62,9 @@ class AuthController {
       }
 
       const user = users[0];
-      console.log(`👤 Found office user: ${user.name}`);
+      console.log(`👤 Found user: ${user.name} (${user.user_type})`);
 
-      // Verify password with bcrypt
+      // Verify password with bcrypt (salt rounds 12)
       const isValidPassword = await bcrypt.compare(password, user.password);
       console.log(`🔑 Password verification: ${isValidPassword}`);
 
@@ -57,115 +76,35 @@ class AuthController {
         });
       }
 
-      // Generate JWT tokens
-      const accessToken = jwtService.generateAccessToken({
+      // Update last_login timestamp
+      await supabase
+        .from("office_credentials")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", user.id);
+
+      // Build JWT token payload
+      const tokenPayload = {
         userId: user.id,
         email: user.email,
-        userType: "office_user",
+        userType: user.user_type,
         name: user.name,
-        office_id: user.office_id,
-      });
+      };
 
-      const refreshToken = jwtService.generateRefreshToken(user.id);
-
-      console.log(`✅ Office login successful: ${user.email}`);
-
-      // Set refresh token as httpOnly cookie
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-
-      // Return success response
-      res.json({
-        success: true,
-        message: "Login successful",
-        data: {
-          accessToken,
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            office_id: user.office_id,
-            userType: "office_user",
-          },
-        },
-      });
-    } catch (error) {
-      console.error("❌ Office login error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Authentication failed",
-      });
-    }
-  }
-
-  // Unit Director Login
-  static async loginUnitDirector(req, res) {
-    try {
-      const { email, password } = req.body;
-
-      // Validation
-      if (!email || !password) {
-        return res.status(400).json({
-          success: false,
-          message: "Email and password are required",
-        });
-      }
-
-      console.log(`🔐 Unit Director login attempt: ${email}`);
-
-      // Get director from database
-      const { data: directors, error } = await supabase
-        .from("unit_directors")
-        .select("*")
-        .eq("email", email.trim().toLowerCase())
-        .limit(1);
-
-      if (error) {
-        console.error("Database error:", error);
-        return res.status(500).json({
-          success: false,
-          message: "Database error",
-        });
-      }
-
-      if (!directors || directors.length === 0) {
-        console.log(`❌ Unit Director not found: ${email}`);
-        return res.status(401).json({
-          success: false,
-          message: "Invalid credentials",
-        });
-      }
-
-      const director = directors[0];
-      console.log(`👤 Found director: ${director.name}`);
-
-      // Verify password with bcrypt
-      const isValidPassword = await bcrypt.compare(password, director.password);
-      console.log(`🔑 Password verification: ${isValidPassword}`);
-
-      if (!isValidPassword) {
-        console.log(`❌ Invalid password for: ${email}`);
-        return res.status(401).json({
-          success: false,
-          message: "Invalid credentials",
-        });
+      // Add office information for office users (STRICT: one office per user)
+      if (user.user_type === "office_user" && user.offices) {
+        tokenPayload.office_id = user.office_id; // CRITICAL: This enforces single office access
+        tokenPayload.office = {
+          id: user.offices.id,
+          name: user.offices.name,
+          acronym: user.offices.acronym,
+        };
       }
 
       // Generate JWT tokens
-      const accessToken = jwtService.generateAccessToken({
-        userId: director.id,
-        email: director.email,
-        userType: "unit_director",
-        name: director.name,
-      });
+      const accessToken = jwtService.generateAccessToken(tokenPayload);
+      const refreshToken = jwtService.generateRefreshToken(user.id);
 
-      const refreshToken = jwtService.generateRefreshToken(director.id);
-
-      console.log(`✅ Unit Director login successful: ${director.email}`);
+      console.log(`✅ Login successful: ${user.email} (${user.user_type})`);
 
       // Set refresh token as httpOnly cookie
       res.cookie("refreshToken", refreshToken, {
@@ -175,22 +114,36 @@ class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
+      // Build response user object
+      const responseUser = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        userType: user.user_type,
+      };
+
+      // Add office info for office users
+      if (user.user_type === "office_user" && user.offices) {
+        responseUser.office_id = user.office_id;
+        responseUser.office = {
+          id: user.offices.id,
+          name: user.offices.name,
+          acronym: user.offices.acronym,
+          description: user.offices.description,
+        };
+      }
+
       // Return success response
       res.json({
         success: true,
         message: "Login successful",
         data: {
           accessToken,
-          user: {
-            id: director.id,
-            email: director.email,
-            name: director.name,
-            userType: "unit_director",
-          },
+          user: responseUser,
         },
       });
     } catch (error) {
-      console.error("❌ Unit Director login error:", error);
+      console.error("❌ Login error:", error);
       res.status(500).json({
         success: false,
         message: "Authentication failed",
@@ -198,7 +151,17 @@ class AuthController {
     }
   }
 
-  // Refresh Token
+  // ========================================
+  // UNIT DIRECTOR LOGIN - Uses same unified login
+  // ========================================
+  static async loginUnitDirector(req, res) {
+    console.log("🔄 Using unified login for Unit Director");
+    return AuthController.loginOffice(req, res);
+  }
+
+  // ========================================
+  // REFRESH TOKEN
+  // ========================================
   static async refreshToken(req, res) {
     try {
       const refreshToken = req.cookies.refreshToken;
@@ -225,54 +188,50 @@ class AuthController {
 
       const { userId } = verification.payload;
 
-      // Get user data from database (you'd implement this based on userType)
-      // For now, we'll fetch from both tables
-      let userData = null;
-
-      // Try office_users first
-      const { data: officeUsers } = await supabase
-        .from("office_users")
-        .select("*")
+      // Get user from unified office_credentials table
+      const { data: users, error } = await supabase
+        .from("office_credentials")
+        .select(`
+          *,
+          offices (
+            id,
+            name,
+            acronym
+          )
+        `)
         .eq("id", userId)
+        .eq("is_active", true)
         .limit(1);
 
-      if (officeUsers && officeUsers.length > 0) {
-        const user = officeUsers[0];
-        userData = {
-          userId: user.id,
-          email: user.email,
-          userType: "office_user",
-          name: user.name,
-          office_id: user.office_id,
-        };
-      } else {
-        // Try unit_directors
-        const { data: directors } = await supabase
-          .from("unit_directors")
-          .select("*")
-          .eq("id", userId)
-          .limit(1);
-
-        if (directors && directors.length > 0) {
-          const director = directors[0];
-          userData = {
-            userId: director.id,
-            email: director.email,
-            userType: "unit_director",
-            name: director.name,
-          };
-        }
-      }
-
-      if (!userData) {
+      if (error || !users || users.length === 0) {
         return res.status(401).json({
           success: false,
           message: "User not found",
         });
       }
 
+      const user = users[0];
+
+      // Build token payload
+      const tokenPayload = {
+        userId: user.id,
+        email: user.email,
+        userType: user.user_type,
+        name: user.name,
+      };
+
+      // Add office_id for office users (STRICT access control)
+      if (user.user_type === "office_user" && user.offices) {
+        tokenPayload.office_id = user.office_id;
+        tokenPayload.office = {
+          id: user.offices.id,
+          name: user.offices.name,
+          acronym: user.offices.acronym,
+        };
+      }
+
       // Generate new access token
-      const newAccessToken = jwtService.generateAccessToken(userData);
+      const newAccessToken = jwtService.generateAccessToken(tokenPayload);
 
       console.log("✅ Access token refreshed successfully");
 
