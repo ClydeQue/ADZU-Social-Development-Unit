@@ -18,9 +18,9 @@ export default function UnitDirectorDashboard() {
     pending: { count: 3, status: 'On Discuss' },
     flagshipUpdate: { percentage: 85, completed: 85, inProgress: 10, pending: 5 },
     upcoming: [
-      { office: 'ACCA', activity: 'ARTEJOS', due: 'Oct 5, 2025' },
-      { office: 'ACES', activity: 'Inigo Tree Planting', due: 'Oct 6, 2025' },
-      { office: 'ALTEC', activity: 'SUGPAT Program', due: 'Oct 7, 2025' },
+      { office: 'ACCA', activity: 'ARTEJOS', due: 'Oct 5, 2025', logo: '/images/acca_logo_small.webp' },
+      { office: 'ACES', activity: 'Inigo Tree Planting', due: 'Oct 6, 2025', logo: '/images/aces_logo_small.webp' },
+      { office: 'ALTEC', activity: 'SUGPAT Program', due: 'Oct 7, 2025', logo: '/images/altec_logo_small.webp' },
     ],
     budget: {
       total: 1000000,
@@ -175,10 +175,12 @@ export default function UnitDirectorDashboard() {
                                 key={index}
                                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#f8f9ff] transition-colors flex-shrink-0"
                               >
-                                <div className="w-9 h-9 rounded-lg bg-[#E8EAFF] flex items-center justify-center flex-shrink-0">
-                                  <span className="font-semibold text-[#5B6FED] text-[0.8rem]">
-                                    {item.office.substring(0, 2)}
-                                  </span>
+                                <div className="w-9 h-9 rounded-lg  flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                  <img 
+                                    src={item.logo} 
+                                    alt={item.office}
+                                    className="w-full h-full object-contain p-1"
+                                  />
                                 </div>
                                 <div className="flex-grow min-w-0">
                                   <div className="text-[0.65rem] font-bold text-[#0401955e]">

@@ -126,8 +126,8 @@ export default function Sidebar() {
                     onClick={() => handleNavigation(item.path)}
                     className={`w-full rounded-xl py-[9.6px]  flex items-center transition-all duration-200 ${
                       isActive(item.path) 
-                        ? 'bg-transparent text-[#4D49FC]' 
-                        : 'bg-transparent text-[#040195] hover:bg-[#F4F4F4]'
+                        ? 'bg-transparent text-[#4D49FC] cursor-pointer' 
+                        : 'bg-transparent text-[#040195] hover:bg-[#F4F4F4] cursor-pointer'
                     }`}
                   >
                     <div className={`min-w-[36px] ${isActive(item.path) ? 'text-[#4D49FC]' : 'text-[#040195]'}`}>
@@ -151,10 +151,10 @@ export default function Sidebar() {
               </div>
 
               {generalItems.map((item) => (
-                <div key={item.text} className="mb-0.5 px-6">
+                <div key={item.text} className="mb-0.5 px-6 ">
                   <button
                     onClick={item.action === 'logout' ? handleLogout : () => handleNavigation(item.path)}
-                    className="w-full rounded-xl py-[9.6px]  flex items-center bg-transparent text-[#040195] hover:bg-[#F4F4F4] transition-all duration-200"
+                    className="w-full rounded-xl py-[9.6px] cursor-pointer  flex items-center bg-transparent text-[#040195] hover:bg-[#F4F4F4] transition-all duration-200"
                   >
                     <div className="text-[#1E22AA] min-w-[36px]">
                       {item.icon}
