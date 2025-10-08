@@ -60,7 +60,7 @@ const UnitDirectorLoginPage = () => {
         <div className="w-full max-w-xl bg-white rounded-t-3xl shadow-lg p-10 flex flex-col items-center">
       
       {/*Back Icon*/}
-      <div className="absolute" style={{ top: 20, left: 20 }}>
+      <div className="absolute" style={{ top: 40, left: 20 }}>
         <Button
           onClick={() => navigate('/')}
           className="flex items-center gap-2"
@@ -70,14 +70,15 @@ const UnitDirectorLoginPage = () => {
       </div>
     
           {/*Office Logo/Unit Director Picture*/}
+          <div className="mb-4 mt-2 pt-6">
           <div className="w-44 h-44 rounded-full bg-white flex items-center justify-center shadow-xl">
             <div className="w-40 h-40 rounded-full bg-[#040195] flex items-center justify-center">
               <img src="/images/pic.jpg" alt="Profile" className="w-36 h-36 rounded-full object-cover"/>
             </div>
           </div>
-
+          </div>
           {/*Name*/}
-          <h2 className="text-3xl font-bold text-blue-800 font-poppins p-5 mb-6">
+          <h2 className="text-4xl font-bold text-blue-800 font-poppins pb-5 pt-2 mb-6">
             UNIT DIRECTOR
           </h2>
 
@@ -136,7 +137,7 @@ const UnitDirectorLoginPage = () => {
             </div>
 
             {/*Login Button*/}
-            <div className="flex justify-center mb-7 mt-4">
+            <div className="flex justify-center mb-7 mt-4 pt-4 pb-8">
               <button
                 type="submit"
                 disabled={loading}
