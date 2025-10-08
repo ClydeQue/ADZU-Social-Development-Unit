@@ -17,12 +17,10 @@ export const titleVariants = {
     },
   },
 };
-
+// animations dito
 export const buttonVariants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    scale: 0.8,
   },
   visible: {
     opacity: 1,
@@ -33,7 +31,7 @@ export const buttonVariants = {
       ease: [0.25, 0.46, 0.45, 0.94],
       delay: 0.3,
       type: "spring",
-      stiffness: 60,
+      stiffness: 20,
       damping: 15,
     },
   },
@@ -82,7 +80,7 @@ export const imageVariants = {
     transition: {
       duration: 0.6,
       ease: "easeOut",
-      delay: 0.15,
+      delay: 0.05,
     },
   },
 };
@@ -93,7 +91,7 @@ export const containerVariants = {
     opacity: 1,
     transition: {
       duration: 0.3,
-      staggerChildren: 0.05,
+
     },
   },
 };
@@ -109,10 +107,10 @@ export const textScaleVariants = {
     scale: 1,
     y: 0,
     transition: {
-      duration: 0.5,
+      duration: 2,
       ease: [0.25, 0.46, 0.45, 0.94],
       type: "spring",
-      stiffness: 80,
+      stiffness: 20,
       damping: 12,
     },
   },

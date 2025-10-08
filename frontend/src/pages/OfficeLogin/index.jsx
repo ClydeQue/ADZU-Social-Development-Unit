@@ -1,17 +1,8 @@
-import{ useState } from 'react';
-import { 
-  Box, 
-  Paper, 
-  TextField, 
-  Button, 
-  Typography, 
-  Alert,
-  Container,
-  CircularProgress
-} from '@mui/material';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Business, ArrowBack } from '@mui/icons-material';
+import { Alert, Button } from '@mui/material';
 import { useAuth } from '@/context/AuthContext.jsx';
+import { motion } from "framer-motion";
 
 const OfficeLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +15,19 @@ const OfficeLoginPage = () => {
   
   const { login, loading } = useAuth();
   const officeName = location.state?.officeName || 'Office';
+  const officeId = location.state?.officeId || 'office';
+  
+  // Map office IDs to their logos
+  const officeLogos = {
+    'acca': '/logos/officeLogo/acca_logo_big.webp',
+    'aces': '/logos/officeLogo/aces_logo_big.webp',
+    'aclg': '/logos/officeLogo/aclg_logo_big.webp',
+    'altec': '/logos/officeLogo/altec_logo_big.webp',
+    'apc': '/logos/officeLogo/apc_logo_big.webp',
+    'cces': '/logos/officeLogo/cces_logo_big.webp'
+  };
+  
+  const officeLogo = officeLogos[officeId] || '/logos/officeLogo/aclg_logo_big.webp';
 
   const handleChange = (e) => {
     setFormData({
@@ -32,110 +36,145 @@ const OfficeLoginPage = () => {
     });
   };
 
-  
-
-
-   
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      console.log('� Office Login Attempt:', formData.email);
+      console.log('🏢 Office Login Attempt:', formData.email);
       
       await login(formData.email, formData.password, 'office');
       
-      console.log('✅ Office login successful - navigating to dashboard');
+      console.log('Office login successful - navigating to dashboard');
       navigate('/office/dashboard');
       
     } catch (err) {
-      console.error('❌ Office login error:', err);
+      console.error('Office login error:', err);
       setError(err.message || 'Login failed');
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        }}
-        className="bg-gradient-to-br from-blue-600 to-purple-600 px-4"
+    <div 
+      className="w-screen h-screen flex justify-center items-end bg-no-repeat bg-cover bg-center  relative overflow-hidden"
+      style={{
+        background: 'url(/images/office-login-bg.webp) center/cover no-repeat',
+      }}
+    >
+      {/* AdZU Branding Bottom Right */}
+      <div className="absolute bottom-8 right-8 flex items-center gap-4">
+        <img src="/logos/logoRightHeader.webp" alt="AdZU" className="h-15 object-contain" />
+
+      </div>
+
+      {/* Login Card */}
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-lg bg-white rounded-tr-3xl rounded-tl-3xl shadow-2xl p-15 flex flex-col items-center relative"
       >
-        <Button
-          startIcon={<ArrowBack />}
-          onClick={() => navigate('/office-selection')}
-          sx={{ 
-            position: 'absolute',
-            top: 20,
-            left: 20,
-            color: 'white'
-          }}
-        >
-          Back to Office Selection
-        </Button>
+        {/* Back Button */}
+        <div className="absolute top-6 left-6">
+          <Button
+            onClick={() => navigate('/office-selection')}
+            sx={{ 
+              minWidth: 'auto',
+              padding: 0,
+              '&:hover': { opacity: 0.7 }
+            }}
+          >
+            <img src="/icons/arrow_left_blue.svg" alt="Back" className="w-10 h-10" />
+          </Button>
+        </div>
 
-        <Paper elevation={8} sx={{ p: 4, width: '100%', maxWidth: 400 }}>
-          <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-            <Business 
-              sx={{ fontSize: 60, color: '#388e3c', mb: 1 }}
-            />
-            <Typography variant="h4" component="h1" gutterBottom align="center">
-              {officeName}
-            </Typography>
-            <Typography variant="h6" color="textSecondary" align="center">
-              Login
-            </Typography>
-          </Box>
+        {/* Office Loooogo */}
+        <div className="mb-6">
+          <img 
+            src={officeLogo} 
+            alt={officeName} 
+            className="h-32 w-auto object-contain"
+          />
+        </div>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {/* Office Titleeeeeeeeee */}
+        <h2 className="text-2xl font-bold font-poppins text-[#040195] text-center mb-8 px-4">
+          {officeName}
+        </h2>
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              margin="normal"
-              disabled={loading}
-            />
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              margin="normal"
-              disabled={loading}
-            />
-            <Button
+        {/* Error Alert */}
+        {error && (
+          <div className="w-full mb-4">
+            <Alert severity="error">{error}</Alert>
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="w-full">
+          {/* Email Input */}
+          <div className="mb-6">
+            <label className="block text-base font-inter font-semibold text-[#040195] mb-2">
+              AdZU Address
+            </label>
+            <div className="relative">
+              <img
+                src="/icons/person.svg"
+                alt="person icon"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10"
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                className="w-full border-2 font-poppins border-[#040195] rounded-xl px-12 py-3 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] placeholder-[#CACACA]"
+              />
+            </div>
+          </div>
+
+          {/* Password Input */}
+          <div className="mb-8">
+            <label className="block text-base font-inter font-semibold text-[#040195] mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <img
+                src="/icons/password.svg"
+                alt="password icon"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10"
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                className="w-full border-2 font-poppins border-[#040195] rounded-xl px-12 py-3 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] placeholder-[#CACACA]"
+              />
+            </div>
+          </div>
+
+          {/* Login Button */}
+          <div className="flex justify-center">
+            <button
               type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
               disabled={loading}
-              size="large"
+              className="w-48 py-3 text-lg font-poppins font-bold shadow-lg 
+                        bg-[#4D49FC] text-white rounded-full 
+                        hover:bg-[#3d39dc] transition cursor-pointer 
+                        disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? <CircularProgress size={24} /> : 'Login'}
-            </Button>
-          </form>
-
-          <Typography variant="body2" align="center" color="textSecondary" sx={{ mt: 2 }}>
-            Use your office credentials to access the dashboard
-          </Typography>
-        </Paper>
-      </Box>
-    </Container>
+              {loading ? 'Logging in...' : 'LOGIN'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
   );
 };
 

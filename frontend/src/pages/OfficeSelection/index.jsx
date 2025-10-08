@@ -26,42 +26,42 @@ const OfficeSelectionPage = () => {
       id: 'acca',
       acronym: 'ACCA',
       name: 'Ateneo Center for Culture and the Arts',
-      logo: '/logos/accaLogo.png',
+      logo: '/logos/officeLogoTransparent/accaLogo.webp',
     },
     {
       id: 'aces',
       acronym: 'ACES',
       name: 'Ateneo Center for Environment and Sustainability',
-      logo: '/logos/acesLogo.png',
+      logo: '/logos/officeLogoTransparent/acesLogo.webp',
     },
     {
       id: 'aclg',
       acronym: 'ACLG',
       name: 'Ateneo Center for Leadership and Governance',
-      logo: '/logos/aclgLogo.png',
+      logo: '/logos/officeLogoTransparent/aclgLogo.webp',
     },
     {
       id: 'altec',
       acronym: 'ALTEC',
       name: 'Ateneo Learning and Teaching Excellence Center',
-      logo: '/logos/altecLogo.png',
+      logo: '/logos/officeLogoTransparent/altecLogo.webp',
     },
     {
       id: 'apc',
       acronym: 'APC',
       name: 'Ateneo Peace Center',
-      logo: '/logos/apcLogo.png',
+      logo: '/logos/officeLogoTransparent/apcLogo.webp',
     },
     {
       id: 'cces',
       acronym: 'CCES',
       name: 'Center for Community Extension and Services',
-      logo: '/logos/ccesLogo.png',
+      logo: '/logos/officeLogoTransparent/ccesLogo.webp',
     }
   ];
 
   const handleOfficeClick = (officeId, officeName) => {
-    navigate(`/office/login/${officeId}`, { state: { officeName } });
+    navigate(`/office/login/${officeId}`, { state: { officeName, officeId } });
   };
 
   return (
@@ -84,8 +84,8 @@ const OfficeSelectionPage = () => {
             overflow: 'auto',
             position: 'relative',
             backgroundImage: window.innerWidth < 768 
-              ? 'url(/images/office-phone-bg.png)' 
-              : 'url(/images/office-login-bg.png)',
+              ? 'url(/images/office-phone-bg.webp)' 
+              : 'url(/images/office-selection-bg.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
@@ -115,6 +115,7 @@ const OfficeSelectionPage = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            fontFamily: 'inter',
             marginBottom: '80px',
             padding: '16px'
           }}
@@ -161,6 +162,7 @@ const OfficeSelectionPage = () => {
                   color: 'white',
                   cursor: 'pointer',
                   fontSize: '16px',
+                  fontFamily: 'poppins',
                   fontWeight: 'medium',
                   '&:hover': {
                     color: 'rgba(255, 255, 255, 0.8)',
@@ -174,6 +176,8 @@ const OfficeSelectionPage = () => {
                 sx={{
                   color: 'white',
                   fontSize: '16px',
+                  fontFamily: 'poppins',
+
                   fontWeight: 'bold',
                 }}
               >
@@ -280,7 +284,7 @@ const OfficeSelectionPage = () => {
                       fontFamily: 'Inter',
                       color: '#4D49FC',
                       mb: 1,
-                      fontSize: { xs: '0.875rem', xl: '1.125rem' } // Larger on lg screens
+                      fontSize: { xs: '0.875rem', xl: '1.125rem' } 
                     }}
                   >
                     {office.acronym}
@@ -288,7 +292,7 @@ const OfficeSelectionPage = () => {
                   <Typography 
                     variant="h6"
                     component="h1" 
-                    fontFamily={"Inter"}
+                    fontFamily="Inter"
                     align="start"
                     sx={{ 
                       fontWeight: 'bold', 

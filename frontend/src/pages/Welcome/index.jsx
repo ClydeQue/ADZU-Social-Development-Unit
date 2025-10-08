@@ -63,7 +63,7 @@ const WelcomePage = () => {
               animate="visible"
             >
               <LazyLoadImage
-                src="/images/high.png"
+                src="/images/high.webp"
                 alt="Students working"
                 className="w-auto object-contain max-w-none md:h-[80%] lg:h-[99%]"
                 effect="blur"
@@ -235,14 +235,14 @@ const WelcomePage = () => {
           
           {/* Mobile image section */}
           <m.div 
-            className="absolute -bottom-40 w-full  z-10  h-[100%] max-h-[32rem] "
+            className="absolute -bottom-45 w-full  z-10  h-[100%] max-h-[32rem] "
             variants={imageVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
           >
             <LazyLoadImage
-              src="/images/high.png" 
+              src="/images/high.webp" 
               alt="Students working" 
               draggable= 'false'
               className="h-full  w-full object-center  object-contain scale-125 "
