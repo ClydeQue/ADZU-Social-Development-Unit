@@ -79,7 +79,7 @@ const UnitDirectorLoginPage = () => {
         <div className="mb-6">
           <div className="w-36 h-36 rounded-full bg-white flex items-center justify-center shadow-xl">
             <div className="w-32 h-32 rounded-full bg-[#040195] flex items-center justify-center">
-              <img src="/images/pic.jpg" alt="Profile" className="w-28 h-28 rounded-full object-cover"/>
+              <img src="/images/pic.webp" alt="Profile" className="w-28 h-28 rounded-full object-cover"/>
             </div>
           </div>
         </div>
