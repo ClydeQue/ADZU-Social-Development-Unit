@@ -14,29 +14,7 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useMutation } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-
-// API helper
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
-
-const apiCall = async (endpoint, options = {}) => {
-  const token = localStorage.getItem("auth_token");
-  
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Network error" }));
-    throw new Error(error.error || error.message || "API call failed");
-  }
-
-  return response.json();
-};
+import UserService from '../services/userService.js';
 
 const ChangePasswordDialog = ({ open, onClose, userType = 'office_user' }) => {
   const [formData, setFormData] = useState({
@@ -55,13 +33,10 @@ const ChangePasswordDialog = ({ open, onClose, userType = 'office_user' }) => {
 
   const changePasswordMutation = useMutation({
     mutationFn: async ({ currentPassword, newPassword }) => {
-      return await apiCall('/secure-auth/change-password', {
-        method: 'PUT',
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-          userType
-        })
+      return await UserService.changePassword({
+        currentPassword,
+        newPassword,
+        userType
       });
     },
     onSuccess: (data) => {

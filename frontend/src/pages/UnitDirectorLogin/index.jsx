@@ -41,13 +41,13 @@ const UnitDirectorLoginPage = () => {
     setError('');
 
     try {
-      console.log('Unit Director Login Attempt:', formData.email);
+      await login({
+        email: formData.email,
+        password: formData.password,
+        userType: 'unit_director'
+      });
       
-      await login(formData.email, formData.password, 'unit_director');
-      
-      console.log('Unit Director login successful - navigating to dashboard');
       navigate('/unit-director/dashboard');
-      
     } catch (err) {
       console.error('Unit Director login error:', err);
       setError(err.message || 'Login failed');

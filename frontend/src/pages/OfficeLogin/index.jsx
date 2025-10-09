@@ -57,13 +57,14 @@ const OfficeLoginPage = () => {
     setError('');
 
     try {
-      console.log('🏢 Office Login Attempt:', formData.email);
+      await login({
+        email: formData.email,
+        password: formData.password,
+        userType: 'office'
+      });
       
-      await login(formData.email, formData.password, 'office');
-      
-      console.log('Office login successful - navigating to dashboard');
-      navigate('/office/dashboard');
-      
+      // Route to office-specific dashboard based on officeId
+      navigate(`/office/${officeId}/dashboard`);
     } catch (err) {
       console.error('Office login error:', err);
       setError(err.message || 'Login failed');

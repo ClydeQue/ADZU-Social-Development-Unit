@@ -1,0 +1,79 @@
+/**
+ * Program Service
+ * Handles program-related API calls
+ * Programs are office-specific and fixed per office
+ */
+
+import api from "./api.js";
+
+class ProgramService {
+  /**
+   * Get all programs (usually for Unit Director)
+   */
+  async getAllPrograms(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = queryParams ? `program/all?${queryParams}` : "program/all";
+    const response = await api.get(endpoint);
+    return response.programs;
+  }
+
+  /**
+   * Get programs for current office user
+   */
+  async getMyPrograms() {
+    const response = await api.get("programs");
+    return response.data;
+  }
+
+  /**
+   * Get programs by office ID
+   * Useful for viewing specific office's programs
+   */
+  async getProgramsByOffice(officeId) {
+    const response = await api.get(`office/${officeId}/programs`);
+    return response.programs;
+  }
+
+  /**
+   * Get program by ID
+   */
+  async getProgramById(programId) {
+    const response = await api.get(`program/${programId}`);
+    return response.program;
+  }
+
+  /**
+   * Create new program
+   * Note: In the future, programs may be fixed per office
+   */
+  async createProgram(programData) {
+    const response = await api.post("program", programData);
+    return response.program;
+  }
+
+  /**
+   * Update program
+   */
+  async updateProgram(programId, programData) {
+    const response = await api.put(`program/${programId}`, programData);
+    return response.program;
+  }
+
+  /**
+   * Delete program
+   */
+  async deleteProgram(programId) {
+    return await api.delete(`program/${programId}`);
+  }
+
+  /**
+   * Get program statistics
+   */
+  async getProgramStats(programId) {
+    const response = await api.get(`program/${programId}/stats`);
+    return response.data;
+  }
+}
+
+export default new ProgramService();
+

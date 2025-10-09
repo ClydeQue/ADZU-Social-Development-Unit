@@ -102,3 +102,9 @@ ehthumbs.db
 # Local development
 .vscode/
 .history/
+
+# SQL seed files and documentation
+*.sql
+*.md
+!README.md
+test-credentials.js

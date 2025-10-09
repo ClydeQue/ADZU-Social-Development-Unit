@@ -16,32 +16,4 @@ router.post("/logout", AuthController.logout);
 // Refresh access token using HttpOnly cookie
 router.post("/refresh", AuthController.refreshToken);
 
-// Verify session (for protected routes)
-router.get("/verify", (req, res) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      success: false,
-      message: "No valid token provided",
-    });
-  }
-
-  const token = authHeader.substring(7);
-  const validation = AuthController.validateSession(token);
-
-  if (validation.valid) {
-    res.json({
-      success: true,
-      message: "Session valid",
-      session: validation.session,
-    });
-  } else {
-    res.status(401).json({
-      success: false,
-      message: validation.reason,
-    });
-  }
-});
-
 module.exports = router;

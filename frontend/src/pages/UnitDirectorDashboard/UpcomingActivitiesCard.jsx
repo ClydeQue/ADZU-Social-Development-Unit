@@ -1,0 +1,53 @@
+// eslint-disable-next-line react/prop-types
+const UpcomingActivitiesCard = ({ upcomingData }) => {
+  return (
+    <div className="border border-[#E5E7EB] rounded-xl flex-1 overflow-auto bg-white shadow-none">
+      <div className="p-4 h-full flex flex-col">
+        <div className="flex justify-between items-center mb-3 flex-shrink-0">
+          <h6 className="text-[#040195] font-semibold leading-[1.6]">
+            Upcoming
+          </h6>
+          <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-[rgba(0,0,0,0.04)] transition-colors">
+            <img src="/icons/arrow_diagonal.svg" alt="View" className="w-10 h-10" />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-3 flex-1 overflow-auto">
+          {/* eslint-disable-next-line react/prop-types */}
+          {upcomingData?.map((item, index) => (
+            <div 
+              key={index}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#f8f9ff] transition-colors flex-shrink-0"
+            >
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img 
+                  src={item.logo} 
+                  alt={item.office}
+                  className="w-full h-full object-contain p-1"
+                />
+              </div>
+              <div className="flex-grow min-w-0">
+                <div className="text-[0.65rem] font-bold text-[#0401955e]">
+                  {item.office}
+                </div>
+                <div className="text-[0.85rem] font-normal text-[#4D49FC]">
+                  {item.activity}
+                </div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <div className="text-[0.65rem] font-bold text-[#0401955e]">
+                  Due
+                </div>
+                <div className="text-[0.75rem] font-normal text-[#4D49FC]">
+                  {item.due}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UpcomingActivitiesCard;

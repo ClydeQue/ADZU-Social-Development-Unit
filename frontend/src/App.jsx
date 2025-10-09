@@ -11,7 +11,15 @@ import UnitDirectorLoginPage from '@/pages/UnitDirectorLogin';
 import OfficeLoginPage from '@/pages/OfficeLogin';
 import UnitDirectorDashboard from '@/pages/UnitDirectorDashboard';
 import UnitDirectorReports from '@/pages/UnitDirectorReports';
-import OfficeDashboard from '@/pages/OfficeDashboard/OfficeDashboard';
+import UnitDirectorCalendar from '@/pages/UnitDirectorCalendar';
+
+// Office Dashboards (6 offices)
+import CCESDashboard from '@/pages/CCESDashboard';
+import ACCADashboard from '@/pages/ACCADashboard';
+import ACESDashboard from '@/pages/ACESDashboard';
+import ALTECDashboard from '@/pages/ALTECDashboard';
+import APCDashboard from '@/pages/APCDashboard';
+import ACLGDashboard from '@/pages/ACLGDashboard';
 
 import './App.css';
 
@@ -42,13 +50,61 @@ const AppContent = () => {
           </ProtectedRoute>
         } 
       />
-
-      {/* Protected Office Routes */}
       <Route 
-        path="/office/dashboard" 
+        path="/unit-director/calendar" 
+        element={
+          <ProtectedRoute requiredRole="unit_director">
+            <UnitDirectorCalendar />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Protected Office Routes - Each office has its own dashboard */}
+      <Route 
+        path="/office/cces/dashboard" 
         element={
           <ProtectedRoute requiredRole="office_user">
-            <OfficeDashboard />
+            <CCESDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/office/acca/dashboard" 
+        element={
+          <ProtectedRoute requiredRole="office_user">
+            <ACCADashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/office/aces/dashboard" 
+        element={
+          <ProtectedRoute requiredRole="office_user">
+            <ACESDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/office/altec/dashboard" 
+        element={
+          <ProtectedRoute requiredRole="office_user">
+            <ALTECDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/office/apc/dashboard" 
+        element={
+          <ProtectedRoute requiredRole="office_user">
+            <APCDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/office/aclg/dashboard" 
+        element={
+          <ProtectedRoute requiredRole="office_user">
+            <ACLGDashboard />
           </ProtectedRoute>
         } 
       />

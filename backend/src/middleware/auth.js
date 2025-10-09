@@ -156,66 +156,6 @@ const filterByOffice = (req, res, next) => {
 };
 
 // ========================================
-// REQUIRE OWNERSHIP - Check resource ownership
-// ========================================
-const requireOwnership = (userIdField = "userId") => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({
-        error: "Authentication required",
-      });
-    }
-
-    const resourceUserId = req.params[userIdField] || req.body[userIdField];
-
-    if (req.user.userId !== resourceUserId) {
-      console.log(
-        `🚫 Ownership denied: ${req.user.userId} tried to access resource owned by ${resourceUserId}`
-      );
-      return res.status(403).json({
-        error: "Access denied",
-        message: "You can only access your own resources",
-      });
-    }
-
-    next();
-  };
-};
-
-// ========================================
-// OPTIONAL AUTHENTICATION
-// For public endpoints that benefit from user context
-// ========================================
-const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    req.user = null;
-    return next();
-  }
-
-  const verification = jwtService.verifyAccessToken(token);
-
-  if (verification.valid) {
-    const decoded = verification.payload || verification.decoded;
-    req.user = {
-      userId: decoded.userId,
-      userType: decoded.userType,
-      email: decoded.email,
-      name: decoded.name,
-      office_id: decoded.office_id || null,
-      office: decoded.office || null,
-      tokenExp: decoded.exp,
-    };
-  } else {
-    req.user = null;
-  }
-
-  next();
-};
-
-// ========================================
 // REQUIRE UNIT DIRECTOR
 // Shorthand for requireRole(["unit_director"])
 // ========================================
@@ -232,8 +172,6 @@ module.exports = {
   requireRole,
   requireOfficeAccess,
   filterByOffice,
-  requireOwnership,
-  optionalAuth,
   requireUnitDirector,
   requireOfficeUser,
 };

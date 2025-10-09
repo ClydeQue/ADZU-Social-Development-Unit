@@ -38,48 +38,53 @@ const LazyImage = ({ src, alt, className, style, ...props }) => {
 const OfficeSelectionPage = () => {
   const navigate = useNavigate();
   
-  // arrayed na sya para cleaner
+  // Static office data for selection page
   const offices = [
+    {
+      id: 'cces',
+      acronym: 'CCES',
+      name: 'Center for Community Engagement and Service',
+      logo: '/logos/officeLogoTransparent/ccesLogo.webp'
+    },
     {
       id: 'acca',
       acronym: 'ACCA',
-      name: 'Ateneo Center for Culture and the Arts',
-      logo: '/logos/officeLogoTransparent/accaLogo.webp',
+      name: 'AdZU Center for Culture and the Arts',
+      logo: '/logos/officeLogoTransparent/accaLogo.webp'
     },
     {
       id: 'aces',
       acronym: 'ACES',
-      name: 'Ateneo Center for Environment and Sustainability',
-      logo: '/logos/officeLogoTransparent/acesLogo.webp',
-    },
-    {
-      id: 'aclg',
-      acronym: 'ACLG',
-      name: 'Ateneo Center for Leadership and Governance',
-      logo: '/logos/officeLogoTransparent/aclgLogo.webp',
+      name: 'AdZU Center for Engagement and Social Development',
+      logo: '/logos/officeLogoTransparent/acesLogo.webp'
     },
     {
       id: 'altec',
       acronym: 'ALTEC',
-      name: 'Ateneo Learning and Teaching Excellence Center',
-      logo: '/logos/officeLogoTransparent/altecLogo.webp',
+      name: 'AdZU Language and Technology Center',
+      logo: '/logos/officeLogoTransparent/altecLogo.webp'
     },
     {
       id: 'apc',
       acronym: 'APC',
-      name: 'Ateneo Peace Center',
-      logo: '/logos/officeLogoTransparent/apcLogo.webp',
+      name: 'AdZU Peace Center',
+      logo: '/logos/officeLogoTransparent/apcLogo.webp'
     },
     {
-      id: 'cces',
-      acronym: 'CCES',
-      name: 'Center for Community Extension and Services',
-      logo: '/logos/officeLogoTransparent/ccesLogo.webp',
+      id: 'aclg',
+      acronym: 'ACLG',
+      name: 'AdZU Center for Local Governance',
+      logo: '/logos/officeLogoTransparent/aclgLogo.webp'
     }
   ];
 
-  const handleOfficeClick = (officeId, officeName) => {
-    navigate(`/office/login/${officeId}`, { state: { officeName, officeId } });
+  const handleOfficeClick = (office) => {
+    navigate(`/office/login/${office.id}`, { 
+      state: { 
+        officeName: office.acronym, 
+        officeId: office.id 
+      } 
+    });
   };
 
   return (
@@ -267,49 +272,35 @@ const OfficeSelectionPage = () => {
                   borderColor: 'divider'
                 }}
               >
-                {/* Dynamic Logo Background This */}
-                {office.logo && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      right: { xs: -10, sm: -15, md: -20, lg: -25, xl: -20 },
-                      width: { 
-                        xs: '300px', 
-                        sm: '250px', 
-                        md: '250px', 
-                        lg: '280px', 
-                        xl: '300px' 
-                      },
-                      height: { 
-                        xs: '200px', 
-                        sm: '160px', 
-                        md: '150px', 
-                        lg: '180px', 
-                        xl: '200px' 
-                      },
-                      backgroundImage: `url(${office.logo})`,
-                      backgroundSize: 'contain',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center right',
-                      opacity: '80%',
-                      zIndex: 0,
-                    }}
-                  />
-                )}
+                {/* Dynamic Logo Background */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: { xs: -10, sm: -15, md: -20, lg: -25, xl: -20 },
+                    width: { 
+                      xs: '300px', 
+                      sm: '250px', 
+                      md: '250px', 
+                      lg: '280px', 
+                      xl: '300px' 
+                    },
+                    height: { 
+                      xs: '200px', 
+                      sm: '160px', 
+                      md: '150px', 
+                      lg: '180px', 
+                      xl: '200px' 
+                    },
+                    backgroundImage: `url(${office.logo})`,
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center right',
+                    opacity: '80%',
+                    zIndex: 0,
+                  }}
+                />
                 <Box sx={{ position: 'relative', zIndex: 1 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 'bold',
-                      fontFamily: 'Inter',
-                      color: '#4D49FC',
-                      mb: 1,
-                      fontSize: { xs: '0.875rem', xl: '1.125rem' } 
-                    }}
-                  >
-                    {office.acronym}
-                  </Typography>
                   <Typography 
                     variant="h6"
                     component="h1" 
@@ -320,10 +311,21 @@ const OfficeSelectionPage = () => {
                       color: '#040195',
                       mb: 2,
                       lineHeight: 1.3,
-                      fontSize: { xs: '1.3rem', sm: '1.3rem', md: '1.4rem', lg: '1.40rem', xl: '1.50rem' } // Larger on lg screens
+                      fontSize: { xs: '1.3rem', sm: '1.3rem', md: '1.4rem', lg: '1.40rem', xl: '1.50rem' }
                     }}
                   >
                     {office.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 'bold',
+                      fontFamily: 'Inter',
+                      color: '#4D49FC',
+                      fontSize: { xs: '0.875rem', xl: '1.125rem' } 
+                    }}
+                  >
+                    {office.acronym}
                   </Typography>
                 </Box>
                 
@@ -335,29 +337,29 @@ const OfficeSelectionPage = () => {
                 >
                   <Button
                   variant="contained"
-                  onClick={() => handleOfficeClick(office.id, office.name)}
+                  onClick={() => handleOfficeClick(office)}
                   sx={{
                     backgroundColor: '#4D49FC',
                     color: 'white',
                     borderRadius: 3,
                     paddingX: 3,
-                    fontWeight: 'bold',
-                    position: 'relative',
-                    zIndex: 1,
-                    fontSize: { xs: '0.675rem', md: '0.875rem', lg: '0.8rem' }, // Larger on lg screens
-                    '&:hover': {
-                      backgroundColor: '#030180'
-                    },
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  Login
-                </Button>
-                </m.div>
-              </Paper>
-            </m.div>
-            </Grid>
-          ))}
+                  fontWeight: 'bold',
+                  position: 'relative',
+                  zIndex: 1,
+                  fontSize: { xs: '0.675rem', md: '0.875rem', lg: '0.8rem' },
+                  '&:hover': {
+                    backgroundColor: '#030180'
+                  },
+                  alignSelf: 'flex-start'
+                }}
+              >
+                Login
+              </Button>
+              </m.div>
+            </Paper>
+          </m.div>
+          </Grid>
+        ))}
         </Grid>
         </m.div>
       </m.div>

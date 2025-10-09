@@ -173,13 +173,13 @@ class AuthController {
         });
       }
 
-      console.log("🔄 Refreshing access token...");
+      console.log("Refreshing access token...");
 
       // Verify refresh token
       const verification = jwtService.verifyRefreshToken(refreshToken);
 
       if (!verification.valid) {
-        console.log("❌ Invalid refresh token");
+        console.log("Invalid refresh token");
         return res.status(401).json({
           success: false,
           message: "Invalid refresh token",
@@ -235,11 +235,29 @@ class AuthController {
 
       console.log("✅ Access token refreshed successfully");
 
+      // Prepare user data to send back (same structure as login)
+      const userData = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        userType: user.user_type,
+      };
+
+      // Add office info for office users
+      if (user.user_type === "office_user" && user.offices) {
+        userData.office = {
+          id: user.offices.id,
+          name: user.offices.name,
+          acronym: user.offices.acronym,
+        };
+      }
+
       res.json({
         success: true,
         message: "Token refreshed",
         data: {
           accessToken: newAccessToken,
+          user: userData,
         },
       });
     } catch (error) {
@@ -276,44 +294,6 @@ class AuthController {
       res.status(500).json({
         success: false,
         message: "Logout failed",
-      });
-    }
-  }
-
-  // Verify Token (for protected routes)
-  static async verifyToken(req, res) {
-    try {
-      const authHeader = req.headers.authorization;
-
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({
-          success: false,
-          message: "No valid token provided",
-        });
-      }
-
-      const token = authHeader.substring(7);
-      const verification = jwtService.verifyAccessToken(token);
-
-      if (!verification.valid) {
-        return res.status(401).json({
-          success: false,
-          message: verification.error,
-        });
-      }
-
-      res.json({
-        success: true,
-        message: "Token is valid",
-        data: {
-          user: verification.payload,
-        },
-      });
-    } catch (error) {
-      console.error("❌ Token verification error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Token verification failed",
       });
     }
   }

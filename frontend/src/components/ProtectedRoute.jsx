@@ -8,6 +8,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   // Show loading spinner while checking auth
   if (loading) {
+    console.log('⏳ ProtectedRoute: Still loading authentication...');
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
@@ -17,7 +18,12 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   // Not authenticated - redirect to home
   if (!isAuthenticated) {
-    console.log('🔒 Not authenticated - redirecting to home');
+    console.log('🔒 Not authenticated - redirecting to home', { 
+      user: user?.email, 
+      userType, 
+      isAuthenticated,
+      loading 
+    });
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

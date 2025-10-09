@@ -9,7 +9,7 @@ router.get("/all", async (req, res) => {
   try {
     const { data: offices, error } = await supabase
       .from("offices")
-      .select("id, name, description")
+      .select("id, name, acronym, description")
       .order("name");
 
     if (error) throw error;

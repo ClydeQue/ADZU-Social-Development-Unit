@@ -95,51 +95,9 @@ class JWTService {
     }
   }
 
-  // Refresh Access Token
-  async refreshAccessToken(refreshToken) {
-    const verification = this.verifyRefreshToken(refreshToken);
-
-    if (!verification.valid) {
-      throw new Error("Invalid refresh token");
-    }
-
-    // Here you would typically fetch user data from database
-    // For now, return basic payload structure
-    const { userId } = verification.payload;
-
-    return {
-      userId,
-      // You'd fetch other user data from DB here
-    };
-  }
-
   // Revoke Refresh Token
   revokeRefreshToken(token) {
     this.refreshTokens.delete(token);
-  }
-
-  // Revoke all refresh tokens for a user
-  revokeAllRefreshTokens(userId) {
-    for (const token of this.refreshTokens) {
-      try {
-        const decoded = jwt.verify(token, this.REFRESH_TOKEN_SECRET);
-        if (decoded.userId === userId) {
-          this.refreshTokens.delete(token);
-        }
-      } catch (error) {
-        // Token is invalid, remove it
-        this.refreshTokens.delete(token);
-      }
-    }
-  }
-
-  // Get token info without verification (for debugging)
-  decodeToken(token) {
-    try {
-      return jwt.decode(token, { complete: true });
-    } catch (error) {
-      return null;
-    }
   }
 }
 
