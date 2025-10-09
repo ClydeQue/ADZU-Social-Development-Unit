@@ -137,7 +137,7 @@ const BudgetCard = ({ budgetData }) => {
                       }}
                     />
                   </div>
-                  {/* Number beside the bar, aligned with bottom */}
+                  {/* Number beside the ba*/}
                   <span className="text-[#040195] font-semibold text-xs leading-none pb-0.5">
                     {item.id}
                   </span>
@@ -147,21 +147,8 @@ const BudgetCard = ({ budgetData }) => {
           </div>
         </div>
 
-        {/* Page Indicator with animations */}
-        <div className="flex justify-center gap-1.5 mt-2 flex-shrink-0">
-          {Array.from({ length: totalSlides }).map((_, idx) => (
-            <motion.div
-              key={idx}
-              className={`h-1.5 rounded-full ${
-                idx === currentIndex ? 'bg-[#4D49FC]' : 'bg-[#C7D2FE]'
-              }`}
-              animate={{ 
-                width: idx === currentIndex ? '16px' : '6px',
-              }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            />
-          ))}
-        </div>
+
+        
       </div>
     </div>
   );
