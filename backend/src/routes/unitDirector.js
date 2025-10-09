@@ -70,7 +70,7 @@ router.get(
         .select(
           `
         *,
-        offices(name)
+        offices(name, acronym)
       `
         )
         .order("created_at", { ascending: false });
@@ -95,6 +95,83 @@ router.get(
       res.json({ programs: transformedPrograms });
     } catch (error) {
       console.error("Unit director reports error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Get user profile data
+router.get(
+  "/profile",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      const { data: user, error } = await supabase
+        .from("unit_directors")
+        .select("id, name, email, created_at")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ user });
+    } catch (error) {
+      console.error("Unit director profile error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Get notifications
+router.get(
+  "/notifications",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      // For now, return mock data until we have a notifications table
+      // You can create a notifications table later
+      const notifications = {
+        unread: 0,
+        items: []
+      };
+
+      res.json(notifications);
+    } catch (error) {
+      console.error("Unit director notifications error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Get messages/emails
+router.get(
+  "/messages",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      // For now, return mock data until we have a messages table
+      // You can create a messages table later
+      const messages = {
+        unread: 0,
+        items: []
+      };
+
+      res.json(messages);
+    } catch (error) {
+      console.error("Unit director messages error:", error);
       res.status(500).json({ error: "Server error" });
     }
   }
