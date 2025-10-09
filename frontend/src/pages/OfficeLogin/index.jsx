@@ -86,12 +86,12 @@ const OfficeLoginPage = () => {
         userType: 'office'
       });
       
-      // Route to office-specific dashboard based on officeId
+      // Route to office-specific dashboard based on officeId (ACRONYM)
       navigate(`/office/${officeId}/dashboard`);
     } catch (err) {
       console.error('Office login error:', err);
       
-      // Handle account lockout (too many failed attempts)
+      // Handle account lockout eto 
       if (err.locked) {
         const seconds = err.remainingSeconds || 60;
         setLockoutSeconds(seconds);
