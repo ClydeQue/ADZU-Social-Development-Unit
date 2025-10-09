@@ -1,9 +1,23 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Button } from '@mui/material';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { motion } from "framer-motion";
 import ThreeCircles from '../../utils/ThreeCircles';
+
+// Lazy load image component with Suspense support
+// eslint-disable-next-line react/prop-types
+const LazyImage = ({ src, alt, className, ...props }) => {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      {...props}
+    />
+  );
+};
 
 const UnitDirectorLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -51,7 +65,9 @@ const UnitDirectorLoginPage = () => {
             <ThreeCircles />
       {/* AdZU lolgo right Branding Bottom Right */}
       <div className="absolute bottom-8 right-8 flex items-center gap-4">
-        <img src="/logos/logoRightHeader.webp" alt="AdZU" className="h-16 object-contain" />
+        <Suspense fallback={<div className="h-16 w-24 bg-white/20 rounded animate-pulse" />}>
+          <LazyImage src="/logos/logoRightHeader.webp" alt="AdZU" className="h-16 object-contain" />
+        </Suspense>
       </div>
 
       {/* BUg fix Login Card */}
@@ -71,7 +87,9 @@ const UnitDirectorLoginPage = () => {
               '&:hover': { opacity: 0.7 }
             }}
           >
-            <img src="/icons/arrow_left_blue.svg" alt="Back" className=" w-6 h-6 lg:w-10 lg:h-10" />
+            <Suspense fallback={<div className="w-10 h-10 bg-blue-100 rounded animate-pulse" />}>
+              <LazyImage src="/icons/arrow_left_blue.svg" alt="Back" className=" w-6 h-6 lg:w-10 lg:h-10" />
+            </Suspense>
           </Button>
         </div>
 
@@ -79,7 +97,9 @@ const UnitDirectorLoginPage = () => {
         <div className="mb-6">
           <div className="w-36 h-36 rounded-full bg-white flex items-center justify-center shadow-xl">
             <div className="w-32 h-32 rounded-full bg-[#040195] flex items-center justify-center">
-              <img src="/images/pic.webp" alt="Profile" className="w-28 h-28 rounded-full object-cover"/>
+              <Suspense fallback={<div className="w-28 h-28 rounded-full bg-blue-200 animate-pulse" />}>
+                <LazyImage src="/images/pic.webp" alt="Profile" className="w-28 h-28 rounded-full object-cover"/>
+              </Suspense>
             </div>
           </div>
         </div>
@@ -104,11 +124,13 @@ const UnitDirectorLoginPage = () => {
               AdZU Address
             </label>
             <div className="relative">
-              <img
-                src="/icons/person.svg"
-                alt="person icon"
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10"
-              />
+              <Suspense fallback={<div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 bg-gray-200 rounded" />}>
+                <LazyImage
+                  src="/icons/person.svg"
+                  alt="person icon"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10"
+                />
+              </Suspense>
               <input
                 type="email"
                 name="email"
@@ -128,11 +150,13 @@ const UnitDirectorLoginPage = () => {
               Password
             </label>
             <div className="relative">
-              <img
-                src="/icons/password.svg"
-                alt="password icon"
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10"
-              />
+              <Suspense fallback={<div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 bg-gray-200 rounded" />}>
+                <LazyImage
+                  src="/icons/password.svg"
+                  alt="password icon"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10"
+                />
+              </Suspense>
               <input
                 type="password"
                 name="password"

@@ -1,8 +1,22 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Alert, Button } from '@mui/material';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { motion } from "framer-motion";
+
+// Lazy load image component with Suspense support
+// eslint-disable-next-line react/prop-types
+const LazyImage = ({ src, alt, className, ...props }) => {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      {...props}
+    />
+  );
+};
 
 const OfficeLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -63,8 +77,9 @@ const OfficeLoginPage = () => {
     >
       {/* AdZU Branding Bottom Right */}
       <div className="absolute bottom-8 right-8 flex items-center gap-4">
-        <img src="/logos/logoRightHeader.webp" alt="AdZU" className="h-15 object-contain" />
-
+        <Suspense fallback={<div className="h-15 w-20 bg-white/20 rounded animate-pulse" />}>
+          <LazyImage src="/logos/logoRightHeader.webp" alt="AdZU" className="h-15 object-contain" />
+        </Suspense>
       </div>
 
       {/* Login Card */}
@@ -84,17 +99,21 @@ const OfficeLoginPage = () => {
               '&:hover': { opacity: 0.7 }
             }}
           >
-            <img src="/icons/arrow_left_blue.svg" alt="Back" className="w-10 h-10" />
+            <Suspense fallback={<div className="w-10 h-10 bg-blue-100 rounded animate-pulse" />}>
+              <LazyImage src="/icons/arrow_left_blue.svg" alt="Back" className="w-10 h-10" />
+            </Suspense>
           </Button>
         </div>
 
         {/* Office Loooogo */}
         <div className="mb-6">
-          <img 
-            src={officeLogo} 
-            alt={officeName} 
-            className="h-32 w-auto object-contain"
-          />
+          <Suspense fallback={<div className="h-32 w-32 bg-gray-200 rounded animate-pulse" />}>
+            <LazyImage 
+              src={officeLogo} 
+              alt={officeName} 
+              className="h-32 w-auto object-contain"
+            />
+          </Suspense>
         </div>
 
         {/* Office Titleeeeeeeeee */}

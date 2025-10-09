@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Suspense } from "react"; //
+import { Suspense } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion"; //animation libray, you guys can check docs at motion.dev
-import { LazyLoadImage } from 'react-lazy-load-image-component'; // recommended to for all components to reduce memory load
-import 'react-lazy-load-image-component/src/effects/blur.css';
 import { 
   titleVariants, 
   buttonVariants, 
@@ -12,6 +10,20 @@ import {
   layoutVariants,
   textScaleVariants
 } from "../../utils/animations";
+
+// Lazy load image component with Suspense support
+// eslint-disable-next-line react/prop-types
+const LazyImage = ({ src, alt, className, ...props }) => {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      {...props}
+    />
+  );
+};
 
 
 const WelcomePage = () => {
@@ -62,16 +74,17 @@ const WelcomePage = () => {
               initial="hidden"
               animate="visible"
             >
-              <LazyLoadImage
-                src="/images/high.webp"
-                alt="Students working"
-                className="w-auto object-contain max-w-none md:h-[80%] lg:h-[99%]"
-                effect="blur"
-                wrapperProps={{
-                  style: { display: 'inline-block', width: '100%', height: '100%' }
-                }}
-                onLoad={() => console.log('Desktop image loaded')}
-              />
+              <Suspense fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="animate-pulse bg-white/20 w-full h-[80%] rounded-lg"></div>
+                </div>
+              }>
+                <LazyImage
+                  src="/images/high.webp"
+                  alt="Students working"
+                  className="w-auto object-contain max-w-none md:h-[80%] lg:h-[99%]"
+                />
+              </Suspense>
             </m.div>
           </m.div>
 
@@ -241,16 +254,18 @@ const WelcomePage = () => {
             animate="visible"
             exit="hidden"
           >
-            <LazyLoadImage
-              src="/images/high.webp" 
-              alt="Students working" 
-              draggable= 'false'
-              className="h-full  w-full object-center  object-contain scale-125 "
-              effect="blur"
-              wrapperProps={{
-                style: { display: 'inline-block', width: '100%', height: '100%' }
-              }}
-            />
+            <Suspense fallback={
+              <div className="h-full w-full flex items-center justify-center">
+                <div className="animate-pulse bg-white/20 w-full h-full rounded-lg"></div>
+              </div>
+            }>
+              <LazyImage
+                src="/images/high.webp" 
+                alt="Students working" 
+                draggable="false"
+                className="h-full w-full object-center object-contain scale-125"
+              />
+            </Suspense>
           </m.div>
         </m.div>
         

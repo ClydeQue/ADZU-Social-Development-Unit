@@ -8,6 +8,7 @@ import {
   Link
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { Suspense } from 'react';
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { 
   containerVariants, 
@@ -16,6 +17,21 @@ import {
   imageVariants
 } from "../../utils/animations";
 import SDUTitle from '../../utils/SDUTitle';
+
+// Lazy load image component with Suspense support
+// eslint-disable-next-line react/prop-types
+const LazyImage = ({ src, alt, className, style, ...props }) => {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={style}
+      loading="lazy"
+      {...props}
+    />
+  );
+};
 
 const OfficeSelectionPage = () => {
   const navigate = useNavigate();
@@ -192,15 +208,17 @@ const OfficeSelectionPage = () => {
               height: { xs: '35px', md: '45px' },
             }}
           >
-            <img 
-              src="/logos/logoLeftHeader.webp" 
-              alt="ADZU Logo" 
-              style={{
-                height: '100%',
-                width: 'auto',
-                objectFit: 'contain'
-              }}
-            />
+            <Suspense fallback={<div style={{ height: '100%', width: '100px', backgroundColor: 'rgba(255,255,255,0.1)' }} />}>
+              <LazyImage 
+                src="/logos/logoLeftHeader.webp" 
+                alt="ADZU Logo" 
+                style={{
+                  height: '100%',
+                  width: 'auto',
+                  objectFit: 'contain'
+                }}
+              />
+            </Suspense>
           </Box>
         </m.div>
 
