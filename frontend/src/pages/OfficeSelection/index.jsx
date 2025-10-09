@@ -17,6 +17,8 @@ import {
   imageVariants
 } from "../../utils/animations";
 import SDUTitle from '../../utils/SDUTitle';
+import ThreeCirclesUpperLeft from '../../utils/ThreeCirclesUpperLeft';
+
 
 // Lazy load image component with Suspense support
 // eslint-disable-next-line react/prop-types
@@ -111,6 +113,7 @@ const OfficeSelectionPage = () => {
           initial="hidden"
           animate="visible"
         >
+          <ThreeCirclesUpperLeft />
         {/* SDU Title to inexport ko galing utils   */}
         <Box
           sx={{
@@ -205,7 +208,7 @@ const OfficeSelectionPage = () => {
           {/* ADZU left logo upper right conrer*/}
           <Box
             sx={{
-              height: { xs: '35px', md: '45px' },
+              height: { xs: '35px', md: '45px', xl: '55px' },
             }}
           >
             <Suspense fallback={<div style={{ height: '100%', width: '100px', backgroundColor: 'rgba(255,255,255,0.1)' }} />}>

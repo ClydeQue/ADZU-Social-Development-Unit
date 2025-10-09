@@ -27,7 +27,7 @@ const UnitDirectorLoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   
-  const { login, loading } = useAuth();
+  const { login, loading = false } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -70,15 +70,16 @@ const UnitDirectorLoginPage = () => {
         </Suspense>
       </div>
 
-      {/* BUg fix Login Card */}
+      {/* Bug fix Login Card */}
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full lg:max-w-lg bg-white ml-20 rounded-tl-3xl rounded-tr-3xl shadow-2xl p-15 flex flex-col items-center relative"
+        className="w-full lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl bg-red-100 ml-20 
+        rounded-tl-3xl rounded-tr-3xl shadow-2xl lg:p-15 2xl:p-40 flex flex-col items-center relative"
       >
         {/* Back Button  */}
-        <div className="absolute top-6 left-6">
+        <div className="absolute top-6 left-6 xl:top-10 xl:left-10">
           <Button
             onClick={() => navigate('/')}
             sx={{ 
@@ -95,17 +96,17 @@ const UnitDirectorLoginPage = () => {
 
         {/* Unit Director Picture */}
         <div className="mb-6">
-          <div className="w-36 h-36 rounded-full bg-white flex items-center justify-center shadow-xl">
-            <div className="w-32 h-32 rounded-full bg-[#040195] flex items-center justify-center">
+          <div className="xl:w-36 xl:h-36 2xl:w-40 2xl:h-40 rounded-full bg-white flex items-center justify-center shadow-xl">
+            <div className="xl:w-32 xl:h-32 2xl:w-36 2xl:h-36 rounded-full bg-[#040195] flex items-center justify-center">
               <Suspense fallback={<div className="w-28 h-28 rounded-full bg-blue-200 animate-pulse" />}>
-                <LazyImage src="/images/pic.webp" alt="Profile" className="w-28 h-28 rounded-full object-cover"/>
+                <LazyImage src="/images/pic.webp" alt="Profile" className="xl:w-28 xl:h-28 2xl:w-30 2xl:h-30 rounded-full object-cover"/>
               </Suspense>
             </div>
           </div>
         </div>
 
         {/* Title */}
-        <h2 className="text-3xl font-poppins font-bold text-[#040195] text-center mb-8">
+        <h2 className="text-3xl font-poppins font-bold text-[#040195] text-center mb-8 xl:pb-6">
           UNIT DIRECTOR
         </h2>
 
@@ -117,14 +118,15 @@ const UnitDirectorLoginPage = () => {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="w-full">
+        <form onSubmit={handleSubmit} className="xl:w-full 2xl:w-[24rem]">
           {/* Email Input */}
           <div className="mb-6">
             <label className="block text-base font-semibold font-inter text-[#040195] mb-2">
               AdZU Address
             </label>
             <div className="relative">
-              <Suspense fallback={<div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 bg-gray-200 rounded" />}>
+              <Suspense fallback={<div className="absolute left-4 top-1/2 transform -translate-y-1/2 
+              w-5 h-5 bg-gray-200 rounded" />}>
                 <LazyImage
                   src="/icons/person.svg"
                   alt="person icon"
@@ -139,7 +141,9 @@ const UnitDirectorLoginPage = () => {
                 onChange={handleChange}
                 required
                 disabled={loading}
-                className="w-full border-2 border-[#040195] font-poppins rounded-xl px-12 py-3 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] placeholder-[#CACACA]"
+                className="w-full border-2 border-[#040195] font-poppins rounded-xl px-12 py-3 
+                text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] 
+                placeholder-[#CACACA]"
               />
             </div>
           </div>
