@@ -81,7 +81,7 @@ const OfficeSelectionPage = () => {
   const handleOfficeClick = (office) => {
     navigate(`/office/login/${office.id}`, { 
       state: { 
-        officeName: office.acronym, 
+        officeName: office.name, 
         officeId: office.id 
       } 
     });
@@ -301,6 +301,18 @@ const OfficeSelectionPage = () => {
                   }}
                 />
                 <Box sx={{ position: 'relative', zIndex: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 'bold',
+                      fontFamily: 'Inter',
+                      color: '#4D49FC',
+                      mb: 1,
+                      fontSize: { xs: '0.875rem', xl: '1.125rem' } 
+                    }}
+                  >
+                    {office.acronym}
+                  </Typography>
                   <Typography 
                     variant="h6"
                     component="h1" 
@@ -315,17 +327,6 @@ const OfficeSelectionPage = () => {
                     }}
                   >
                     {office.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 'bold',
-                      fontFamily: 'Inter',
-                      color: '#4D49FC',
-                      fontSize: { xs: '0.875rem', xl: '1.125rem' } 
-                    }}
-                  >
-                    {office.acronym}
                   </Typography>
                 </Box>
                 

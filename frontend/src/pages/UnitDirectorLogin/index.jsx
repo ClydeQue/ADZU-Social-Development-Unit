@@ -1,6 +1,6 @@
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button } from '@mui/material';
+import { Button } from '@mui/material';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { motion } from "framer-motion";
 import ThreeCircles from '../../utils/ThreeCircles';
@@ -25,9 +25,27 @@ const UnitDirectorLoginPage = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const navigate = useNavigate();
   
   const { login, loading = false } = useAuth();
+
+  // Live countdown timer for lockout
+  useEffect(() => {
+    if (lockoutSeconds > 0) {
+      const timer = setInterval(() => {
+        setLockoutSeconds(prev => {
+          if (prev <= 1) {
+            setError('');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [lockoutSeconds]);
 
   const handleChange = (e) => {
     setFormData({
@@ -40,6 +58,11 @@ const UnitDirectorLoginPage = () => {
     e.preventDefault();
     setError('');
 
+    // Don't allow login if locked out
+    if (lockoutSeconds > 0) {
+      return;
+    }
+
     try {
       await login({
         email: formData.email,
@@ -50,7 +73,26 @@ const UnitDirectorLoginPage = () => {
       navigate('/unit-director/dashboard');
     } catch (err) {
       console.error('Unit Director login error:', err);
-      setError(err.message || 'Login failed');
+      
+      // Handle account lockout (too many failed attempts)
+      if (err.locked) {
+        const seconds = err.remainingSeconds || 60;
+        setLockoutSeconds(seconds);
+        setError(`🔒 Too many failed attempts. Try again in ${seconds} seconds.`);
+      }
+      // Handle request throttling (spam prevention) - only if NOT locked
+      else if (err.throttled) {
+        const seconds = err.waitSeconds || 2;
+        setError(`⏱️ Too fast! Please wait ${seconds} second${seconds > 1 ? 's' : ''}.`);
+      }
+      // Show remaining attempts
+      else if (err.remainingAttempts !== undefined) {
+        const attempts = err.remainingAttempts;
+        setError(`❌ ${err.message}. ${attempts} attempt${attempts !== 1 ? 's' : ''} remaining.`);
+      } 
+      else {
+        setError(err.message || 'Login failed');
+      }
     }
   };
 
@@ -110,13 +152,6 @@ const UnitDirectorLoginPage = () => {
           UNIT DIRECTOR
         </h2>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="w-full mb-4">
-            <Alert severity="error">{error}</Alert>
-          </div>
-        )}
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="xl:w-full 2xl:w-[24rem]">
           {/* Email Input */}
@@ -140,10 +175,10 @@ const UnitDirectorLoginPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                disabled={loading}
+                disabled={loading || lockoutSeconds > 0}
                 className="w-full border-2 border-[#040195] font-poppins rounded-xl px-12 py-3 
                 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] 
-                placeholder-[#CACACA]"
+                placeholder-[#CACACA] disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -168,24 +203,38 @@ const UnitDirectorLoginPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                disabled={loading}
-                className="w-full border-2 border-[#040195] font-poppins rounded-xl px-12 py-3 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] placeholder-[#CACACA]"
+                disabled={loading || lockoutSeconds > 0}
+                className="w-full border-2 border-[#040195] font-poppins rounded-xl px-12 py-3 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] placeholder-[#CACACA] disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             </div>
           </div>
 
           {/* Login Button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center relative">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || lockoutSeconds > 0}
               className="w-48 py-3 text-lg font-bold shadow-lg 
                         bg-[#4D49FC] text-white rounded-full 
                         hover:bg-[#3d39dc] transition cursor-pointer 
                         disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Logging in...' : 'LOGIN'}
+              {loading ? 'Logging in...' : lockoutSeconds > 0 ? 'LOCKED' : 'LOGIN'}
             </button>
+
+            {/* Error Message - Absolute Below Button */}
+            {error && (
+              <div className="absolute top-full mt-4 left-1/2 transform -translate-x-1/2 w-max">
+                {lockoutSeconds > 0 ? (
+                  <div className="text-red-600 text-sm font-medium text-center">
+                    <div>Too many failed attempts</div>
+                    <div className="mt-1">Try again in <span className="font-bold">{lockoutSeconds}</span>s</div>
+                  </div>
+                ) : (
+                  <div className="text-red-600 text-sm font-medium text-center">{error}</div>
+                )}
+              </div>
+            )}
           </div>
         </form>
       </motion.div>

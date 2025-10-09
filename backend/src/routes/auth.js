@@ -1,14 +1,15 @@
 // Simple Authentication Routes
 const express = require("express");
 const AuthController = require("../controllers/authController");
+const { checkLoginRateLimit } = require("../middleware/loginRateLimiter");
 
 const router = express.Router();
 
-// Office user login
-router.post("/login/office", AuthController.loginOffice);
+// Office user login (with rate limiting)
+router.post("/login/office", checkLoginRateLimit, AuthController.loginOffice);
 
-// Unit Director login
-router.post("/login/unit-director", AuthController.loginUnitDirector);
+// Unit Director login (with rate limiting)
+router.post("/login/unit-director", checkLoginRateLimit, AuthController.loginUnitDirector);
 
 // Logout
 router.post("/logout", AuthController.logout);

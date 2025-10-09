@@ -50,14 +50,39 @@ class AuthService {
       ? "/api/auth/login/unit-director"
       : "/api/auth/login/office";
 
-    const response = await authAxios.post(endpoint, { email, password });
+    try {
+      const response = await authAxios.post(endpoint, { email, password });
 
-    if (!response.data.success) {
-      throw new Error(response.data.message || "Login failed");
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Login failed");
+      }
+
+      this.setAccessToken(response.data.data.accessToken);
+      return response.data.data; // { accessToken, user }
+    } catch (error) {
+      // Handle rate limiting errors
+      if (error.response?.status === 429) {
+        const data = error.response.data;
+        const errorObj = new Error(data.message || "Too many login attempts");
+        errorObj.locked = data.locked;
+        errorObj.throttled = data.throttled;
+        errorObj.waitSeconds = data.waitSeconds;
+        errorObj.remainingMinutes = data.remainingMinutes;
+        errorObj.remainingSeconds = data.remainingSeconds;
+        throw errorObj;
+      }
+      
+      // Handle invalid credentials with attempt tracking
+      if (error.response?.status === 401) {
+        const data = error.response.data;
+        const errorObj = new Error(data.message || "Invalid credentials");
+        errorObj.remainingAttempts = data.remainingAttempts;
+        errorObj.attemptsUsed = data.attemptsUsed;
+        throw errorObj;
+      }
+      
+      throw error;
     }
-
-    this.setAccessToken(response.data.data.accessToken);
-    return response.data.data; // { accessToken, user }
   }
 
   /**

@@ -55,6 +55,18 @@ class AuthController {
 
       if (!users || users.length === 0) {
         console.log(`❌ User not found: ${email}`);
+        
+        // Record failed attempt
+        if (req.loginRateLimiter) {
+          const attemptInfo = req.loginRateLimiter.recordFailedAttempt();
+          return res.status(401).json({
+            success: false,
+            message: "Invalid credentials",
+            remainingAttempts: attemptInfo.remainingAttempts,
+            attemptsUsed: attemptInfo.attempts
+          });
+        }
+        
         return res.status(401).json({
           success: false,
           message: "Invalid credentials",
@@ -70,10 +82,37 @@ class AuthController {
 
       if (!isValidPassword) {
         console.log(`❌ Invalid password for: ${email}`);
+        
+        // Record failed attempt
+        if (req.loginRateLimiter) {
+          const attemptInfo = req.loginRateLimiter.recordFailedAttempt();
+          
+          if (attemptInfo.isLocked) {
+            return res.status(429).json({
+              success: false,
+              message: "Too many failed login attempts. Please try again in 1 minute.",
+              locked: true,
+              remainingAttempts: 0
+            });
+          }
+          
+          return res.status(401).json({
+            success: false,
+            message: "Invalid credentials",
+            remainingAttempts: attemptInfo.remainingAttempts,
+            attemptsUsed: attemptInfo.attempts
+          });
+        }
+        
         return res.status(401).json({
           success: false,
           message: "Invalid credentials",
         });
+      }
+
+      // Reset attempts on successful login
+      if (req.loginRateLimiter) {
+        req.loginRateLimiter.resetAttempts();
       }
 
       // Update last_login timestamp
