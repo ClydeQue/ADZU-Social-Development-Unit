@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Alert, Button } from '@mui/material';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { motion } from "framer-motion";
+import ThreeCircles from '../../utils/ThreeCircles';
 
 const OfficeLoginPage = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +30,7 @@ const OfficeLoginPage = () => {
   
   const officeLogo = officeLogos[officeId] || '/logos/officeLogo/aclg_logo_big.webp';
 
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -61,6 +63,7 @@ const OfficeLoginPage = () => {
         background: 'url(/images/office-login-bg.webp) center/cover no-repeat',
       }}
     >
+      <ThreeCircles />
       {/* AdZU Branding Bottom Right */}
       <div className="absolute bottom-8 right-8 flex items-center gap-4">
         <img src="/logos/logoRightHeader.webp" alt="AdZU" className="h-15 object-contain" />
