@@ -75,7 +75,7 @@ const UnitDirectorLoginPage = () => {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl bg-red-100 ml-20 
+        className="w-full lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl bg-white ml-20 
         rounded-tl-3xl rounded-tr-3xl shadow-2xl lg:p-15 2xl:p-40 flex flex-col items-center relative"
       >
         {/* Back Button  */}
@@ -89,24 +89,24 @@ const UnitDirectorLoginPage = () => {
             }}
           >
             <Suspense fallback={<div className="w-10 h-10 bg-blue-100 rounded animate-pulse" />}>
-              <LazyImage src="/icons/arrow_left_blue.svg" alt="Back" className=" w-6 h-6 lg:w-10 lg:h-10" />
+              <LazyImage src="/icons/arrow_left_blue.svg" alt="Back" className=" w-6 h-6 lg:w-10 lg:h-10 2xl:w-12 2xl:h-12" />
             </Suspense>
           </Button>
         </div>
 
         {/* Unit Director Picture */}
-        <div className="mb-6">
+        <div className="lg:mb-6 2xl:mb-10 2xl:-mt-14">
           <div className="xl:w-36 xl:h-36 2xl:w-40 2xl:h-40 rounded-full bg-white flex items-center justify-center shadow-xl">
             <div className="xl:w-32 xl:h-32 2xl:w-36 2xl:h-36 rounded-full bg-[#040195] flex items-center justify-center">
               <Suspense fallback={<div className="w-28 h-28 rounded-full bg-blue-200 animate-pulse" />}>
-                <LazyImage src="/images/pic.webp" alt="Profile" className="xl:w-28 xl:h-28 2xl:w-30 2xl:h-30 rounded-full object-cover"/>
+                <LazyImage src="/images/pic.webp" alt="Profile" className="xl:w-28 xl:h-28 2xl:w-32 2xl:h-32 rounded-full object-cover"/>
               </Suspense>
             </div>
           </div>
         </div>
 
         {/* Title */}
-        <h2 className="text-3xl font-poppins font-bold text-[#040195] text-center mb-8 xl:pb-6">
+        <h2 className="lg:text-3xl 2xl:text-4xl font-poppins font-bold text-[#040195] text-center mb-8 xl:pb-6">
           UNIT DIRECTOR
         </h2>
 

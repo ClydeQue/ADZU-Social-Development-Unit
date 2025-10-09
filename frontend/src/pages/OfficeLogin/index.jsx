@@ -90,10 +90,11 @@ const OfficeLoginPage = () => {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-lg bg-white rounded-tr-3xl rounded-tl-3xl shadow-2xl p-15 flex flex-col items-center relative"
+        className="w-full lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl bg-white ml-20 
+        rounded-tl-3xl rounded-tr-3xl shadow-2xl lg:p-15 2xl:p-40 flex flex-col items-center relative"
       >
         {/* Back Button */}
-        <div className="absolute top-6 left-6">
+        <div className="absolute top-6 left-6 xl:top-10 xl:left-10">
           <Button
             onClick={() => navigate('/office-selection')}
             sx={{ 
@@ -103,13 +104,13 @@ const OfficeLoginPage = () => {
             }}
           >
             <Suspense fallback={<div className="w-10 h-10 bg-blue-100 rounded animate-pulse" />}>
-              <LazyImage src="/icons/arrow_left_blue.svg" alt="Back" className="w-10 h-10" />
+              <LazyImage src="/icons/arrow_left_blue.svg" alt="Back" className="w-10 h-10 lg:w-10 lg:h-10 2xl:w-12 2xl:h-12" />
             </Suspense>
           </Button>
         </div>
 
         {/* Office Loooogo */}
-        <div className="mb-6">
+        <div className="lg:mb-6 2xl:mb-10 2xl:-mt-14">
           <Suspense fallback={<div className="h-32 w-32 bg-gray-200 rounded animate-pulse" />}>
             <LazyImage 
               src={officeLogo} 
@@ -120,7 +121,7 @@ const OfficeLoginPage = () => {
         </div>
 
         {/* Office Titleeeeeeeeee */}
-        <h2 className="text-2xl font-bold font-poppins text-[#040195] text-center mb-8 px-4">
+        <h2 className="2xl:w-[28rem] text-2xl font-bold font-poppins text-[#040195] text-center mb-8 px-4 xl:pb-6 ">
           {officeName}
         </h2>
 
@@ -132,7 +133,7 @@ const OfficeLoginPage = () => {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="w-full">
+        <form onSubmit={handleSubmit} className="xl:w-full 2xl:w-[24rem]">
           {/* Email Input */}
           <div className="mb-6">
             <label className="block text-base font-inter font-semibold text-[#040195] mb-2">
