@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Alert, Button } from '@mui/material';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { motion } from "framer-motion";
+import ThreeCircles from '../../utils/ThreeCircles';
 
 // Lazy load image component with Suspense support
 // eslint-disable-next-line react/prop-types
@@ -43,6 +44,7 @@ const OfficeLoginPage = () => {
   
   const officeLogo = officeLogos[officeId] || '/logos/officeLogo/aclg_logo_big.webp';
 
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -75,6 +77,7 @@ const OfficeLoginPage = () => {
         background: 'url(/images/office-login-bg.webp) center/cover no-repeat',
       }}
     >
+      <ThreeCircles />
       {/* AdZU Branding Bottom Right */}
       <div className="absolute bottom-8 right-8 flex items-center gap-4">
         <Suspense fallback={<div className="h-15 w-20 bg-white/20 rounded animate-pulse" />}>
