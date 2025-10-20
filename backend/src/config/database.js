@@ -13,8 +13,31 @@ if (!supabaseUrl || !supabaseServiceKey) {
   );
 
   // Don't exit in serverless - just throw an error
-  throw new Error("Missing required Supabase environment variables");
+  throw new Error(
+    `Missing required Supabase environment variables. Please ensure your .env file contains valid SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY values. Current values: URL=${!!supabaseUrl}, KEY=${!!supabaseServiceKey}`
+  );
 }
+
+// Test the database connection immediately
+const testConnection = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("activities")
+      .select("count")
+      .limit(1);
+
+    if (error) {
+      console.error("Database connection test failed:", error);
+      throw error;
+    }
+
+    console.log("✅ Successfully connected to Supabase database");
+    return true;
+  } catch (error) {
+    console.error("❌ Database connection error:", error);
+    throw error;
+  }
+};
 
 // Create Supabase client with service role key for server operations
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -24,29 +47,52 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Test database connection (only in development)
-const testConnection = async () => {
-  // Skip database test in serverless environment
+// Test database connection on startup
+const validateDatabaseConnection = async () => {
+  // Skip in production
   if (process.env.NODE_ENV === "production") {
     console.log("Skipping database connection test in production");
     return;
   }
 
   try {
-    const { data, error } = await supabase
-      .from("offices")
+    console.log("Testing database connection...");
+
+    // Test activities table
+    const activitiesTest = await supabase
+      .from("activities")
       .select("count")
       .limit(1);
-    if (error) throw error;
-    console.log("Connected to Supabase database");
+
+    if (activitiesTest.error) {
+      throw new Error(
+        `Activities table error: ${activitiesTest.error.message}`
+      );
+    }
+
+    // Test notifications table
+    const notificationsTest = await supabase
+      .from("notifications")
+      .select("count")
+      .limit(1);
+
+    if (notificationsTest.error) {
+      throw new Error(
+        `Notifications table error: ${notificationsTest.error.message}`
+      );
+    }
+
+    console.log("✅ Successfully connected to Supabase database");
+    console.log("✅ Verified access to activities and notifications tables");
   } catch (error) {
-    console.error("Database connection error:", error);
+    console.error("❌ Database connection/validation error:", error);
+    // Don't throw here - let the application continue but log the error
   }
 };
 
-// Only test connection in development
+// Run validation in development
 if (process.env.NODE_ENV !== "production") {
-  testConnection();
+  validateDatabaseConnection();
 }
 
 module.exports = supabase;
