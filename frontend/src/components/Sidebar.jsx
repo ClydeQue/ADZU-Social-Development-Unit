@@ -106,7 +106,6 @@ export default function Sidebar() {
           <div className="relative w-full box-border  bg-[#F4F4F4] border-r-0 rounded-[15px] h-full">
             {/* Logo */}
             <div className="p-3 flex items-center justify-center">
-              <SDUTitleSidebar />
             </div>
 
             <div className=" my-10 space-y-2 ">

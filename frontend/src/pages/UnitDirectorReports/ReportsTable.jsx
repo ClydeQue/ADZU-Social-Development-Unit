@@ -25,28 +25,28 @@ const ReportsTable = ({ reports }) => {
 
   return (
     <div 
-      className="flex-1 overflow-auto pr-2" 
+      className="h-full flex flex-col" 
       style={{ 
         fontFamily: 'Inter, sans-serif',
       }}
     >
       <style>{`
-        .flex-1.overflow-auto::-webkit-scrollbar {
+        .reports-scroll-container::-webkit-scrollbar {
           width: 5px;
         }
-        .flex-1.overflow-auto::-webkit-scrollbar-track {
+        .reports-scroll-container::-webkit-scrollbar-track {
           background: transparent;
         }
-        .flex-1.overflow-auto::-webkit-scrollbar-thumb {
+        .reports-scroll-container::-webkit-scrollbar-thumb {
           background-color: #040195;
           border-radius: 42px;
         }
-        .flex-1.overflow-auto::-webkit-scrollbar-thumb:hover {
+        .reports-scroll-container::-webkit-scrollbar-thumb:hover {
           background-color: #030174;
         }
       `}</style>
       {/* Header Row */}
-      <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[35px_180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center sticky top-0 z-10">
+      <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[35px_180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center flex-shrink-0 flex-grow-0">
         <input 
           type="checkbox" 
           checked={selectedRows.length === reports.length}
@@ -61,8 +61,9 @@ const ReportsTable = ({ reports }) => {
         <div></div>
       </div>
 
-      {/* Data Rows */}
-      <div className="space-y-1.5">
+      {/* Data Rows - Scrollable Container */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 reports-scroll-container min-h-0">
+        <div className="space-y-1.5">
         {reports.map((report) => {
           const isNew = report.isNew && !viewedReports.includes(report.id);
           
@@ -112,6 +113,7 @@ const ReportsTable = ({ reports }) => {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

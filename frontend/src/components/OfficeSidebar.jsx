@@ -103,6 +103,7 @@ export default function OfficeSidebar({ officeColor = '#4D49FC', basePath }) {
             <div className="p-3 flex items-center justify-center">
               <SDUTitleSidebar />
             </div>
+          
 
             <div className="my-10 space-y-2">
               {/* MENU Label */}
