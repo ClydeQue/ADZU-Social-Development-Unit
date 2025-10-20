@@ -56,6 +56,7 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed, redirect to login
         window.location.href = "/";
+        console.log(refreshError);
         return Promise.reject(new Error("Session expired. Please login again."));
       }
     }

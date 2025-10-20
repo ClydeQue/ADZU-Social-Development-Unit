@@ -38,7 +38,7 @@ export default function UnitDirectorReports() {
 
       return {
         id: program.id,
-        office: program.offices?.name || program.office_name || 'Unknown Office',
+        office: program.offices?.acronym || program.office_acronym || 'CCES',
         program: program.title || 'Untitled Program',
         activity: program.description || 'No description',
         due: new Date(program.created_at).toLocaleDateString('en-US', { 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-
+ 
 const ReportsTable = ({ reports }) => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [viewedReports, setViewedReports] = useState([]);
