@@ -1,7 +1,20 @@
-import CCESDashboard from '../CCESDashboard';
+import OfficeDashboardLayout from '@/components/OfficeDashboardLayout';
+import { useAuth } from '@/context/AuthContext';
 
-// ALTEC Dashboard - AdZU Language and Technology Center
-// Reusing CCES dashboard structure for now
+/**
+ * ALTEC Dashboard
+ * AdZU Language and Technology Center
+ * Focus: Language programs, technology initiatives
+ */
 export default function ALTECDashboard() {
-  return <CCESDashboard />;
+  const { user } = useAuth();
+  const officeId = user?.office_id || user?.office?.id;
+
+  return (
+    <OfficeDashboardLayout
+      officeColor="#7B1FA2"
+      basePath="/office/altec"
+      officeId={officeId}
+    />
+  );
 }

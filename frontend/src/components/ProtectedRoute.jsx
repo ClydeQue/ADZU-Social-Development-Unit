@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { CircularProgress, Box } from '@mui/material';
+import PropTypes from 'prop-types';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { user, userType, isAuthenticated, loading } = useAuth();
@@ -35,6 +36,11 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   console.log('✅ Access granted:', { user: user?.email, userType });
   return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  requiredRole: PropTypes.string
 };
 
 export default ProtectedRoute;

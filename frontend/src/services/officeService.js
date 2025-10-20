@@ -36,6 +36,13 @@ class OfficeService {
     const response = await api.get(`office/${officeId}/programs`);
     return response.programs;
   }
+
+  /**
+   * Get office reports data
+   */
+  async getOfficeReports(officeId) {
+    return await api.get(`office/${officeId}/reports`);
+  }
 }
 
 export default new OfficeService();

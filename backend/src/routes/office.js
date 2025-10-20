@@ -70,7 +70,7 @@ router.get("/:officeId/dashboard", authenticateToken, async (req, res) => {
     // Get office programs with statistics
     const { data: programs, error: programsError } = await supabase
       .from("programs")
-      .select("*")
+      .select("id, title, description, is_fixed, office_id, created_at, updated_at")
       .eq("office_id", officeId)
       .order("created_at", { ascending: false });
 
@@ -107,7 +107,7 @@ router.get("/:officeId/programs", authenticateToken, async (req, res) => {
 
     const { data: programs, error } = await supabase
       .from("programs")
-      .select("*")
+      .select("id, title, description, is_fixed, office_id, created_at, updated_at")
       .eq("office_id", officeId)
       .order("created_at", { ascending: false });
 
@@ -116,6 +116,168 @@ router.get("/:officeId/programs", authenticateToken, async (req, res) => {
     res.json({ programs });
   } catch (error) {
     console.error("Get office programs error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get office reports data
+router.get("/:officeId/reports", authenticateToken, async (req, res) => {
+  try {
+    const { officeId } = req.params;
+
+    // Check if user has access to this office
+    if (req.user.userType !== "unit_director" && req.user.office_id != officeId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Get office details
+    const { data: office, error: officeError } = await supabase
+      .from("offices")
+      .select("id, name, acronym, description")
+      .eq("id", officeId)
+      .single();
+
+    if (officeError) throw officeError;
+
+    // Get all programs for this office
+    const { data: programs, error: programsError } = await supabase
+      .from("programs")
+      .select("id, title, description, is_fixed, office_id, created_at, updated_at")
+      .eq("office_id", officeId)
+      .order("created_at", { ascending: false });
+
+    if (programsError) throw programsError;
+
+    // Get all activities for this office's programs with program info
+    const programIds = programs.map(p => p.id);
+    let activities = [];
+    
+    if (programIds.length > 0) {
+      const { data: activitiesData, error: activitiesError } = await supabase
+        .from("activities")
+        .select(`
+          id,
+          program_id,
+          activity_name,
+          start_date,
+          end_date,
+          implementing_partners,
+          objectives,
+          participants_count,
+          venue,
+          budget,
+          sdg_number,
+          status,
+          notes,
+          created_at,
+          updated_at,
+          programs(id, title)
+        `)
+        .in("program_id", programIds)
+        .order("start_date", { ascending: false });
+
+      if (activitiesError) throw activitiesError;
+      activities = activitiesData || [];
+    }
+
+    // Calculate comprehensive statistics
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    // Program statistics
+    const programStats = {
+      total: programs.length,
+      by_status: {
+        ongoing: programs.filter(p => p.status === "ongoing").length,
+        completed: programs.filter(p => p.status === "completed").length,
+        upcoming: programs.filter(p => p.status === "upcoming").length,
+        planned: programs.filter(p => p.status === "planned").length,
+      },
+      this_year: programs.filter(p => {
+        const createdDate = new Date(p.created_at);
+        return createdDate.getFullYear() === currentYear;
+      }).length,
+    };
+
+    // Activity statistics
+    const activityStats = {
+      total: activities.length,
+      by_status: {
+        completed: activities.filter(a => a.status === "completed").length,
+        ongoing: activities.filter(a => a.status === "ongoing").length,
+        planned: activities.filter(a => a.status === "planned").length,
+        cancelled: activities.filter(a => a.status === "cancelled").length,
+      },
+      this_year: activities.filter(a => {
+        const startDate = new Date(a.start_date);
+        return startDate.getFullYear() === currentYear;
+      }).length,
+      this_month: activities.filter(a => {
+        const startDate = new Date(a.start_date);
+        return startDate.getFullYear() === currentYear && startDate.getMonth() === currentMonth;
+      }).length,
+    };
+
+    // Participant statistics
+    const totalParticipants = activities.reduce((sum, a) => sum + (a.participants_count || 0), 0);
+    const avgParticipants = activities.length > 0 ? Math.round(totalParticipants / activities.length) : 0;
+
+    // Budget statistics
+    const totalBudget = activities.reduce((sum, a) => sum + (parseFloat(a.budget) || 0), 0);
+    const avgBudget = activities.length > 0 ? totalBudget / activities.length : 0;
+
+    // SDG distribution
+    const sdgDistribution = {};
+    activities.forEach(a => {
+      if (a.sdg_number) {
+        sdgDistribution[a.sdg_number] = (sdgDistribution[a.sdg_number] || 0) + 1;
+      }
+    });
+
+    // Recent programs (last 5)
+    const recentPrograms = programs.slice(0, 5);
+
+    // Recent activities (last 10)
+    const recentActivities = activities.slice(0, 10);
+
+    // Monthly activity trend (last 6 months)
+    const monthlyTrend = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(currentYear, currentMonth - i, 1);
+      const month = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      const count = activities.filter(a => {
+        const startDate = new Date(a.start_date);
+        return startDate.getFullYear() === date.getFullYear() && 
+               startDate.getMonth() === date.getMonth();
+      }).length;
+      monthlyTrend.push({ month, count });
+    }
+
+    res.json({
+      office,
+      summary: {
+        programs: programStats,
+        activities: activityStats,
+        participants: {
+          total: totalParticipants,
+          average: avgParticipants,
+        },
+        budget: {
+          total: totalBudget,
+          average: avgBudget,
+          currency: "PHP",
+        },
+        sdg_distribution: sdgDistribution,
+      },
+      recent_programs: recentPrograms,
+      recent_activities: recentActivities,
+      trends: {
+        monthly_activities: monthlyTrend,
+      },
+    });
+  } catch (error) {
+    console.error("Get office reports error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });

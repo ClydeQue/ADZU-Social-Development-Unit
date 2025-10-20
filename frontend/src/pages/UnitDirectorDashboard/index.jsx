@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+// Imports
+import { useState, useEffect, useRef } from 'react';
 import { 
   Search as SearchIcon,
   Email as EmailIcon,
   Notifications as NotificationsIcon,
+  MailOutline as MailOutlineIcon,
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import NavbarService from '@/services/navbarService';
@@ -12,10 +14,87 @@ import UpcomingActivitiesCard from './UpcomingActivitiesCard';
 import BudgetCard from './BudgetCard';
 import StatsCards from './StatsCards';
 
+// Dashboard
 export default function UnitDirectorDashboard() {
+  // Auth
   const { user } = useAuth();
+  // State
   const [notificationsCount, setNotificationsCount] = useState(0);
   const [messagesCount, setMessagesCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationFilter, setNotificationFilter] = useState('all'); // 'all' or 'unread'
+  const notificationRef = useRef(null);
+
+  // Notifications
+  const allNotifications = [
+    { 
+      id: 1, 
+      office: 'ACCA', 
+      activity: 'ARTEJOS', 
+      type: 'Reminder',
+      dueDate: 'Oct 5, 2025',
+      time: '1m',
+      unread: true,
+      logo: '/images/acca_logo_small.webp'
+    },
+    { 
+      id: 2, 
+      office: 'ACCA', 
+      activity: 'AdZU Concert Band', 
+      type: 'Report',
+      submittedDate: 'Oct 5, 2025',
+      time: '12m',
+      unread: true,
+      logo: '/images/acca_logo_small.webp'
+    },
+    { 
+      id: 3, 
+      office: 'ALTEC', 
+      activity: 'LeAP', 
+      type: 'Report',
+      submittedDate: 'Oct 4, 2025',
+      time: '1h',
+      unread: false,
+      logo: '/images/altec_logo_small.webp'
+    },
+    { 
+      id: 4, 
+      office: 'ACLG', 
+      activity: 'Think @ 51', 
+      type: 'Reminder',
+      dueDate: 'Sep 31, 2025',
+      time: '25m',
+      unread: true,
+      logo: '/images/aclg_logo_small.webp'
+    },
+    { 
+      id: 5, 
+      office: 'ACES', 
+      activity: 'Iñigo Volunteer', 
+      type: 'Report',
+      submittedDate: 'Oct 3, 2025',
+      time: '8m',
+      unread: false,
+      logo: '/images/aces_logo_small.webp'
+    },
+    { 
+      id: 6, 
+      office: 'API', 
+      activity: 'Unyon Mindanao', 
+      type: 'Report',
+      submittedDate: 'Oct 3, 2025',
+      time: '1h',
+      unread: false,
+      logo: '/images/apc_logo_small.webp'
+    },
+  ];
+
+  // Filtered
+  const notifications = notificationFilter === 'unread' 
+    ? allNotifications.filter(n => n.unread)
+    : allNotifications;
+
+  // Dashboard data
   const [dashboardData] = useState({
     // Hardcoded data for now muna
     completed: { count: 10, trend: 'up', change: 'Increased from last month' },
@@ -34,7 +113,7 @@ export default function UnitDirectorDashboard() {
     }
   });
 
-  // Fetch navbar data on mount
+  // Navbar fetch
   useEffect(() => {
     const fetchNavbarData = async () => {
       try {
@@ -54,26 +133,44 @@ export default function UnitDirectorDashboard() {
     fetchNavbarData();
   }, []);
 
-  // Get date logic present time nowww
+  // Dropdown close
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications]);
+
+  // Date logic
   const currentDate = new Date();
   const day = currentDate.getDate().toString().padStart(2, '0');
   const month = currentDate.toLocaleDateString('en-US', { month: 'long' }).toUpperCase();
   const weekday = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
 
+  // Render
   return (
     <div className="flex bg-[#EAE9E9] min-h-screen max-h-screen p-2 sm:p-4 xl:p-[35px] overflow-hidden">
-      {/* WhiteContainer Wrapper (Gamitin niyo to for start) */}
+  {/* Container */}
       <div className="bg-white rounded-[20px] flex flex-1 overflow-hidden">
-        {/* Sidebar Container */}
+  {/* Sidebar */}
         <Sidebar />
 
-        {/* Main Content */}
+  {/* Main */}
         <main className="flex-grow pt-2 sm:pt-4 xl:pt-4 pb-2 sm:pb-6 xl:pb-4 p-1 sm:p-2 flex flex-col overflow-hidden">
-          {/* Container maxWidth="xl" equivalent */}
+          {/* XL Container */}
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
-            {/* Header - Floating Container */}
+            {/* Header */}
             <div className="bg-[#F4F4F4] rounded-[15px] p-2 mb-2 xl:mb-3 mx-2 sm:mx-3 xl:mx-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 flex-shrink-0">
-              {/* Search Bar this One */}
+              {/* Search */}
               <div className="relative ml-0 sm:ml-2 xl:ml-3 w-full sm:w-[400px] xl:w-[450px]">
                 <input
                   type="text"
@@ -87,9 +184,9 @@ export default function UnitDirectorDashboard() {
                 </div>
               </div>
 
-              {/* Right Side Icons */}
+              {/* Icons */}
               <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
-                {/* Messages/Email Button with Badge */}
+                {/* Email */}
                 <button className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors relative">
                   <EmailIcon className="text-[#5B6FED]" sx={{ fontSize: { xs: 16, sm: 18, xl: 19 } }} />
                   {messagesCount > 0 && (
@@ -99,16 +196,114 @@ export default function UnitDirectorDashboard() {
                   )}
                 </button>
 
-                {/* Notifications Button with Badge */}
-                <button className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors relative">
-                  <NotificationsIcon className="text-[#5B6FED]" sx={{ fontSize: { xs: 16, sm: 18, xl: 19 } }} />
-                  {notificationsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold text-[9px] xl:text-[10px]">
-                      {notificationsCount > 9 ? '9+' : notificationsCount}
-                    </span>
+                {/* Notifications */}
+                <div className="relative font-inter" ref={notificationRef}>
+                  <button 
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9  hover:cursor-pointer flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors relative"
+                  >
+                    <NotificationsIcon className="text-[#5B6FED]" sx={{ fontSize: { xs: 16, sm: 18, xl: 19 } }} />
+                    {notificationsCount > 0 && (
+                      <span className="absolute bottom-0 right-0 z-50 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold text-[9px] xl:text-[10px] shadow-md border-2 border-white pointer-events-none">
+                        {notificationsCount > 9 ? '9+' : notificationsCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Dropdown */}
+                  {showNotifications && (
+                    <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl z-50 border border-gray-100">
+                      {/* Title */}
+                      <div className="px-5 py-4 border-b border-gray-100">
+                        <h3 className="text-xl font-bold text-[#040195] mb-3">Notifications</h3>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setNotificationFilter('all')}
+                            className={`px-4 py-1.5 rounded-full hover:cursor-pointer text-xs font-semibold transition-colors ${
+                              notificationFilter === 'all'
+                                ? 'bg-[#CDCCFF] text-[#040195]'
+                                : 'text-[#040195]  bg-[#F4F4FF] hover:bg-[#E6E6FF]'
+                            }`}
+                          >
+                            All
+                          </button>
+                          <button
+                            onClick={() => setNotificationFilter('unread')}
+                            className={`px-4 py-1.5 hover:cursor-pointer rounded-full text-xs font-semibold transition-colors ${
+                              notificationFilter === 'unread'
+                                ? 'bg-[#E8E7FF] text-[#040195]'
+                                : 'text-[#040195] bg-[#F4F4FF] hover:bg-[#E6E6FF]'
+                            }`}
+                          >
+                            Unread
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* List */}
+                      <div className="max-h-[500px] overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className="px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
+                            >
+                              <div className="flex items-start gap-3">
+                                {/* Logo */}
+                                <div className="flex-shrink-0 mt-1">
+                                  <img 
+                                    src={notification.logo} 
+                                    alt={notification.office}
+                                    className="w-10 h-10 object-contain"
+                                  />
+                                </div>
+
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1">
+                                      <p className="text-xs font-bold text-gray-500 mb-0.5">{notification.office}</p>
+                                      <p className="text-sm font-black text-[#4D49FC] mb-1">{notification.activity}</p>
+                                      <p className="text-xs text-gray-400">
+                                        {notification.type === 'Reminder' ? (
+                                          <>
+                                            Due: <span style={{ color: '#4D49FC' }}>{notification.dueDate}</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            Submitted: <span style={{ color: '#4D49FC' }}>{notification.submittedDate}</span>
+                                          </>
+                                        )}
+                                      </p>
+                                    </div>
+                                    {/* Badge */}
+                                    <div className="flex items-end gap-2 justify-center min-w-[70px]">
+                                      <span className={`px-3 p-1 rounded-full text-[12px] font-semibold bg-[#8988CD] text-[#ffffff]`}>
+                                        {notification.type}
+                                      </span>
+                                      <div className="flex flex-col items-center ml-1">
+                                        <span className={`w-2.5 h-2.5 rounded-full mb-0.5 ${
+                                          notification.unread ? 'bg-red-500' : 'bg-green-500'
+                                        }`}></span>
+                                        <span className="text-[10px] text-gray-400">{notification.time}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-5 py-8 text-center text-sm text-gray-400">
+                            No notifications
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </button>
-                {/* Avatar and User Info */}
+                </div>
+
+                {/* Avatar */}
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 rounded-full bg-white text-[#5B6FED] flex items-center justify-center font-medium text-xs sm:text-sm xl:text-base">
                     {user?.name?.charAt(0) || 'U'}
@@ -125,9 +320,9 @@ export default function UnitDirectorDashboard() {
               </div>
             </div>
 
-            {/* Main Content containerr */}
+            {/* Main Content */}
             <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-2 sm:mx-3 xl:mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
-              {/* Title and Date */}
+              {/* Title */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 xl:mb-3 flex-shrink-0 gap-2 sm:gap-0">
                 <h5 className="text-lg sm:text-xl xl:text-2xl font-bold leading-[1.2] text-[#040195]">
                   Overview
@@ -146,27 +341,27 @@ export default function UnitDirectorDashboard() {
                 </div>
               </div>
 
-              {/* Grid Container */}
+              {/* Grid */}
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 xl:gap-3 min-h-0 overflow-hidden">
-                {/* Column 1 - Flagship Update (md={4}) */}
+                {/* Flagship */}
                 <div className="lg:col-span-5 flex flex-col min-h-[300px] sm:min-h-[350px] lg:min-h-0">
                   <FlagshipUpdateCard flagshipData={dashboardData.flagshipUpdate} />
                 </div>
 
-                {/* Column 2 - Upcoming and Budget (md={4.5}) */}
+                {/* Upcoming */}
                 <div className="lg:col-span-4 flex flex-col min-h-0 gap-2 xl:gap-3">
-                  {/* Upcoming Activities - 60% height on desktop */}
+                  {/* Activities */}
                   <div className="flex flex-col min-h-[250px] sm:min-h-[300px] lg:flex-1">
                     <UpcomingActivitiesCard upcomingData={dashboardData.upcoming} />
                   </div>
 
-                  {/* Budget Card with Carousel */}
+                  {/* Budget */}
                   <div className="flex flex-col min-h-[200px] sm:min-h-[220px] lg:min-h-0 lg:flex-1">
                     <BudgetCard budgetData={dashboardData.budget} />
                   </div>
                 </div>
 
-                {/* Column 3 - Stats Cards (md={3.5}) */}
+                {/* Stats */}
                 <div className="lg:col-span-3 flex flex-col min-h-0 gap-2 xl:gap-3 lg:gap-0">
                   <StatsCards 
                     completed={dashboardData.completed}

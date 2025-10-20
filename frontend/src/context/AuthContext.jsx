@@ -7,6 +7,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showTransitionLoader, setShowTransitionLoader] = useState(false);
 
   // Initialize session on mount
   useEffect(() => {
@@ -24,7 +25,7 @@ export const AuthProvider = ({ children }) => {
           accessToken: result.accessToken,
         });
       }
-    } catch (error) {
+    } catch {
       // Refresh failed, clear any stale data
       AuthService.clearAuth();
     } finally {
@@ -33,26 +34,54 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (credentials) => {
-    const result = await AuthService.login(credentials);
-    
-    if (result?.accessToken && result?.user) {
-      setSession({
-        user: result.user,
-        accessToken: result.accessToken,
-      });
-      return result;
+    try {
+      const result = await AuthService.login(credentials);
+      
+      if (result?.accessToken && result?.user) {
+        setSession({
+          user: result.user,
+          accessToken: result.accessToken,
+        });
+        setShowTransitionLoader(true); // Show loader on successful login
+        return result;
+      }
+      
+      throw new Error("Login failed");
+    } catch (error) {
+      // Ensure loader is hidden on error
+      setShowTransitionLoader(false);
+      throw error;
     }
-    
-    throw new Error("Login failed");
   };
 
   const logout = async () => {
-    try {
-      await AuthService.logout();
-    } finally {
-      setSession(null);
-      AuthService.clearAuth();
-    }
+    // CRITICAL: Show loader first and wait for it to render
+    setShowTransitionLoader(true);
+    
+    // Wait for React to render the loader (use RAF to ensure paint)
+    await new Promise(resolve => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(resolve, 100); // Extra 100ms to ensure loader is visible
+        });
+      });
+    });
+    
+    // Now keep loader visible while logging out
+    setTimeout(async () => {
+      try {
+        await AuthService.logout();
+      } finally {
+        // Clear session (this triggers redirect to welcome page)
+        setSession(null);
+        AuthService.clearAuth();
+        
+        // Keep loader visible for additional time to cover the page transition
+        setTimeout(() => {
+          setShowTransitionLoader(false); // Fade out loader
+        }, 1000); // Extra 1s to ensure welcome page is loaded before fade out
+      }
+    }, 1900); // Show loader for ~2 seconds total before clearing session
   };
 
   const value = {
@@ -60,6 +89,8 @@ export const AuthProvider = ({ children }) => {
     userType: session?.user?.userType,
     isAuthenticated: !!session,
     loading,
+    showTransitionLoader,
+    setShowTransitionLoader,
     login,
     logout,
   };

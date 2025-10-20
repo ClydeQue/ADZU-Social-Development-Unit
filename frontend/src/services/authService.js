@@ -60,7 +60,16 @@ class AuthService {
       this.setAccessToken(response.data.data.accessToken);
       return response.data.data; // { accessToken, user }
     } catch (error) {
-      // Handle rate limiting errors
+      console.error('Login error details:', error);
+      
+      // Handle network errors (no response from server)
+      if (!error.response) {
+        const networkError = new Error("Network error. Please check your connection and backend server.");
+        networkError.isNetworkError = true;
+        throw networkError;
+      }
+      
+      // Handle rate limiting errors (429)
       if (error.response?.status === 429) {
         const data = error.response.data;
         const errorObj = new Error(data.message || "Too many login attempts");
@@ -72,7 +81,7 @@ class AuthService {
         throw errorObj;
       }
       
-      // Handle invalid credentials with attempt tracking
+      // Handle invalid credentials with attempt tracking (401)
       if (error.response?.status === 401) {
         const data = error.response.data;
         const errorObj = new Error(data.message || "Invalid credentials");
@@ -81,7 +90,13 @@ class AuthService {
         throw errorObj;
       }
       
-      throw error;
+      // Handle other server errors
+      if (error.response?.status >= 500) {
+        throw new Error("Server error. Please try again later.");
+      }
+      
+      // Generic error
+      throw new Error(error.response?.data?.message || error.message || "Login failed");
     }
   }
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { 
   Button, 
   Dialog, 
@@ -7,7 +8,6 @@ import {
   DialogContentText, 
   DialogTitle
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { ExitToApp } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext.jsx';
 
@@ -21,13 +21,11 @@ const LogoutButton = ({
   children 
 }) => {
   const [open, setOpen] = React.useState(false);
-  const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
     setOpen(false);
+    await logout(); // AuthContext handles the loader and navigation
   };
 
   return (
@@ -62,6 +60,16 @@ const LogoutButton = ({
       </Dialog>
     </>
   );
+};
+
+LogoutButton.propTypes = {
+  variant: PropTypes.string,
+  color: PropTypes.string,
+  size: PropTypes.string,
+  fullWidth: PropTypes.bool,
+  sx: PropTypes.object,
+  showIcon: PropTypes.bool,
+  children: PropTypes.node,
 };
 
 export default LogoutButton;
