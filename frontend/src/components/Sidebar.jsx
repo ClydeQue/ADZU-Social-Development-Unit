@@ -47,7 +47,7 @@ export default function Sidebar() {
   const generalItems = [
     { 
       text: 'Settings', 
-      icon: <SettingsIcon />, 
+      icon: <img src="/icons/settings.svg" alt="Calendar" className="w-6 h-6" />, 
       path: '/unit-director/settings' 
     },
     { 
@@ -105,7 +105,8 @@ export default function Sidebar() {
         <div className="w-full flex-shrink-0 h-full relative">
           <div className="relative w-full box-border  bg-[#F4F4F4] border-r-0 rounded-[15px] h-full">
             {/* Logo */}
-            <div className="p-3 flex items-center justify-center">
+            <div className="p-3 py-4 flex items-center justify-center">
+              <SDUTitleSidebar />
             </div>
 
             <div className=" my-10 space-y-2 ">
@@ -155,7 +156,7 @@ export default function Sidebar() {
                     onClick={item.action === 'logout' ? handleLogout : () => handleNavigation(item.path)}
                     className="w-full rounded-xl py-[9.6px] cursor-pointer  flex items-center bg-transparent text-[#040195] hover:bg-[#F4F4F4] transition-all duration-200"
                   >
-                    <div className="text-[#1E22AA] min-w-[36px]">
+                    <div className="text-[#1E22AA] min-w-[34px]">
                       {item.icon}
                     </div>
                     <span className="text-[0.9rem] font-medium">

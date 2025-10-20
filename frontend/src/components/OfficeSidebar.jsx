@@ -98,9 +98,9 @@ export default function OfficeSidebar({ officeColor = '#4D49FC', basePath }) {
       {/* Desktop View: Sidebar */}
       <div className="hidden md:block pl-6 pt-6 pb-6 w-[15rem] flex-shrink-0 bg-transparent h-full">
         <div className="w-full flex-shrink-0 h-full relative">
-          <div className="relative w-full box-border bg-[#F4F4F4] border-r-0 rounded-[15px] h-full">
+          <div className="relative w-full box-border bg-[#F4F4F4] border-r-0 rounded-[15px] h-full overflow-y-auto">
             {/* Logo */}
-            <div className="p-3 flex items-center justify-center">
+            <div className="p-3 py-4 flex items-center justify-center flex-shrink-0">
               <SDUTitleSidebar />
             </div>
           
