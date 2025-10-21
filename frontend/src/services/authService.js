@@ -5,20 +5,15 @@
  */
 
 import axios from "axios";
-import { getApiBase, switchToProduction, isFallbackActive } from "../config/api.config.js";
+import { getApiBase, switchToProduction, isFallbackActive, API_CONFIG } from "../config/api.config.js";
 
 const ACCESS_TOKEN_KEY = "sdu_access_token";
 
-// Create a separate axios instance for auth (no interceptors)
+// Create axios instance for auth endpoints
 const authAxios = axios.create({
-  get baseURL() {
-    return getApiBase();
-  },
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: false, // Disable cookies for CORS
-  timeout: 10000,
+  baseURL: getApiBase(),
+  withCredentials: true, // Enable cookies for refresh token
+  timeout: API_CONFIG.REQUEST_TIMEOUT,
 });
 
 class AuthService {

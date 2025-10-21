@@ -20,7 +20,7 @@ export default function UnitDirectorReports() {
     staleTime: 2 * 60 * 1000, // 2 minutes cache:D
   });
 
-  // mappezs
+  // Map activities to reports format
   const reports = useMemo(() => {
     const logoMap = {
       'acca': 'acca_logo_small.webp',
@@ -32,28 +32,31 @@ export default function UnitDirectorReports() {
       'cces': 'cces_logo_small.webp',
     };
 
-    let transformed = reportsData?.programs?.map((program) => {
-      const acronym = (program.offices?.acronym || 'CCES').toLowerCase();
+    let transformed = reportsData?.activities?.map((activity) => {
+      const acronym = (activity.office_acronym || 'CCES').toLowerCase();
       const logoFile = logoMap[acronym] || 'cces_logo_small.webp';
 
       return {
-        id: program.id,
-        office: program.offices?.acronym || program.office_acronym || 'CCES',
-        program: program.title || 'Untitled Program',
-        activity: program.description || 'No description',
-        due: new Date(program.created_at).toLocaleDateString('en-US', { 
+        id: activity.id,
+        office: activity.office_acronym || 'CCES',
+        program: activity.program_title || 'Untitled Program',
+        activity: activity.activity_name || 'Untitled Activity',
+        due: activity.end_date ? new Date(activity.end_date).toLocaleDateString('en-US', { 
           month: 'short', 
           day: 'numeric', 
           year: 'numeric' 
-        }),
-        submitted: new Date(program.created_at).toLocaleDateString('en-US', { 
+        }) : 'N/A',
+        submitted: activity.start_date ? new Date(activity.start_date).toLocaleDateString('en-US', { 
           month: 'short', 
           day: 'numeric', 
           year: 'numeric' 
-        }),
+        }) : 'N/A',
+        status: activity.status || 'planned',
+        participants: activity.participants_count || 0,
+        budget: activity.budget || 0,
         isNew: false,
         logo: `/images/${logoFile}`,
-        createdAt: new Date(program.created_at),
+        createdAt: new Date(activity.start_date || activity.created_at),
       };
     }) || [];
 

@@ -10,17 +10,19 @@ const router = express.Router();
 router.get("/", authenticateToken, async (req, res) => {
   console.log("Fetching notifications for user:", req.user?.id);
   try {
-    // Get notifications with activity and office details
+    // Get deets
     const selectFields = `
         id,
         type,
         activity_id,
         office_id,
         created_at,
-        read_at
+        read_at,
+        updated_at
       `;
 
     let notificationsResult;
+  
     if (req.user.userType !== "unit_director" && req.user.office_id) {
       // Office-limited query
       notificationsResult = await supabase
@@ -70,13 +72,13 @@ router.get("/", authenticateToken, async (req, res) => {
     );
     const officesMap = new Map(officesResult.data?.map((o) => [o.id, o]) || []);
 
-    // Format notifications
+    // Format notifications for frtonend
     const formattedNotifications = notifications
       .map((notification) => {
         const activity = activitiesMap.get(notification.activity_id);
         const office = officesMap.get(notification.office_id);
 
-        // Log detailed info for debugging
+        // Debug codee
         console.log("Processing notification:", {
           notificationId: notification.id,
           activityId: notification.activity_id,
@@ -94,8 +96,7 @@ router.get("/", authenticateToken, async (req, res) => {
           return null;
         }
         
-        // For Reminder type: activity is REQUIRED (must have due date)
-        // For Report type: activity is REQUIRED (must have submission details)
+
         if (!activity) {
           console.log(
             "Skipping notification due to missing activity:",
@@ -104,9 +105,30 @@ router.get("/", authenticateToken, async (req, res) => {
           return null;
         }
 
+        // Map acronym to correct logo file name
+        const acronymLower = office.acronym?.toLowerCase();
+        const logoMap = {
+          'acca': '/images/acca_logo_small.webp',
+          'aces': '/images/aces_logo_small.webp',
+          'aclg': '/images/aclg_logo_small.webp',
+          'altec': '/images/altec_logo_small.webp',
+          'apc': '/images/apc_logo_small.webp',
+          'cces': '/images/cces_logo_small.webp'
+        };
+
+
+        let indicatorColor = '#040195'; // Default blue
+        if (notification.type === 'Reminder') {
+          indicatorColor = '#ef4444'; // Red for due/overdue
+        } else if (notification.type === 'Report') {
+          indicatorColor = '#22c55e'; // Green for submitted
+        } else if (notification.type === 'Updated') {
+          indicatorColor = '#3b82f6'; // Blue for updated
+        }
+
         return {
           id: notification.id,
-          type: notification.type, // "Reminder" or "Report"
+          type: notification.type, // "Reminder", "Report", or "Updated"
           office: office.name || "Unknown Office",
           officeAcronym: office.acronym || office.name,
           activity: activity.activity_name || "Untitled Activity",
@@ -114,9 +136,12 @@ router.get("/", authenticateToken, async (req, res) => {
           submittedDate: activity.start_date || null,
           status: activity.status || "pending",
           createdAt: notification.created_at,
+          updatedAt: notification.updated_at,
           time: getTimeAgo(notification.created_at),
+          updatedTime: notification.updated_at ? getTimeAgo(notification.updated_at) : null,
           unread: !notification.read_at,
-          logo: `/logos/officeLogoTransparent/${office.acronym?.toLowerCase() || 'default'}.png`,
+          logo: logoMap[acronymLower] || '/images/default_logo.webp',
+          indicatorColor: indicatorColor,
         };
       })
       .filter(Boolean); // Remove null entries
@@ -273,9 +298,9 @@ router.post("/test", authenticateToken, async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
-    if (!["Reminder", "Report"].includes(testNotification.type)) {
+    if (!["Reminder", "Report", "Updated"].includes(testNotification.type)) {
       throw new Error(
-        'Invalid notification type. Must be either "Reminder" or "Report"'
+        'Invalid notification type. Must be "Reminder", "Report", or "Updated"'
       );
     }
 

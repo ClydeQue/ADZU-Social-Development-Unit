@@ -56,7 +56,7 @@ router.get(
   }
 );
 
-// Get reports data
+// Get reports data - Returns ACTIVITIES (not programs)
 router.get(
   "/reports",
   authenticateToken,
@@ -65,34 +65,45 @@ router.get(
     try {
       const { month, year } = req.query;
 
+      // Query activities with their programs and offices
       let query = supabase
-        .from("programs")
+        .from("activities")
         .select(
           `
         *,
-        offices(name, acronym)
+        programs(
+          id,
+          title,
+          description,
+          offices(id, name, acronym)
+        )
       `
         )
-        .order("created_at", { ascending: false });
+        .order("start_date", { ascending: false });
 
+      // Filter by month and year if provided
       if (month && year) {
-        // Filter by month and year
         const startDate = new Date(year, month - 1, 1).toISOString();
         const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
-        query = query.gte("created_at", startDate).lte("created_at", endDate);
+        query = query.gte("start_date", startDate).lte("start_date", endDate);
       }
 
-      const { data: programs, error } = await query;
+      const { data: activities, error } = await query;
 
       if (error) throw error;
 
-      // Transform the data to match expected format
-      const transformedPrograms = programs.map((program) => ({
-        ...program,
-        office_name: program.offices?.name,
+      // Transform the data to include program and office info at root level
+      const transformedActivities = activities.map((activity) => ({
+        ...activity,
+        program_id: activity.programs?.id,
+        program_title: activity.programs?.title || "Untitled Program",
+        program_description: activity.programs?.description,
+        office_id: activity.programs?.offices?.id,
+        office_name: activity.programs?.offices?.name || "Unknown Office",
+        office_acronym: activity.programs?.offices?.acronym || "N/A",
       }));
 
-      res.json({ programs: transformedPrograms });
+      res.json({ activities: transformedActivities });
     } catch (error) {
       console.error("Unit director reports error:", error);
       res.status(500).json({ error: "Server error" });

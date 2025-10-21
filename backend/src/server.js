@@ -47,20 +47,44 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration based on environment
+// CORS configuration - SIMPLIFIED for development
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? process.env.FRONTEND_URL || "https://ateneo-sdu.vercel.app"
-      : [
-          "http://localhost:5173",
-          "http://127.0.0.1:5173",
-          "http://localhost:3000",
-        ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman, mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Production - strict whitelist
+    if (process.env.NODE_ENV === "production") {
+      const productionOrigins = [
+        process.env.FRONTEND_URL || "https://ateneo-sdu.vercel.app"
+      ];
+      if (productionOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn(`CORS blocked origin: ${origin}`);
+      return callback(new Error('Not allowed by CORS'));
+    }
+    
+    // Development - allow localhost and local network
+    // This regex matches:
+    // - localhost:* (any port)
+    // - 127.0.0.1:* (any port)
+    // - 192.168.x.x:* (local network)
+    // - 10.x.x.x:* (local network)
+    // - 172.16-31.x.x:* (local network)
+    const devOriginRegex = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+):\d+$/;
+    
+    if (devOriginRegex.test(origin)) {
+      return callback(null, true);
+    }
+    
+    console.warn(`CORS blocked origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  optionsSuccessStatus: 200, // For legacy browser support
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));

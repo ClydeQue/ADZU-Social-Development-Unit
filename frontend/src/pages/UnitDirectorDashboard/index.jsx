@@ -1,17 +1,14 @@
 // Imports
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Search as SearchIcon,
   Email as EmailIcon,
-  Notifications as NotificationsIcon,
-  MailOutline as MailOutlineIcon,
 } from "@mui/icons-material";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import NavbarService from "@/services/navbarService";
-import NotificationService from "@/services/notificationService";
-import { getTimeAgo, formatDate } from "@/utils/timeFormat";
 import Sidebar from "@/components/Sidebar";
+import NotificationDropdown from "@/components/NotificationDropdown";
 import FlagshipUpdateCard from "./FlagshipUpdateCard";
 import UpcomingActivitiesCard from "./UpcomingActivitiesCard";
 import BudgetCard from "./BudgetCard";
@@ -22,54 +19,22 @@ export default function UnitDirectorDashboard() {
   // Auth
   const { user } = useAuth();
   // State
-  const [notificationsCount, setNotificationsCount] = useState(0);
   const [messagesCount, setMessagesCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationFilter, setNotificationFilter] = useState("all"); // 'all' or 'unread'
   const [, setTimeUpdate] = useState(0); // Force re-render for time updates
-  const notificationRef = useRef(null);
 
   // Query client for mutations
   const queryClient = useQueryClient();
 
-  // Notifications Query with optimized settings
-  const {
-    data: notificationsData,
-    isLoading: notificationsLoading,
-    error: notificationsError,
-    refetch: refetchNotifications,
-  } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: NotificationService.getNotifications,
-    select: (data) => data || { items: [], unread: 0 },
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
-    refetchOnWindowFocus: true, // Refetch when user returns to window
-    refetchInterval: false, // Disable automatic polling
-    retry: 2,
-    onSuccess: (data) => {
-      setNotificationsCount(data?.unread || 0);
-    },
-    onError: (error) => {
-      console.error("Error in notifications query:", error);
-    },
-  });
-
   // Handle marking notification as read
   const handleNotificationClick = async (notificationId) => {
     try {
-      await NotificationService.markAsRead(notificationId);
-      // Invalidate the notifications query to trigger a refetch
+      // Invalidate the notifications query to trigger a refetch in the dropdown
       queryClient.invalidateQueries(["notifications"]);
+      console.log("Notification clicked:", notificationId);
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error("Error handling notification click:", error);
     }
   };
-
-  // Filter notifications
-  const notifications = (notificationsData?.items || []).filter((n) =>
-    notificationFilter === "unread" ? n.unread : true
-  );
 
   // Dashboard data
   const [dashboardData] = useState({
@@ -134,25 +99,7 @@ export default function UnitDirectorDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Dropdown close
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
 
-    if (showNotifications) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showNotifications]);
 
   // Date logic
   const currentDate = new Date();
@@ -197,22 +144,6 @@ export default function UnitDirectorDashboard() {
 
               {/* Icons */}
               <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
-                {/* Test Button */}
-                <button
-                  onClick={async () => {
-                    try {
-                      const response =
-                        await NotificationService.testNotifications();
-                      console.log("Test response:", response);
-                    } catch (error) {
-                      console.error("Test error:", error);
-                    }
-                  }}
-                  className="px-3 py-1 bg-[#5B6FED] hover:bg-[#4D49FC] text-white text-xs rounded-full transition-colors"
-                >
-                  Test
-                </button>
-
                 {/* Email */}
                 <button className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors relative">
                   <EmailIcon
@@ -227,190 +158,7 @@ export default function UnitDirectorDashboard() {
                 </button>
 
                 {/* Notifications */}
-                <div className="relative font-inter" ref={notificationRef}>
-                  <button
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9  hover:cursor-pointer flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors relative"
-                  >
-                    <NotificationsIcon
-                      className="text-[#5B6FED]"
-                      sx={{ fontSize: { xs: 16, sm: 18, xl: 19 } }}
-                    />
-                    {notificationsCount > 0 && (
-                      <span className="absolute bottom-0 right-0 z-50 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold text-[9px] xl:text-[10px] shadow-md border-2 border-white pointer-events-none">
-                        {notificationsCount > 9 ? "9+" : notificationsCount}
-                      </span>
-                    )}
-                  </button>
-
-                  {/* Dropdown */}
-                  {showNotifications && (
-                    <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl z-50 border border-gray-100">
-                      {/* Title */}
-                      <div className="px-5 py-4 border-b border-gray-100">
-                        <h3 className="text-xl font-bold text-[#040195] mb-3">
-                          Notifications
-                        </h3>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setNotificationFilter("all")}
-                            className={`px-4 py-1.5 rounded-full hover:cursor-pointer text-xs font-semibold transition-colors ${
-                              notificationFilter === "all"
-                                ? "bg-[#CDCCFF] text-[#040195]"
-                                : "text-[#040195]  bg-[#F4F4FF] hover:bg-[#E6E6FF]"
-                            }`}
-                          >
-                            All
-                          </button>
-                          <button
-                            onClick={() => setNotificationFilter("unread")}
-                            className={`px-4 py-1.5 hover:cursor-pointer rounded-full text-xs font-semibold transition-colors ${
-                              notificationFilter === "unread"
-                                ? "bg-[#E8E7FF] text-[#040195]"
-                                : "text-[#040195] bg-[#F4F4FF] hover:bg-[#E6E6FF]"
-                            }`}
-                          >
-                            Unread
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* List */}
-                      <div className="max-h-[500px] overflow-y-auto">
-                        {notificationsLoading ? (
-                          <div className="px-5 py-8 text-center text-sm text-gray-400">
-                            Loading notifications...
-                          </div>
-                        ) : notificationsError ? (
-                          <div className="px-5 py-8 text-center">
-                            <p className="text-sm text-red-500 mb-2">
-                              Error loading notifications
-                            </p>
-                            <button
-                              onClick={() => refetchNotifications()}
-                              className="text-xs text-[#040195] hover:text-[#4D49FC] transition-colors"
-                            >
-                              Try again
-                            </button>
-                          </div>
-                        ) : notifications.length > 0 ? (
-                          notifications.map((notification) => {
-                            // Calculate dynamic time ago from created_at stored in notification
-                            const timeAgo = getTimeAgo(notification.createdAt || new Date());
-                            
-                            // Determine what date to display based on type
-                            let dateLabel = "";
-                            let dateValue = "";
-                            
-                            if (notification.type === "Reminder") {
-                              // For Reminder: show due date (must exist)
-                              dateLabel = "Due";
-                              dateValue = notification.dueDate ? formatDate(notification.dueDate) : "No due date";
-                            } else if (notification.type === "Report") {
-                              // For Report: show submitted date (must exist)
-                              dateLabel = "Submitted";
-                              dateValue = notification.submittedDate ? formatDate(notification.submittedDate) : "No submission date";
-                            }
-
-                            return (
-                              <div
-                                key={notification.id}
-                                onClick={() =>
-                                  handleNotificationClick(notification.id)
-                                }
-                                className="px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
-                              >
-                                <div className="flex items-start gap-3">
-                                  {/* Logo */}
-                                  <div className="flex-shrink-0 mt-1">
-                                    <img
-                                      src={notification.logo || "/logos/officeLogoTransparent/default.png"}
-                                      alt={notification.officeAcronym || notification.office}
-                                      className="w-10 h-10 object-contain"
-                                      onError={(e) => {
-                                        e.target.src = "/logos/officeLogoTransparent/default.png";
-                                      }}
-                                    />
-                                  </div>
-
-                                  {/* Content */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="flex-1">
-                                        <p className="text-xs font-bold text-gray-500 mb-0.5">
-                                          {notification.officeAcronym || notification.office}
-                                        </p>
-                                        <p className="text-sm font-black text-[#4D49FC] mb-1">
-                                          {notification.activity}
-                                        </p>
-                                        <p className="text-xs text-gray-400">
-                                          {dateLabel}:{" "}
-                                          <span style={{ color: "#4D49FC" }}>
-                                            {dateValue}
-                                          </span>
-                                        </p>
-                                      </div>
-                                      {/* Badge */}
-                                      <div className="flex items-end gap-2 justify-center min-w-[70px]">
-                                        <span
-                                          className={`px-3 p-1 rounded-full text-[12px] font-semibold ${
-                                            notification.type === "Reminder" 
-                                              ? "bg-[#8988CD] text-[#ffffff]"
-                                              : "bg-[#5B6FED] text-[#ffffff]"
-                                          }`}
-                                        >
-                                          {notification.type}
-                                        </span>
-                                        <div className="flex flex-col items-center ml-1">
-                                          <span
-                                            className={`w-2.5 h-2.5 rounded-full mb-0.5 ${
-                                              notification.unread
-                                                ? "bg-red-500"
-                                                : "bg-green-500"
-                                            }`}
-                                          ></span>
-                                          <span className="text-[10px] text-gray-400">
-                                            {timeAgo}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="px-5 py-8 text-center text-sm text-gray-400">
-                            No notifications
-                          </div>
-                        )}
-                      </div>
-                      {notificationsError && (
-                        <div className="px-5 py-3 border-t border-gray-100">
-                          <button
-                            onClick={() => refetchNotifications()}
-                            className="w-full text-center text-sm text-[#040195] hover:text-[#4D49FC] transition-colors"
-                          >
-                            Retry loading notifications
-                          </button>
-                        </div>
-                      )}
-                      {notifications.length > 5 && (
-                        <div className="px-5 py-3 border-t border-gray-100">
-                          <button
-                            onClick={() => {
-                              /* TODO: Implement view all notifications */
-                            }}
-                            className="w-full text-center text-sm text-[#040195] hover:text-[#4D49FC] transition-colors"
-                          >
-                            View All Notifications
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <NotificationDropdown onNotificationClick={handleNotificationClick} />
 
                 {/* Avatar */}
                 <div className="flex items-center gap-2">
