@@ -1,19 +1,22 @@
 /**
  * Base API Configuration
  * Centralized axios instance with interceptors and error handling
+ * Auto-fallback to production server if localhost fails
  */
 
 import axios from "axios";
+import { getApiBase, switchToProduction, isFallbackActive } from "../config/api.config.js";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
-
-// Create axios instance
+// Create axios instance with dynamic baseURL
 const axiosInstance = axios.create({
-  baseURL: `${API_BASE}/api`,
+  get baseURL() {
+    return `${getApiBase()}/api`;
+  },
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Send cookies with requests
+  withCredentials: false, // Disable cookies for CORS
+  timeout: 10000, // 10 second timeout
 });
 
 // Request interceptor - Add access token
@@ -28,11 +31,26 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor - Handle 401 and auto-refresh
+// Response interceptor - Handle 401 and auto-refresh, with fallback
 axiosInstance.interceptors.response.use(
   (response) => response.data, // Return data directly
   async (error) => {
     const originalRequest = error.config;
+
+    // If connection error and not using fallback yet, try production
+    if (
+      error.code === 'ECONNABORTED' || 
+      error.code === 'ERR_NETWORK' ||
+      !error.response
+    ) {
+      if (!isFallbackActive()) {
+        console.warn("🔄 Switching to production server due to connection error");
+        switchToProduction();
+        
+        // Retry with production server
+        return axiosInstance(originalRequest);
+      }
+    }
 
     // If 401 and haven't retried yet, and not an auth endpoint
     if (
@@ -70,6 +88,16 @@ axiosInstance.interceptors.response.use(
 
 // Wrapper class for consistent API
 class ApiService {
+  // Get current API URL
+  getApiUrl() {
+    return getApiBase();
+  }
+
+  // Check if using fallback server
+  isUsingFallbackServer() {
+    return isFallbackActive();
+  }
+
   async get(endpoint, options = {}) {
     return axiosInstance.get(endpoint, options);
   }
