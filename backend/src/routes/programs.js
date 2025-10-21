@@ -123,6 +123,7 @@ router.post(
         .from("activities")
         .insert({
           program_id: programId,
+          office_id: office_id,
           activity_name,
           start_date,
           end_date,

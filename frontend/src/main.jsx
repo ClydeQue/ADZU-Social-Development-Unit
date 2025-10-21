@@ -9,8 +9,8 @@ import App from './App.jsx';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 2 * 60 * 1000, // 2 minutes
-      cacheTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 2 * 60 * 1000, // Data is fresh for 2 minutes
+      gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (renamed from cacheTime in v5)
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) {
@@ -18,7 +18,8 @@ const queryClient = new QueryClient({
         }
         return failureCount < 3;
       },
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false, // Don't auto-refetch on window focus globally
+      refetchOnReconnect: true, // Refetch when reconnecting to internet
     },
     mutations: {
       retry: 1,

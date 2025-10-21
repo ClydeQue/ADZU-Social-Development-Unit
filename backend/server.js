@@ -13,6 +13,7 @@ const authRoutes = require("./src/routes/auth"); // Professional JWT authenticat
 const unitDirectorRoutes = require("./src/routes/unitDirector");
 const officeRoutes = require("./src/routes/office");
 const programsRoutes = require("./src/routes/programs"); // New programs & activities routes
+const notificationRoutes = require("./src/routes/notifications"); // Notifications routes
 
 const app = express();
 
@@ -34,12 +35,20 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration for production
+// CORS configuration based on environment
 const corsOptions = {
-  origin: true, // Allow all origins for now
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.FRONTEND_URL || "https://ateneo-sdu.vercel.app"
+      : [
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+          "http://localhost:3000",
+        ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  optionsSuccessStatus: 200, // For legacy browser support
 };
 
 app.use(cors(corsOptions));
@@ -54,6 +63,7 @@ app.use("/api/auth", authRoutes); // Professional JWT authentication
 app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/programs", programsRoutes); // Programs & Activities API
+app.use("/api/notifications", notificationRoutes); // Notifications API
 
 // Health check endpoint
 app.get("/", (req, res) => {

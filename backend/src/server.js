@@ -3,7 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
-const path = require("path"); 
+const path = require("path");
 
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
@@ -12,6 +12,7 @@ const unitDirectorRoutes = require("./routes/unitDirector");
 const officeRoutes = require("./routes/office");
 const programRoutes = require("./routes/program");
 const programsRoutes = require("./routes/programs"); // Programs & Activities routes
+const notificationRoutes = require("./routes/notifications");
 
 const app = express();
 
@@ -19,6 +20,22 @@ const app = express();
 app.use(
   helmet({
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+          "http://localhost:3000",
+        ],
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        fontSrc: ["'self'", "data:", "https:"],
+      },
+    },
   })
 );
 
@@ -30,12 +47,20 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration for production
+// CORS configuration based on environment
 const corsOptions = {
-  origin: true, // Allow all origins for now
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.FRONTEND_URL || "https://ateneo-sdu.vercel.app"
+      : [
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+          "http://localhost:3000",
+        ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  optionsSuccessStatus: 200, // For legacy browser support
 };
 
 app.use(cors(corsOptions));
@@ -51,6 +76,7 @@ app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/program", programRoutes);
 app.use("/api/programs", programsRoutes); // Programs & Activities API
+app.use("/api/notifications", notificationRoutes); // Notifications API
 
 // Health check endpoint
 app.get("/", (req, res) => {
@@ -140,7 +166,7 @@ const supabase = createClient(
 async function testDatabaseConnection() {
   try {
     const { data, error } = await supabase
-      .from("office_users")
+      .from("office_credentials")
       .select("count", { count: "exact", head: true });
 
     if (error) throw error;

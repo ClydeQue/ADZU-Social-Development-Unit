@@ -1,4 +1,3 @@
-
 const jwtService = require("../services/jwtService");
 
 // ========================================
@@ -15,10 +14,12 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
+  // Verify token using jwtService. jwtService returns { valid, payload } or { valid: false, error }
   const verification = jwtService.verifyAccessToken(token);
 
-  if (!verification.valid) {
-    if (verification.expired) {
+  if (!verification || !verification.valid) {
+    const errMsg = verification?.error || "Invalid token";
+    if (errMsg === "jwt expired") {
       return res.status(401).json({
         error: "Token expired",
         message: "Access token has expired, please refresh",
@@ -28,14 +29,16 @@ const authenticateToken = (req, res, next) => {
 
     return res.status(403).json({
       error: "Invalid token",
-      message: "Access token is invalid or malformed",
+      message: errMsg || "Access token is invalid or malformed",
     });
   }
 
   // Add user info to request (includes office_id for office users)
-  // Note: jwtService returns 'payload' not 'decoded'
+  // Note: jwtService returns the decoded payload under `payload`
   const decoded = verification.payload || verification.decoded;
   req.user = {
+    // Keep both `id` and `userId` for backwards compatibility
+    id: decoded.userId,
     userId: decoded.userId,
     userType: decoded.userType,
     email: decoded.email,
@@ -45,7 +48,11 @@ const authenticateToken = (req, res, next) => {
     tokenExp: decoded.exp,
   };
 
-  console.log(`✅ Authenticated: ${req.user.userType} - ${req.user.name} ${req.user.office_id ? `(Office: ${req.user.office_id})` : '(All Offices)'}`);
+  console.log(
+    `✅ Authenticated: ${req.user.userType} - ${req.user.name} ${
+      req.user.office_id ? `(Office: ${req.user.office_id})` : "(All Offices)"
+    }`
+  );
   next();
 };
 
@@ -53,7 +60,7 @@ const authenticateToken = (req, res, next) => {
 // REQUIRE ROLE - Check user type
 // ========================================
 const requireRole = (allowedRoles) => {
-   return (req, res, next) => {
+  return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
         error: "Authentication required",
@@ -142,7 +149,11 @@ const filterByOffice = (req, res, next) => {
     // Force office_id filter for office users
     req.officeFilter = userOfficeId;
     // Also set in body for create/update operations
-    if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH") {
+    if (
+      req.method === "POST" ||
+      req.method === "PUT" ||
+      req.method === "PATCH"
+    ) {
       req.body.office_id = userOfficeId;
     }
     console.log(`🔒 Query filtered to office: ${userOfficeId}`);
