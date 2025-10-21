@@ -241,7 +241,6 @@ function NotificationDropdown({ onNotificationClick }) {
                                   boxShadow: `0 0 4px ${
                                     notification.indicatorColor || "#ef4444"
                                   }40`,
-                                  border: "1.5px solid white",
                                 }}
                                 className="w-2.5 h-2.5 rounded-full mb-0.5"
                               ></span>

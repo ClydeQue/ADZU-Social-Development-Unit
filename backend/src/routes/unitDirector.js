@@ -11,46 +11,93 @@ router.get(
   requireRole("unit_director"),
   async (req, res) => {
     try {
-      // Get all offices with their program counts
-      const { data: offices, error: officesError } = await supabase.from(
-        "offices"
-      ).select(`
-        id,
-        name,
-        description,
-        programs(count)
-      `);
+      // Get all activities with their status (set by offices)
+      const { data: activities, error: activitiesError } = await supabase
+        .from("activities")
+        .select("id, status");
 
-      if (officesError) throw officesError;
+      if (activitiesError) throw activitiesError;
 
-      // Transform the data to match expected format
-      const officesWithCounts = offices.map((office) => ({
-        ...office,
-        program_count: office.programs.length,
-      }));
-
-      // Get total program statistics
-      const { data: programs, error: statsError } = await supabase
-        .from("programs")
-        .select("status");
-
-      if (statsError) throw statsError;
-
+      // Calculate statistics based on activity status
+      // Status values: "completed", "in progress", "pending", etc.
       const statistics = {
-        total_programs: programs.length,
-        ongoing_programs: programs.filter((p) => p.status === "ongoing").length,
-        completed_programs: programs.filter((p) => p.status === "completed")
-          .length,
-        upcoming_programs: programs.filter((p) => p.status === "upcoming")
-          .length,
+        completed: activities.filter((a) => 
+          a.status && a.status.toLowerCase() === "completed"
+        ).length,
+        in_progress: activities.filter((a) => 
+          a.status && (
+            a.status.toLowerCase() === "in progress" || 
+            a.status.toLowerCase() === "ongoing" ||
+            a.status.toLowerCase() === "in-progress"
+          )
+        ).length,
+        pending: activities.filter((a) => 
+          a.status && (
+            a.status.toLowerCase() === "pending" || 
+            a.status.toLowerCase() === "planned"
+          )
+        ).length,
       };
 
       res.json({
-        offices: officesWithCounts,
         statistics,
       });
     } catch (error) {
       console.error("Unit director dashboard error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Get upcoming activities (next 3 closest to current date)
+router.get(
+  "/upcoming-activities",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const currentDate = today.toISOString();
+
+      // Query activities where end_date >= today (not ended yet)
+      // Ordered by end_date to show activities due soonest first
+      const { data: activities, error } = await supabase
+        .from("activities")
+        .select(
+          `
+          id,
+          activity_name,
+          start_date,
+          end_date,
+          status,
+          programs(
+            id,
+            title,
+            offices(id, name, acronym)
+          )
+        `
+        )
+        .gte("end_date", currentDate)
+        .order("end_date", { ascending: true })
+        .limit(3);
+
+      if (error) throw error;
+
+      // Transform to frontend format
+      const upcomingActivities = activities.map((activity) => ({
+        id: activity.id,
+        office: activity.programs?.offices?.acronym || "N/A",
+        activity: activity.activity_name || "Untitled Activity",
+        due: activity.end_date,
+        start_date: activity.start_date,
+        status: activity.status || "pending",
+        office_name: activity.programs?.offices?.name || "Unknown Office",
+      }));
+
+      res.json({ upcoming: upcomingActivities });
+    } catch (error) {
+      console.error("Unit director upcoming activities error:", error);
       res.status(500).json({ error: "Server error" });
     }
   }

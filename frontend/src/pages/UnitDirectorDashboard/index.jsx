@@ -36,38 +36,8 @@ export default function UnitDirectorDashboard() {
     }
   };
 
-  // Dashboard data
+  // Dashboard data - using hardcoded budget for now (will be updated later)
   const [dashboardData] = useState({
-    // Hardcoded data for now muna
-    completed: { count: 10, trend: "up", change: "Increased from last month" },
-    inProgress: { count: 25, trend: "up", change: "Increased from last month" },
-    pending: { count: 3, status: "On Discuss" },
-    flagshipUpdate: {
-      percentage: 85,
-      completed: 85,
-      inProgress: 10,
-      pending: 5,
-    },
-    upcoming: [
-      {
-        office: "ACCA",
-        activity: "ARTEJOS",
-        due: "Oct 5, 2025",
-        logo: "/images/acca_logo_small.webp",
-      },
-      {
-        office: "ACES",
-        activity: "Inigo Tree Planting",
-        due: "Oct 6, 2025",
-        logo: "/images/aces_logo_small.webp",
-      },
-      {
-        office: "ALTEC",
-        activity: "SUGPAT Program",
-        due: "Oct 7, 2025",
-        logo: "/images/altec_logo_small.webp",
-      },
-    ],
     budget: {
       total: 1000000,
       allocated: 750000,
@@ -202,18 +172,14 @@ export default function UnitDirectorDashboard() {
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 xl:gap-3 min-h-0 overflow-hidden">
                 {/* Flagship */}
                 <div className="lg:col-span-5 flex flex-col min-h-[300px] sm:min-h-[350px] lg:min-h-0">
-                  <FlagshipUpdateCard
-                    flagshipData={dashboardData.flagshipUpdate}
-                  />
+                  <FlagshipUpdateCard />
                 </div>
 
                 {/* Upcoming */}
                 <div className="lg:col-span-4 flex flex-col min-h-0 gap-2 xl:gap-3">
                   {/* Activities */}
                   <div className="flex flex-col min-h-[250px] sm:min-h-[300px] lg:flex-1">
-                    <UpcomingActivitiesCard
-                      upcomingData={dashboardData.upcoming}
-                    />
+                    <UpcomingActivitiesCard />
                   </div>
 
                   {/* Budget */}
@@ -224,11 +190,7 @@ export default function UnitDirectorDashboard() {
 
                 {/* Stats */}
                 <div className="lg:col-span-3 flex flex-col min-h-0 gap-2 xl:gap-3 lg:gap-0">
-                  <StatsCards
-                    completed={dashboardData.completed}
-                    inProgress={dashboardData.inProgress}
-                    pending={dashboardData.pending}
-                  />
+                  <StatsCards />
                 </div>
               </div>
             </div>

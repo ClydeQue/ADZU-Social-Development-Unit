@@ -1,7 +1,20 @@
 import { TrendingUp as TrendingUpIcon } from '@mui/icons-material';
+import { useQuery } from '@tanstack/react-query';
+import DashboardService from '@/services/dashboardService';
 
-// eslint-disable-next-line react/prop-types
-const StatsCards = ({ completed, inProgress, pending }) => {
+const StatsCards = () => {
+  // Fetch live dashboard statistics
+  const { data: statsData, isLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: DashboardService.getDashboardStats,
+    staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes
+    refetchOnWindowFocus: true,
+  });
+
+  const completed = statsData?.statistics?.completed || '-';
+  const inProgress = statsData?.statistics?.in_progress || '-';
+  const pending = statsData?.statistics?.pending || '-';
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 flex-1 min-h-0 lg:grid-rows-3">
       {/* Completed */}
@@ -17,14 +30,12 @@ const StatsCards = ({ completed, inProgress, pending }) => {
               </button>
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0">
-              {/* eslint-disable-next-line react/prop-types */}
-              {completed?.count || 0}
+              {isLoading ? '...' : completed}
             </h4>
             <div className="flex items-center gap-1.5 rounded-md px-2 py-1 w-fit flex-shrink-0">
               <TrendingUpIcon sx={{ fontSize: { xs: 10, sm: 12 } }} className="text-[#5B6FED]" />
               <span className="text-[0.6rem] sm:text-[0.7rem] text-[#C7D2FE]">
-                {/* eslint-disable-next-line react/prop-types */}
-                {completed?.change || 'No data'}
+                Activities completed
               </span>
             </div>
           </div>
@@ -44,14 +55,12 @@ const StatsCards = ({ completed, inProgress, pending }) => {
               </button>
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0 text-[#5B6FED]">
-              {/* eslint-disable-next-line react/prop-types */}
-              {inProgress?.count || 0}
+              {isLoading ? '...' : inProgress}
             </h4>
             <div className="flex items-center gap-1.5 rounded-md px-2 py-1 w-fit flex-shrink-0">
               <TrendingUpIcon sx={{ fontSize: { xs: 10, sm: 12 } }} className="text-[#5B6FED]" />
               <span className="text-[0.6rem] sm:text-[0.7rem] text-[#5B6FED]">
-                {/* eslint-disable-next-line react/prop-types */}
-                {inProgress?.change || 'No data'}
+                Activities ongoing
               </span>
             </div>
           </div>
@@ -71,12 +80,10 @@ const StatsCards = ({ completed, inProgress, pending }) => {
               </button>
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0 text-[#5B6FED]">
-              {/* eslint-disable-next-line react/prop-types */}
-              {pending?.count || 0}
+              {isLoading ? '...' : pending}
             </h4>
             <span className="text-[0.65rem] sm:text-[0.75rem] text-[#5B6FED] flex-shrink-0">
-              {/* eslint-disable-next-line react/prop-types */}
-              {pending?.status || 'No status'}
+              Activities planned
             </span>
           </div>
         </div>
