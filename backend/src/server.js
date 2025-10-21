@@ -166,7 +166,7 @@ const supabase = createClient(
 async function testDatabaseConnection() {
   try {
     const { data, error } = await supabase
-      .from("office_users")
+      .from("office_credentials")
       .select("count", { count: "exact", head: true });
 
     if (error) throw error;

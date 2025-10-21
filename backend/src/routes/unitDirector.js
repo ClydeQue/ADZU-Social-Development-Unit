@@ -110,9 +110,10 @@ router.get(
       const userId = req.user.id;
 
       const { data: user, error } = await supabase
-        .from("unit_directors")
-        .select("id, name, email, created_at")
+        .from("office_credentials")
+        .select("id, name, email, created_at, user_type")
         .eq("id", userId)
+        .eq("user_type", "unit_director")
         .single();
 
       if (error) throw error;

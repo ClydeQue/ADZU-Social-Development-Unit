@@ -1,5 +1,5 @@
 // Imports
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search as SearchIcon,
   Email as EmailIcon,
@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import NavbarService from "@/services/navbarService";
 import NotificationService from "@/services/notificationService";
+import { getTimeAgo, formatDate } from "@/utils/timeFormat";
 import Sidebar from "@/components/Sidebar";
 import FlagshipUpdateCard from "./FlagshipUpdateCard";
 import UpcomingActivitiesCard from "./UpcomingActivitiesCard";
@@ -25,12 +26,13 @@ export default function UnitDirectorDashboard() {
   const [messagesCount, setMessagesCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationFilter, setNotificationFilter] = useState("all"); // 'all' or 'unread'
+  const [, setTimeUpdate] = useState(0); // Force re-render for time updates
   const notificationRef = useRef(null);
 
   // Query client for mutations
   const queryClient = useQueryClient();
 
-  // Notifications Query
+  // Notifications Query with optimized settings
   const {
     data: notificationsData,
     isLoading: notificationsLoading,
@@ -39,16 +41,18 @@ export default function UnitDirectorDashboard() {
   } = useQuery({
     queryKey: ["notifications"],
     queryFn: NotificationService.getNotifications,
-    select: (data) => data || { items: [], unread: 0 }, // Transform undefined to default data
-    refetchInterval: 30000, // Refetch every 30 seconds
+    select: (data) => data || { items: [], unread: 0 },
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
+    refetchOnWindowFocus: true, // Refetch when user returns to window
+    refetchInterval: false, // Disable automatic polling
+    retry: 2,
     onSuccess: (data) => {
-      console.log("Notifications data received:", data);
       setNotificationsCount(data?.unread || 0);
     },
     onError: (error) => {
       console.error("Error in notifications query:", error);
     },
-    retry: 2,
   });
 
   // Handle marking notification as read
@@ -119,6 +123,15 @@ export default function UnitDirectorDashboard() {
     };
 
     fetchMessages();
+  }, []);
+
+  // Update time display every minute without refetching
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeUpdate(prev => prev + 1);
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
   }, []);
 
   // Dropdown close
@@ -281,77 +294,92 @@ export default function UnitDirectorDashboard() {
                             </button>
                           </div>
                         ) : notifications.length > 0 ? (
-                          notifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              onClick={() =>
-                                handleNotificationClick(notification.id)
-                              }
-                              className="px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
-                            >
-                              <div className="flex items-start gap-3">
-                                {/* Logo */}
-                                <div className="flex-shrink-0 mt-1">
-                                  <img
-                                    src={notification.logo}
-                                    alt={notification.office}
-                                    className="w-10 h-10 object-contain"
-                                  />
-                                </div>
+                          notifications.map((notification) => {
+                            // Calculate dynamic time ago from created_at stored in notification
+                            const timeAgo = getTimeAgo(notification.createdAt || new Date());
+                            
+                            // Determine what date to display based on type
+                            let dateLabel = "";
+                            let dateValue = "";
+                            
+                            if (notification.type === "Reminder") {
+                              // For Reminder: show due date (must exist)
+                              dateLabel = "Due";
+                              dateValue = notification.dueDate ? formatDate(notification.dueDate) : "No due date";
+                            } else if (notification.type === "Report") {
+                              // For Report: show submitted date (must exist)
+                              dateLabel = "Submitted";
+                              dateValue = notification.submittedDate ? formatDate(notification.submittedDate) : "No submission date";
+                            }
 
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="flex-1">
-                                      <p className="text-xs font-bold text-gray-500 mb-0.5">
-                                        {notification.office}
-                                      </p>
-                                      <p className="text-sm font-black text-[#4D49FC] mb-1">
-                                        {notification.activity}
-                                      </p>
-                                      <p className="text-xs text-gray-400">
-                                        {notification.type === "Reminder" ? (
-                                          <>
-                                            Due:{" "}
-                                            <span style={{ color: "#4D49FC" }}>
-                                              {notification.dueDate}
-                                            </span>
-                                          </>
-                                        ) : (
-                                          <>
-                                            Submitted:{" "}
-                                            <span style={{ color: "#4D49FC" }}>
-                                              {notification.submittedDate}
-                                            </span>
-                                          </>
-                                        )}
-                                      </p>
-                                    </div>
-                                    {/* Badge */}
-                                    <div className="flex items-end gap-2 justify-center min-w-[70px]">
-                                      <span
-                                        className={`px-3 p-1 rounded-full text-[12px] font-semibold bg-[#8988CD] text-[#ffffff]`}
-                                      >
-                                        {notification.type}
-                                      </span>
-                                      <div className="flex flex-col items-center ml-1">
+                            return (
+                              <div
+                                key={notification.id}
+                                onClick={() =>
+                                  handleNotificationClick(notification.id)
+                                }
+                                className="px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
+                              >
+                                <div className="flex items-start gap-3">
+                                  {/* Logo */}
+                                  <div className="flex-shrink-0 mt-1">
+                                    <img
+                                      src={notification.logo || "/logos/officeLogoTransparent/default.png"}
+                                      alt={notification.officeAcronym || notification.office}
+                                      className="w-10 h-10 object-contain"
+                                      onError={(e) => {
+                                        e.target.src = "/logos/officeLogoTransparent/default.png";
+                                      }}
+                                    />
+                                  </div>
+
+                                  {/* Content */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="flex-1">
+                                        <p className="text-xs font-bold text-gray-500 mb-0.5">
+                                          {notification.officeAcronym || notification.office}
+                                        </p>
+                                        <p className="text-sm font-black text-[#4D49FC] mb-1">
+                                          {notification.activity}
+                                        </p>
+                                        <p className="text-xs text-gray-400">
+                                          {dateLabel}:{" "}
+                                          <span style={{ color: "#4D49FC" }}>
+                                            {dateValue}
+                                          </span>
+                                        </p>
+                                      </div>
+                                      {/* Badge */}
+                                      <div className="flex items-end gap-2 justify-center min-w-[70px]">
                                         <span
-                                          className={`w-2.5 h-2.5 rounded-full mb-0.5 ${
-                                            notification.unread
-                                              ? "bg-red-500"
-                                              : "bg-green-500"
+                                          className={`px-3 p-1 rounded-full text-[12px] font-semibold ${
+                                            notification.type === "Reminder" 
+                                              ? "bg-[#8988CD] text-[#ffffff]"
+                                              : "bg-[#5B6FED] text-[#ffffff]"
                                           }`}
-                                        ></span>
-                                        <span className="text-[10px] text-gray-400">
-                                          {notification.time}
+                                        >
+                                          {notification.type}
                                         </span>
+                                        <div className="flex flex-col items-center ml-1">
+                                          <span
+                                            className={`w-2.5 h-2.5 rounded-full mb-0.5 ${
+                                              notification.unread
+                                                ? "bg-red-500"
+                                                : "bg-green-500"
+                                            }`}
+                                          ></span>
+                                          <span className="text-[10px] text-gray-400">
+                                            {timeAgo}
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          ))
+                            );
+                          })
                         ) : (
                           <div className="px-5 py-8 text-center text-sm text-gray-400">
                             No notifications

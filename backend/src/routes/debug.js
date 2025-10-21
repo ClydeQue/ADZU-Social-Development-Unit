@@ -8,8 +8,9 @@ const router = express.Router();
 router.get("/unit-directors", async (req, res) => {
   try {
     const { data: directors, error } = await supabase
-      .from("unit_directors")
-      .select("id, name, email")
+      .from("office_credentials")
+      .select("id, name, email, user_type")
+      .eq("user_type", "unit_director")
       .limit(5);
 
     if (error) {
@@ -30,8 +31,9 @@ router.get("/unit-directors", async (req, res) => {
 router.get("/office-users", async (req, res) => {
   try {
     const { data: users, error } = await supabase
-      .from("office_users")
-      .select("id, name, email, office_id")
+      .from("office_credentials")
+      .select("id, name, email, office_id, user_type")
+      .eq("user_type", "office_user")
       .limit(5);
 
     if (error) {
@@ -53,12 +55,10 @@ router.post("/check-password", async (req, res) => {
   try {
     const { email, password, userType } = req.body;
 
-    const tableName =
-      userType === "unit_director" ? "unit_directors" : "office_users";
-
+    // All users are in office_credentials table, differentiated by user_type
     const { data: users, error } = await supabase
-      .from(tableName)
-      .select("id, email, password")
+      .from("office_credentials")
+      .select("id, email, password, user_type")
       .eq("email", email.trim().toLowerCase())
       .limit(1);
 
@@ -92,6 +92,7 @@ router.post("/check-password", async (req, res) => {
     res.json({
       success: true,
       email: email,
+      user_type: user.user_type,
       passwordMatch,
       passwordIsHashed: isHashed,
       storedPasswordStart: storedPassword.substring(0, 10) + "...",

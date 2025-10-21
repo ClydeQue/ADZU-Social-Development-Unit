@@ -11,7 +11,6 @@ router.get("/", authenticateToken, async (req, res) => {
   console.log("Fetching notifications for user:", req.user?.id);
   try {
     // Get notifications with activity and office details
-    // Build the select query explicitly to avoid runtime type issues
     const selectFields = `
         id,
         type,
@@ -37,29 +36,14 @@ router.get("/", authenticateToken, async (req, res) => {
         .order("created_at", { ascending: false });
     }
 
-    // First, check if the tables exist
-    const { data: tableCheck, error: tablesError } = await supabase
-      .from("notifications")
-      .select("id")
-      .limit(1);
-
-    console.log("Table check result:", {
-      hasData: !!tableCheck?.length,
-      error: tablesError,
-      userContext: {
-        userId: req.user?.id,
-        userType: req.user?.userType,
-        officeId: req.user?.office_id,
-      },
-    });
-
-    if (tablesError) {
-      console.error("Error checking tables:", tablesError);
-      throw new Error("Database tables not properly configured");
+    const { data: notifications, error } = notificationsResult;
+    
+    if (error) {
+      console.error("Error fetching notifications:", error);
+      throw error;
     }
 
-    const { data: notifications, error } = notificationsResult;
-    if (error) throw error;
+    console.log("Fetched notifications:", notifications?.length || 0);
 
     // Then fetch related data separately to avoid join issues
     const activityIds = notifications.map((n) => n.activity_id).filter(Boolean);
@@ -73,7 +57,7 @@ router.get("/", authenticateToken, async (req, res) => {
             .in("id", activityIds)
         : { data: [] },
       officeIds.length > 0
-        ? supabase.from("offices").select("id, name").in("id", officeIds)
+        ? supabase.from("offices").select("id, name, acronym").in("id", officeIds)
         : { data: [] },
     ]);
 
@@ -85,10 +69,6 @@ router.get("/", authenticateToken, async (req, res) => {
       activitiesResult.data?.map((a) => [a.id, a]) || []
     );
     const officesMap = new Map(officesResult.data?.map((o) => [o.id, o]) || []);
-
-    console.log("Notifications query result:", { notifications, error });
-
-    if (error) throw error;
 
     // Format notifications
     const formattedNotifications = notifications
@@ -105,9 +85,20 @@ router.get("/", authenticateToken, async (req, res) => {
           officeFound: !!office,
         });
 
-        if (!activity || !office) {
+        // Only require office - activity is optional
+        if (!office) {
           console.log(
-            "Skipping notification due to missing relations:",
+            "Skipping notification due to missing office:",
+            notification.id
+          );
+          return null;
+        }
+        
+        // For Reminder type: activity is REQUIRED (must have due date)
+        // For Report type: activity is REQUIRED (must have submission details)
+        if (!activity) {
+          console.log(
+            "Skipping notification due to missing activity:",
             notification.id
           );
           return null;
@@ -115,15 +106,17 @@ router.get("/", authenticateToken, async (req, res) => {
 
         return {
           id: notification.id,
-          type: notification.type,
+          type: notification.type, // "Reminder" or "Report"
           office: office.name || "Unknown Office",
-          activity: activity.activity_name || "Unknown Activity",
-          dueDate: activity.end_date,
-          submittedDate: activity.start_date,
-          status: activity.status,
+          officeAcronym: office.acronym || office.name,
+          activity: activity.activity_name || "Untitled Activity",
+          dueDate: activity.end_date || null,
+          submittedDate: activity.start_date || null,
+          status: activity.status || "pending",
+          createdAt: notification.created_at,
           time: getTimeAgo(notification.created_at),
           unread: !notification.read_at,
-          logo: office.logo_url || "/logos/officeLogoTransparent/default.png",
+          logo: `/logos/officeLogoTransparent/${office.acronym?.toLowerCase() || 'default'}.png`,
         };
       })
       .filter(Boolean); // Remove null entries
