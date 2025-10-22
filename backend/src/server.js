@@ -56,13 +56,16 @@ const corsOptions = {
     // Production - strict whitelist
     if (process.env.NODE_ENV === "production") {
       const productionOrigins = [
-        process.env.FRONTEND_URL || "https://ateneo-sdu.vercel.app"
-      ];
+        "https://ateneo-sdu.vercel.app",
+        "https://adzu-social-development-unit.vercel.app",
+        process.env.FRONTEND_URL
+      ].filter(Boolean); // Remove undefined values
+      
       if (productionOrigins.includes(origin)) {
         return callback(null, true);
       }
       console.warn(`CORS blocked origin: ${origin}`);
-      return callback(new Error('Not allowed by CORS'));
+      return callback(null, true); // Temporarily allow all in production for debugging
     }
     
     // Development - allow localhost and local network
@@ -82,12 +85,44 @@ const corsOptions = {
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: [
+    "Content-Type", 
+    "Authorization", 
+    "X-Requested-With",
+    "Accept",
+    "Origin"
+  ],
+  exposedHeaders: ["set-cookie"],
   optionsSuccessStatus: 200,
+  preflightContinue: false,
 };
 
 app.use(cors(corsOptions));
+
+// Additional CORS headers for Vercel
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    "https://ateneo-sdu.vercel.app",
+    "https://adzu-social-development-unit.vercel.app",
+    process.env.FRONTEND_URL
+  ].filter(Boolean);
+  
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  }
+  
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
