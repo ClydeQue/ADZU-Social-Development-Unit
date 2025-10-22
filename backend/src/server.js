@@ -100,7 +100,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Additional CORS headers for Vercel
+// Additional CORS headers for Vercel - Apply to ALL responses
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   const allowedOrigins = [
@@ -109,16 +109,18 @@ app.use((req, res, next) => {
     process.env.FRONTEND_URL
   ].filter(Boolean);
   
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
+  // Always set CORS headers if origin is allowed (even for errors)
+  if (allowedOrigins.includes(origin) || !origin) {
+    res.header("Access-Control-Allow-Origin", origin || "https://ateneo-sdu.vercel.app");
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+    res.header("Access-Control-Expose-Headers", "set-cookie");
   }
   
   // Handle preflight
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    return res.status(200).end();
   }
   
   next();
