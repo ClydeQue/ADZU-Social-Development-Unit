@@ -47,42 +47,29 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration - SIMPLIFIED for development
+// CORS configuration - SIMPLE and CLEAR
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (Postman, mobile apps, etc.)
+    // Always allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Production - strict whitelist
-    if (process.env.NODE_ENV === "production") {
-      const productionOrigins = [
-        "https://ateneo-sdu.vercel.app",
-        "https://adzu-social-development-unit.vercel.app",
-        process.env.FRONTEND_URL
-      ].filter(Boolean); // Remove undefined values
-      
-      if (productionOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      console.warn(`CORS blocked origin: ${origin}`);
-      return callback(null, true); // Temporarily allow all in production for debugging
-    }
+    // Allowed origins
+    const allowedOrigins = [
+      "https://ateneo-sdu.vercel.app",
+      "https://adzu-social-development-unit.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://127.0.0.1:5173",
+    ];
     
-    // Development - allow localhost and local network
-    // This regex matches:
-    // - localhost:* (any port)
-    // - 127.0.0.1:* (any port)
-    // - 192.168.x.x:* (local network)
-    // - 10.x.x.x:* (local network)
-    // - 172.16-31.x.x:* (local network)
-    const devOriginRegex = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+):\d+$/;
-    
-    if (devOriginRegex.test(origin)) {
+    // Check if origin is allowed
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     
-    console.warn(`CORS blocked origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    // For debugging in production - log blocked origins
+    console.warn(`⚠️ CORS blocked origin: ${origin}`);
+    return callback(null, true); // ALLOW ALL for now to debug
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -91,36 +78,30 @@ const corsOptions = {
     "Authorization", 
     "X-Requested-With",
     "Accept",
-    "Origin"
+    "Origin",
+    "Access-Control-Allow-Origin"
   ],
-  exposedHeaders: ["set-cookie"],
+  exposedHeaders: ["Set-Cookie"],
   optionsSuccessStatus: 200,
   preflightContinue: false,
 };
 
 app.use(cors(corsOptions));
 
-// Additional CORS headers for Vercel - Apply to ALL responses
+// Simple CORS headers middleware - set on EVERY response
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const allowedOrigins = [
-    "https://ateneo-sdu.vercel.app",
-    "https://adzu-social-development-unit.vercel.app",
-    process.env.FRONTEND_URL
-  ].filter(Boolean);
   
-  // Always set CORS headers if origin is allowed (even for errors)
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.header("Access-Control-Allow-Origin", origin || "https://ateneo-sdu.vercel.app");
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
-    res.header("Access-Control-Expose-Headers", "set-cookie");
-  }
+  // Set CORS headers for your frontend
+  res.setHeader("Access-Control-Allow-Origin", origin || "https://ateneo-sdu.vercel.app");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
   
   // Handle preflight
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
   
   next();
