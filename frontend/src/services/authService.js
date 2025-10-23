@@ -9,9 +9,11 @@ import { getApiBase, switchToProduction, isFallbackActive, API_CONFIG } from "..
 
 const ACCESS_TOKEN_KEY = "sdu_access_token";
 
-// Create axios instance for auth endpoints
+// Create axios instance for auth endpoints with dynamic baseURL
 const authAxios = axios.create({
-  baseURL: getApiBase(),
+  get baseURL() {
+    return getApiBase();
+  },
   withCredentials: true, // Enable cookies for refresh token
   timeout: API_CONFIG.REQUEST_TIMEOUT,
 });
