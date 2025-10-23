@@ -15,27 +15,22 @@ import UnitDirectorCalendar from '@/pages/UnitDirectorCalendar';
 // Office Dashboards (6 offices)
 import CCESDashboard from '@/pages/CCESDashboard';
 import CCESReports from '@/pages/CCESDashboard/Reports';
-import CCESCalendar from '@/pages/CCESDashboard/Calendar';
 
 import ACCADashboard from '@/pages/ACCADashboard';
 import ACCAReports from '@/pages/ACCADashboard/Reports';
-import ACCACalendar from '@/pages/ACCADashboard/Calendar';
 
 import ACESDashboard from '@/pages/ACESDashboard';
 import ACESReports from '@/pages/ACESDashboard/Reports';
-import ACESCalendar from '@/pages/ACESDashboard/Calendar';
 
 import ALTECDashboard from '@/pages/ALTECDashboard';
 import ALTECReports from '@/pages/ALTECDashboard/Reports';
-import ALTECCalendar from '@/pages/ALTECDashboard/Calendar';
 
 import APCDashboard from '@/pages/APCDashboard';
 import APCReports from '@/pages/APCDashboard/Reports';
-import APCCalendar from '@/pages/APCDashboard/Calendar';
 
 import ACLGDashboard from '@/pages/ACLGDashboard';
 import ACLGReports from '@/pages/ACLGDashboard/Reports';
-import ACLGCalendar from '@/pages/ACLGDashboard/Calendar';
+import ACLGAddActivity from '@/pages/ACLGDashboard/AddActivity';
 
 import './App.css';
 
@@ -93,14 +88,6 @@ const AppContent = () => {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/office/cces/calendar" 
-          element={
-            <ProtectedRoute requiredRole="office_user">
-              <CCESCalendar />
-            </ProtectedRoute>
-          } 
-        />
 
         {/* ACCA Routes */}
         <Route 
@@ -116,14 +103,6 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCAReports />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/office/acca/calendar" 
-          element={
-            <ProtectedRoute requiredRole="office_user">
-              <ACCACalendar />
             </ProtectedRoute>
           } 
         />
@@ -145,14 +124,6 @@ const AppContent = () => {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/office/aces/calendar" 
-          element={
-            <ProtectedRoute requiredRole="office_user">
-              <ACESCalendar />
-            </ProtectedRoute>
-          } 
-        />
 
         {/* ALTEC Routes */}
         <Route 
@@ -171,14 +142,6 @@ const AppContent = () => {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/office/altec/calendar" 
-          element={
-            <ProtectedRoute requiredRole="office_user">
-              <ALTECCalendar />
-            </ProtectedRoute>
-          } 
-        />
 
         {/* APC Routes */}
         <Route 
@@ -194,14 +157,6 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <APCReports />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/office/apc/calendar" 
-          element={
-            <ProtectedRoute requiredRole="office_user">
-              <APCCalendar />
             </ProtectedRoute>
           } 
         />
@@ -224,10 +179,10 @@ const AppContent = () => {
           } 
         />
         <Route 
-          path="/office/aclg/calendar" 
+          path="/office/aclg/add-activity" 
           element={
             <ProtectedRoute requiredRole="office_user">
-              <ACLGCalendar />
+              <ACLGAddActivity />
             </ProtectedRoute>
           } 
         />

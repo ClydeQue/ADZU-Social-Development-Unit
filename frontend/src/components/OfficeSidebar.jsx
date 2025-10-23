@@ -1,8 +1,7 @@
 import { 
   GridView as GridViewIcon, 
   Settings as SettingsIcon, 
-  Assignment as AssignmentIcon, 
-  Event as EventIcon 
+  Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -39,8 +38,7 @@ export default function OfficeSidebar({ officeColor = '#4D49FC', basePath }) {
   // Menu items - customized per office
     const menuItems = [
     { icon: <GridViewIcon />, text: 'Overview', path: `${basePath}/dashboard` },
-    { icon: <AssignmentIcon />, text: 'Reports', path: `${basePath}/reports` },
-    { icon: <EventIcon />, text: 'Calendar', path: `${basePath}/calendar` },
+    { icon: <AssignmentIcon />, text: 'Projects', path: `${basePath}/reports` },
   ];
 
   // General items

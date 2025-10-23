@@ -2,13 +2,12 @@
 import { useState, useEffect } from "react";
 import {
   Search as SearchIcon,
-  Email as EmailIcon,
 } from "@mui/icons-material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import NavbarService from "@/services/navbarService";
 import Sidebar from "@/components/Sidebar";
 import NotificationDropdown from "@/components/NotificationDropdown";
+import InboxDropdown from "@/components/InboxDropdown";
 import FlagshipUpdateCard from "./FlagshipUpdateCard";
 import UpcomingActivitiesCard from "./UpcomingActivitiesCard";
 import BudgetCard from "./BudgetCard";
@@ -19,7 +18,6 @@ export default function UnitDirectorDashboard() {
   // Auth
   const { user } = useAuth();
   // State
-  const [messagesCount, setMessagesCount] = useState(0);
   const [, setTimeUpdate] = useState(0); // Force re-render for time updates
 
   // Query client for mutations
@@ -44,21 +42,6 @@ export default function UnitDirectorDashboard() {
       remaining: 250000,
     },
   });
-
-  // Messages fetch
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const messagesData = await NavbarService.getMessages();
-        setMessagesCount(messagesData.unread || 0);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-        // Fail silently, keep count at 0
-      }
-    };
-
-    fetchMessages();
-  }, []);
 
   // Update time display every minute without refetching
   useEffect(() => {
@@ -114,18 +97,8 @@ export default function UnitDirectorDashboard() {
 
               {/* Icons */}
               <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
-                {/* Email */}
-                <button className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors relative">
-                  <EmailIcon
-                    className="text-[#5B6FED]"
-                    sx={{ fontSize: { xs: 16, sm: 18, xl: 19 } }}
-                  />
-                  {messagesCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold text-[9px] xl:text-[10px]">
-                      {messagesCount > 9 ? "9+" : messagesCount}
-                    </span>
-                  )}
-                </button>
+                {/* Inbox */}
+                <InboxDropdown />
 
                 {/* Notifications */}
                 <NotificationDropdown onNotificationClick={handleNotificationClick} />

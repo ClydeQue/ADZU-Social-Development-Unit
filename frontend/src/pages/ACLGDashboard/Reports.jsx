@@ -16,11 +16,12 @@ export default function ACLGReports() {
       basePath="/office/aclg"
       officeId={officeId}
     >
-      <div className="p-6 overflow-auto">
+      <div className="h-full flex flex-col p-3">
         <OfficeReports 
           officeId={officeId} 
           officeColor="#1976D2" 
           officeLogo="/images/aclg_logo_small.webp"
+          basePath="/office/aclg"
         />
       </div>
     </OfficeDashboardLayout>

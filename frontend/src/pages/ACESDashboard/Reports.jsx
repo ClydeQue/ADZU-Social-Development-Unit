@@ -16,7 +16,7 @@ export default function ACESReports() {
       basePath="/office/aces"
       officeId={officeId}
     >
-      <div className="p-6 overflow-auto">
+      <div className="h-full flex flex-col p-3">
         <OfficeReports 
           officeId={officeId} 
           officeColor="#388E3C" 

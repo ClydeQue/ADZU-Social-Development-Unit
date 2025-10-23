@@ -16,6 +16,22 @@ const axiosInstance = axios.create({
   withCredentials: true, // Send cookies with requests
 });
 
+// Flag to prevent multiple simultaneous refresh attempts
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 // Request interceptor - Add access token
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -40,7 +56,22 @@ axiosInstance.interceptors.response.use(
       !originalRequest._retry &&
       !originalRequest.url.includes("auth/")
     ) {
+      // If already refreshing, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         // Dynamically import to avoid circular dependency
@@ -51,12 +82,26 @@ axiosInstance.interceptors.response.use(
         const newToken = localStorage.getItem("sdu_access_token");
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
+        // Process any queued requests
+        processQueue(null, newToken);
+        isRefreshing = false;
+
         // Retry original request
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        window.location.href = "/";
-        console.log(refreshError);
+        // Refresh failed, process queue with error
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        
+        // Clear auth data and redirect to login
+        const { default: AuthService } = await import("./authService.js");
+        AuthService.clearAuth();
+        
+        // Only redirect if not already on login page
+        if (window.location.pathname !== '/') {
+          window.location.href = "/";
+        }
+        
         return Promise.reject(new Error("Session expired. Please login again."));
       }
     }

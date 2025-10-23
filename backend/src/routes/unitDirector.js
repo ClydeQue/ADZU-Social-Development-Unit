@@ -236,4 +236,66 @@ router.get(
   }
 );
 
+// Get all activities for calendar view
+router.get(
+  "/activities",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      // Query all activities with their programs and offices
+      const { data: activities, error } = await supabase
+        .from("activities")
+        .select(
+          `
+          id,
+          activity_name,
+          start_date,
+          end_date,
+          status,
+          venue,
+          participants_count,
+          objectives,
+          notes,
+          programs(
+            id,
+            title,
+            offices(
+              id,
+              name,
+              acronym
+            )
+          )
+        `
+        )
+        .order("start_date", { ascending: true });
+
+      if (error) throw error;
+
+      // Transform to include office info at root level
+      const transformedActivities = activities.map((activity) => ({
+        id: activity.id,
+        title: activity.activity_name,
+        start: activity.start_date,
+        end: activity.end_date,
+        status: activity.status || "pending",
+        venue: activity.venue,
+        participants_count: activity.participants_count,
+        objectives: activity.objectives,
+        notes: activity.notes,
+        program_id: activity.programs?.id,
+        program_title: activity.programs?.title || "Untitled Program",
+        office_id: activity.programs?.offices?.id,
+        office_name: activity.programs?.offices?.name || "Unknown",
+        office_acronym: activity.programs?.offices?.acronym || "N/A",
+      }));
+
+      res.json({ activities: transformedActivities });
+    } catch (error) {
+      console.error("Unit director activities error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 module.exports = router;

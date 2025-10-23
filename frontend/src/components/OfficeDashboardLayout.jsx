@@ -9,7 +9,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import OfficeService from '@/services/officeService';
 import OfficeSidebar from '@/components/OfficeSidebar';
-import OfficeStatsCard from '@/components/OfficeStatsCard';
+import UpcomingProgramsList from '@/components/UpcomingProgramsList';
 
 /**
  * Reusable Office Dashboard Layout
@@ -275,7 +275,7 @@ export default function OfficeDashboardLayout({
 
               {/* Content Section */}
               {children || (
-                <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex-1 flex gap-3 min-h-0 overflow-hidden">
                   {dashboardLoading ? (
                     <div className="flex-1 flex items-center justify-center">
                       <div className="flex flex-col items-center gap-3">
@@ -284,33 +284,66 @@ export default function OfficeDashboardLayout({
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 flex-1 min-h-0 lg:grid-rows-3">
-                      {/* Completed Programs */}
-                      <OfficeStatsCard
-                        title="Completed"
-                        count={dashboardData?.statistics?.completed_programs || 0}
-                        trend="Increased from last month"
-                        variant="filled"
-                        bgColor="#040195"
-                        textColor="#FFFFFF"
+                    <>
+                      {/* Left Section - Upcoming Programs */}
+                      <UpcomingProgramsList 
+                        upcomingPrograms={dashboardData?.upcomingPrograms}
                       />
 
-                      {/* In Progress Programs */}
-                      <OfficeStatsCard
-                        title="In Progress"
-                        count={dashboardData?.statistics?.ongoing_programs || 0}
-                        trend="Increased from last month"
-                        variant="outlined"
-                      />
+                      {/* Right Section - Stats and Timeline */}
+                      <div className="flex-[3] min-w-0 flex flex-col gap-3">
+                        {/* Top Row - Stats Cards */}
+                        <div className="grid grid-cols-3 gap-3">
+                          {/* Completed Card */}
+                          <div className="bg-[#1E0A7A] rounded-[20px] p-4 shadow-md flex flex-col relative overflow-hidden">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="text-white text-lg font-semibold">Completed</h3>
+                            </div>
+                            <div className="flex-1 flex items-center">
+                              <h2 className="text-white text-5xl font-bold">{dashboardData?.statistics?.completed_programs || 10}</h2>
+                            </div>
+                            <div className="mt-2">
+                              <span className="text-white/70 text-[0.65rem]">Increased from last month</span>
+                            </div>
+                          </div>
 
-                      {/* Upcoming Programs */}
-                      <OfficeStatsCard
-                        title="Upcoming"
-                        count={dashboardData?.statistics?.upcoming_programs || 0}
-                        subtitle="Programs in planning phase"
-                        variant="outlined"
-                      />
-                    </div>
+                          {/* In Progress Card */}
+                          <div className="bg-[#8B7AB8] rounded-[20px] p-4 shadow-md flex flex-col relative overflow-hidden">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="text-white text-lg font-semibold">In Progress</h3>
+                            </div>
+                            <div className="flex-1 flex items-center">
+                              <h2 className="text-white text-5xl font-bold">{dashboardData?.statistics?.ongoing_programs || 25}</h2>
+                            </div>
+                            <div className="mt-2">
+                              <span className="text-white/70 text-[0.65rem]">Increased from last month</span>
+                            </div>
+                          </div>
+
+                          {/* Pending Card */}
+                          <div className="bg-white rounded-[20px] p-4 shadow-md border border-gray-200 flex flex-col relative overflow-hidden">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="text-[#1E0A7A] text-lg font-semibold">Pending</h3>
+                            </div>
+                            <div className="flex-1 flex items-center">
+                              <h2 className="text-[#5B6FED] text-5xl font-bold">{dashboardData?.statistics?.pending_programs || 3}</h2>
+                            </div>
+                            <p className="text-gray-500 text-xs mt-2">On Discuss</p>
+                          </div>
+                        </div>
+
+                        {/* Bottom Row - Timeline Section */}
+                        <div className="flex-1 bg-white rounded-[20px] p-5 shadow-md border border-gray-200 overflow-hidden flex flex-col">
+                          <h3 className="text-[#1E0A7A] text-2xl font-bold mb-4">Timeline</h3>
+                          <div className="flex-1 overflow-y-auto custom-scrollbar">
+                            {/* Timeline content will go here */}
+                            <div className="text-gray-400 text-sm text-center py-8">
+                              Timeline view coming soon
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               )}

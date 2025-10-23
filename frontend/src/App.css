@@ -109,4 +109,283 @@
   /* Font Families  */
     --font-inter: "Inter", "Poppins", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
     --font-poppins:  "Poppins", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  
+  /* Custom Scrollbar Colors */
+  --color-scrollbar-thumb: #8281C4;
+  --color-scrollbar-thumb-hover: #6c6bb0;
+  --color-scrollbar-track: #f0f0f0;
+}
+
+/* ========================================
+   CUSTOM SCROLLBAR STYLES
+   ======================================== */
+
+/* Custom scrollbar - Purple theme using CSS variables */
+.custom-scrollbar-purple::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.custom-scrollbar-purple::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+  border-radius: 10px;
+}
+
+.custom-scrollbar-purple::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: 10px;
+  border: 2px solid var(--color-scrollbar-track);
+}
+
+.custom-scrollbar-purple::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
+}
+
+/* Firefox */
+.custom-scrollbar-purple {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+}
+
+/* Custom scrollbar with transparent track */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
+}
+
+/* Firefox scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
+}
+
+/* ========================================
+   FULLCALENDAR CUSTOM STYLES
+   ======================================== */
+
+/* Calendar container */
+.calendar-container .fc {
+  font-family: var(--font-poppins);
+  border: 2px solid #040195 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Hide scrollbar but keep scrollable - no space taken */
+.calendar-container {
+  overflow: overlay !important;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+}
+
+.calendar-container::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Hide scrollbar but keep scrollable */
+.calendar-container {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.calendar-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Day grid events - horizontal spanning */
+.fc-daygrid-event {
+  border-radius: 12px !important;
+  padding: 3px 8px !important;
+  margin: 1px 0 !important;
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(77, 73, 252, 0.2) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  min-height: 28px !important;
+  max-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.fc-daygrid-event:hover {
+  box-shadow: 0 4px 12px rgba(77, 73, 252, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Event content */
+.fc-event-main {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.fc-event-title {
+  font-weight: 600 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  color: white !important;
+}
+
+/* Day cell styling */
+.fc-daygrid-day {
+  transition: background-color 0.2s ease !important;
+  min-height: 85px !important;
+  max-height: 100px !important;
+}
+
+.fc-daygrid-day:hover {
+  background-color: rgba(91, 111, 237, 0.05) !important;
+}
+
+.fc-day-today {
+  background-color: rgba(91, 111, 237, 0.08) !important;
+}
+
+/* Day numbers */
+.fc-daygrid-day-number {
+  padding: 6px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+  font-size: 0.85rem !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+  color: #5B6FED !important;
+  font-weight: 700 !important;
+}
+
+/* Column headers - Outside the grid */
+.fc-col-header {
+  background-color: #040195 !important;
+  border: none !important;
+  position: relative !important;
+  margin-bottom: 0 !important;
+}
+
+.fc-col-header-cell {
+  padding: 10px 6px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.5px !important;
+  color: #FFFFFF !important;
+  background-color: #040195 !important;
+  border: none !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.fc-col-header-cell:last-child {
+  border-right: none !important;
+}
+
+.fc-col-header-cell-cushion {
+  color: #FFFFFF !important;
+  padding: 0 !important;
+}
+
+/* Scrolled header */
+.fc-scrollgrid-section-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 3 !important;
+  background-color: #040195 !important;
+}
+
+/* More events link */
+.fc-daygrid-more-link {
+  color: #5B6FED !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+.fc-daygrid-more-link:hover {
+  text-decoration: underline !important;
+}
+
+/* Event time text */
+.fc-event-time {
+  font-size: 0.7rem !important;
+  font-weight: 500 !important;
+  opacity: 0.9 !important;
+}
+
+/* Fix event overlap and stacking */
+.fc-daygrid-event-harness {
+  margin-bottom: 2px !important;
+}
+
+/* Ensure events span full width when crossing multiple days */
+.fc-daygrid-event.fc-event-start,
+.fc-daygrid-event.fc-event-end {
+  border-radius: 12px !important;
+}
+
+/* Multi-day event continuations */
+.fc-daygrid-event.fc-event-start:not(.fc-event-end) {
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+}
+
+.fc-daygrid-event:not(.fc-event-start).fc-event-end {
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+}
+
+.fc-daygrid-event:not(.fc-event-start):not(.fc-event-end) {
+  border-radius: 4px !important;
+}
+
+/* Grid lines */
+.fc-scrollgrid {
+  border-color: #E5E7EB !important;
+  border-top: none !important;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #E5E7EB !important;
+}
+
+/* Remove border between header and body */
+.fc-scrollgrid-section-header > * {
+  border-bottom: none !important;
+}
+
+.fc-scrollgrid-section-body > * {
+  border-top: none !important;
+}
+
+/* Popover for more events */
+.fc-popover {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid #E5E7EB !important;
+}
+
+.fc-popover-header {
+  background-color: #F8F9FA !important;
+  padding: 12px 16px !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #E5E7EB !important;
+}
+
+.fc-popover-body {
+  padding: 8px !important;
 }

@@ -9,14 +9,58 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [showTransitionLoader, setShowTransitionLoader] = useState(false);
 
-  // Initialize session on mount - DISABLED auto-refresh to prevent rate limiting
+  // Initialize session on mount - restore from token if available
   useEffect(() => {
-    // Just check if we have a token in localStorage
-    const token = AuthService.getAccessToken();
-    if (!token) {
-      AuthService.clearAuth();
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        const token = AuthService.getAccessToken();
+        const storedUser = localStorage.getItem('sdu_user');
+        
+        if (token && storedUser) {
+          try {
+            // First, try to use stored user data for immediate access
+            const user = JSON.parse(storedUser);
+            setSession({
+              user,
+              accessToken: token,
+            });
+            
+            // Then validate token in background by refreshing
+            AuthService.refreshToken()
+              .then((result) => {
+                if (result?.user) {
+                  // Update with fresh data
+                  setSession({
+                    user: result.user,
+                    accessToken: result.accessToken,
+                  });
+                  localStorage.setItem('sdu_user', JSON.stringify(result.user));
+                }
+              })
+              .catch((error) => {
+                // If refresh fails silently, keep using cached data
+                console.warn("Token refresh failed, using cached session:", error);
+              });
+          } catch (error) {
+            // If parsing fails, clear auth
+            console.error("Failed to parse stored user:", error);
+            AuthService.clearAuth();
+            localStorage.removeItem('sdu_user');
+          }
+        } else {
+          AuthService.clearAuth();
+          localStorage.removeItem('sdu_user');
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        AuthService.clearAuth();
+        localStorage.removeItem('sdu_user');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (credentials) => {
@@ -24,10 +68,16 @@ export const AuthProvider = ({ children }) => {
       const result = await AuthService.login(credentials);
       
       if (result?.accessToken && result?.user) {
-        setSession({
+        // Store session in state and localStorage for persistence
+        const newSession = {
           user: result.user,
           accessToken: result.accessToken,
-        });
+        };
+        setSession(newSession);
+        
+        // Also store user data in localStorage for page refresh
+        localStorage.setItem('sdu_user', JSON.stringify(result.user));
+        
         setShowTransitionLoader(true); // Show loader on successful login
         return result;
       }
@@ -61,6 +111,7 @@ export const AuthProvider = ({ children }) => {
         // Clear session (this triggers redirect to welcome page)
         setSession(null);
         AuthService.clearAuth();
+        localStorage.removeItem('sdu_user'); // Remove stored user data
         
         // Keep loader visible for additional time to cover the page transition
         setTimeout(() => {

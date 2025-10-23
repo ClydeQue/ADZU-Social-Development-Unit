@@ -104,14 +104,24 @@ class AuthService {
    * Refresh access token using HttpOnly cookie
    */
   async refreshToken() {
-    const response = await authAxios.post("/api/auth/refresh");
+    try {
+      const response = await authAxios.post("/api/auth/refresh");
 
-    if (!response.data.success) {
-      throw new Error(response.data.message || "Token refresh failed");
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Token refresh failed");
+      }
+
+      this.setAccessToken(response.data.data.accessToken);
+      return response.data.data; // { accessToken, user }
+    } catch (error) {
+      // Clear auth data on refresh failure
+      this.clearAuth();
+      
+      // Throw a specific error that won't trigger another refresh
+      const refreshError = new Error(error.response?.data?.message || "Session expired");
+      refreshError.isAuthError = true;
+      throw refreshError;
     }
-
-    this.setAccessToken(response.data.data.accessToken);
-    return response.data.data; // { accessToken, user }
   }
 
   /**

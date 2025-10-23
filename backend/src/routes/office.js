@@ -282,4 +282,69 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
   }
 });
 
+// Get office activities for calendar
+router.get("/:officeId/activities", authenticateToken, async (req, res) => {
+  try {
+    const { officeId } = req.params;
+
+    // Check if user has access to this office
+    if (req.user.userType !== "unit_director" && req.user.office_id != officeId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Get all programs for this office
+    const { data: programs, error: programsError } = await supabase
+      .from("programs")
+      .select("id")
+      .eq("office_id", officeId);
+
+    if (programsError) throw programsError;
+
+    const programIds = programs.map(p => p.id);
+    let activities = [];
+    
+    if (programIds.length > 0) {
+      const { data: activitiesData, error: activitiesError } = await supabase
+        .from("activities")
+        .select(`
+          id,
+          activity_name,
+          start_date,
+          end_date,
+          status,
+          venue,
+          participants_count,
+          objectives,
+          notes,
+          programs(id, title)
+        `)
+        .in("program_id", programIds)
+        .order("start_date", { ascending: true });
+
+      if (activitiesError) throw activitiesError;
+      activities = activitiesData || [];
+    }
+
+    // Transform to calendar format
+    const transformedActivities = activities.map((activity) => ({
+      id: activity.id,
+      title: activity.activity_name,
+      start: activity.start_date,
+      end: activity.end_date,
+      status: activity.status || "pending",
+      venue: activity.venue,
+      participants_count: activity.participants_count,
+      objectives: activity.objectives,
+      notes: activity.notes,
+      program_id: activity.programs?.id,
+      program_title: activity.programs?.title || "Untitled Program",
+    }));
+
+    res.json({ activities: transformedActivities });
+  } catch (error) {
+    console.error("Get office activities error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;

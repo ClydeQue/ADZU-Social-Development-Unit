@@ -37,6 +37,13 @@ class UnitDirectorService {
   async getAllOfficesWithPrograms() {
     return await api.get("office/all-with-programs");
   }
+
+  /**
+   * Get all activities across all offices for calendar
+   */
+  async getAllActivities() {
+    return await api.get("unit-director/activities");
+  }
 }
 
 export default new UnitDirectorService();

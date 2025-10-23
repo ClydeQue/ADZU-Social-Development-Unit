@@ -43,6 +43,13 @@ class OfficeService {
   async getOfficeReports(officeId) {
     return await api.get(`office/${officeId}/reports`);
   }
+
+  /**
+   * Get office activities for calendar
+   */
+  async getOfficeActivities(officeId) {
+    return await api.get(`office/${officeId}/activities`);
+  }
 }
 
 export default new OfficeService();

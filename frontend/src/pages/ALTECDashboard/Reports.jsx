@@ -16,7 +16,7 @@ export default function ALTECReports() {
       basePath="/office/altec"
       officeId={officeId}
     >
-      <div className="p-6 overflow-auto">
+      <div className="h-full flex flex-col p-3">
         <OfficeReports 
           officeId={officeId} 
           officeColor="#7B1FA2" 
