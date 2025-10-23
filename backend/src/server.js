@@ -50,6 +50,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS configuration - CRITICAL: Must allow credentials and set proper origins
+// Updated: 2025-10-23 to fix production CORS
 const allowedOrigins = [
   "https://ateneo-sdu.vercel.app",
   "https://adzu-social-development-unit.vercel.app",
