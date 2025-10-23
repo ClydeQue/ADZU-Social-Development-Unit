@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
@@ -47,67 +46,39 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration - SIMPLE and CLEAR
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Always allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allowed origins
-    const allowedOrigins = [
-      "https://ateneo-sdu.vercel.app",
-      "https://adzu-social-development-unit.vercel.app",
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://127.0.0.1:5173",
-    ];
-    
-    // Check if origin is allowed
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // For debugging in production - log blocked origins
-    console.warn(`⚠️ CORS blocked origin: ${origin}`);
-    return callback(null, true); // ALLOW ALL for now to debug
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: [
-    "Content-Type", 
-    "Authorization", 
-    "X-Requested-With",
-    "Accept",
-    "Origin",
-    "Access-Control-Allow-Origin"
-  ],
-  exposedHeaders: ["Set-Cookie"],
-  optionsSuccessStatus: 200,
-  preflightContinue: false,
-};
+// CORS Configuration - Fixed for Vercel production
+const allowedOrigins = [
+  "https://ateneo-sdu.vercel.app",
+  "https://adzu-social-development-unit.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+];
 
-app.use(cors(corsOptions));
-
-// Simple CORS headers middleware - set on EVERY response
+// CORS middleware that works with credentials
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  // Set CORS headers for your frontend
-  res.setHeader("Access-Control-Allow-Origin", origin || "https://ateneo-sdu.vercel.app");
+  // Check if origin is allowed
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else if (!origin) {
+    // No origin header (same-origin request or tools like curl)
+    res.setHeader("Access-Control-Allow-Origin", allowedOrigins[0]);
+  }
+  
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  res.setHeader("Access-Control-Expose-Headers", "Set-Cookie");
   
   // Handle preflight
   if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
-  
-  next();
-});
 
-// Body parsing middleware
+  next();
+});// Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
