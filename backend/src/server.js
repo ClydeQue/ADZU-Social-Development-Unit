@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
@@ -38,47 +39,45 @@ app.use(
   })
 );
 
-// Rate limiting - for production to
+// Rate limiting - for production to prevent abuse on authentication endpoints
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "production" ? 1000 : 100, // Higher limit for production
-  message: { error: "Too many requests, please try again later" },
+  max: 100, // limit each IP to 100 requests per windowMs for general endpoints
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
+
 app.use(limiter);
 
-// CORS Configuration - Fixed for Vercel production
-const allowedOrigins = [
-  "https://ateneo-sdu.vercel.app",
-  "https://adzu-social-development-unit.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://127.0.0.1:5173",
-];
+// CORS configuration - allow both development and production origins
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "https://ateneo-sdu.vercel.app",
+      "https://adzu-social-development-unit.vercel.app",
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "http://localhost:3000",
+    ];
+    
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  optionsSuccessStatus: 200, // For legacy browser support
+};
 
-// CORS middleware that works with credentials
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // Check if origin is allowed
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  } else if (!origin) {
-    // No origin header (same-origin request or tools like curl)
-    res.setHeader("Access-Control-Allow-Origin", allowedOrigins[0]);
-  }
-  
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
-  res.setHeader("Access-Control-Expose-Headers", "Set-Cookie");
-  
-  // Handle preflight
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  next();
-});// Body parsing middleware
+app.use(cors(corsOptions));
+// Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
