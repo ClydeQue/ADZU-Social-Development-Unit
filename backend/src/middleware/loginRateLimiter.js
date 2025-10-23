@@ -10,9 +10,9 @@
 
 const loginAttempts = new Map(); // Store: email -> { attempts, lockedUntil, lastRequestTime }
 
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 10; // Increased from 5
 const LOCKOUT_DURATION = 1 * 60 * 1000; // 1 minute
-const REQUEST_DELAY = 1 * 1000; // 1 second between requests (reduced from 2)
+const REQUEST_DELAY = 500; // 0.5 seconds between requests (reduced from 1s)
 
 /**
  * Middleware to check login rate limit

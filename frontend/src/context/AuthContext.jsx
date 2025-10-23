@@ -9,29 +9,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [showTransitionLoader, setShowTransitionLoader] = useState(false);
 
-  // Initialize session on mount
+  // Initialize session on mount - DISABLED auto-refresh to prevent rate limiting
   useEffect(() => {
-    initializeSession();
-  }, []);
-
-  const initializeSession = async () => {
-    try {
-      // Try to get new access token using refresh token cookie
-      const result = await AuthService.refreshToken();
-      
-      if (result?.accessToken && result?.user) {
-        setSession({
-          user: result.user,
-          accessToken: result.accessToken,
-        });
-      }
-    } catch {
-      // Refresh failed, clear any stale data
+    // Just check if we have a token in localStorage
+    const token = AuthService.getAccessToken();
+    if (!token) {
       AuthService.clearAuth();
-    } finally {
-      setLoading(false);
     }
-  };
+    setLoading(false);
+  }, []);
 
   const login = async (credentials) => {
     try {
