@@ -1,21 +1,20 @@
 /**
  * Authentication Service
  * Handles login, logout, token refresh
- * Auto-fallback to production server if localhost fails
  */
 
 import axios from "axios";
-import { getApiBase, switchToProduction, isFallbackActive, API_CONFIG } from "../config/api.config.js";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const ACCESS_TOKEN_KEY = "sdu_access_token";
 
-// Create axios instance for auth endpoints with dynamic baseURL
+// Create a separate axios instance for auth (no interceptors)
 const authAxios = axios.create({
-  get baseURL() {
-    return getApiBase();
+  baseURL: API_BASE,
+  headers: {
+    "Content-Type": "application/json",
   },
-  withCredentials: true, // Enable cookies for refresh token
-  timeout: API_CONFIG.REQUEST_TIMEOUT,
+  withCredentials: true, // Send cookies
 });
 
 class AuthService {
@@ -65,23 +64,6 @@ class AuthService {
       
       // Handle network errors (no response from server)
       if (!error.response) {
-        // Try production server if not already using it
-        if (!isFallbackActive()) {
-          console.warn("🔄 Retrying login with production server...");
-          switchToProduction();
-          
-          try {
-            const retryResponse = await authAxios.post(endpoint, { email, password });
-            if (!retryResponse.data.success) {
-              throw new Error(retryResponse.data.message || "Login failed");
-            }
-            this.setAccessToken(retryResponse.data.data.accessToken);
-            return retryResponse.data.data;
-          } catch (retryError) {
-            console.error("Production server also failed:", retryError);
-          }
-        }
-        
         const networkError = new Error("Network error. Please check your connection and backend server.");
         networkError.isNetworkError = true;
         throw networkError;
