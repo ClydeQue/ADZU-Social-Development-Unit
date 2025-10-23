@@ -55,10 +55,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "https://ateneo-sdu.vercel.app",
-      "https://adzu-social-development-unit.vercel.app",
       "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "http://localhost:3000",
     ];
     
     // Allow requests with no origin (like mobile apps, curl, Postman)
