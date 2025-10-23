@@ -9,7 +9,6 @@ require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const authRoutes = require("./routes/auth"); //JWT authentication
 const unitDirectorRoutes = require("./routes/unitDirector");
 const officeRoutes = require("./routes/office");
-const programRoutes = require("./routes/program");
 const programsRoutes = require("./routes/programs"); // Programs & Activities routes
 const notificationRoutes = require("./routes/notifications");
 
@@ -86,7 +85,6 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes); // Professional JWT authentication
 app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
-app.use("/api/program", programRoutes);
 app.use("/api/programs", programsRoutes); // Programs & Activities API
 app.use("/api/notifications", notificationRoutes); // Notifications API
 
