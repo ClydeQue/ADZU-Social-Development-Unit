@@ -25,9 +25,7 @@ const StatsCards = () => {
               <h6 className="text-lg sm:text-xl md:text-[1.5rem] font-bold leading-[1]">
                 Completed
               </h6>
-              <button className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-white transition-colors flex-shrink-0">
-                <img src="/icons/arrow_diagonal.svg" alt="View" className="w-8 h-8 sm:w-10 sm:h-10 brightness-0 invert" />
-              </button>
+             
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0">
               {isLoading ? '...' : completed}
@@ -50,9 +48,7 @@ const StatsCards = () => {
               <h6 className="text-lg sm:text-xl md:text-[1.5rem] font-bold leading-[1]">
                 In Progress
               </h6>
-              <button className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center transition-colors flex-shrink-0">
-                <img src="/icons/arrow_diagonal.svg" alt="View" className="w-8 h-8 sm:w-10 sm:h-10" />
-              </button>
+              
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0 text-[#5B6FED]">
               {isLoading ? '...' : inProgress}
@@ -75,9 +71,7 @@ const StatsCards = () => {
               <h6 className="text-lg sm:text-xl md:text-[1.5rem] font-bold leading-[1]">
                 Pending
               </h6>
-              <button className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center transition-colors flex-shrink-0">
-                <img src="/icons/arrow_diagonal.svg" alt="View" className="w-8 h-8 sm:w-10 sm:h-10" />
-              </button>
+            
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0 text-[#5B6FED]">
               {isLoading ? '...' : pending}

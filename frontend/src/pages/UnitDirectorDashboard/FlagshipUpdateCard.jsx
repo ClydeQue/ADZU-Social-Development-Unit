@@ -31,7 +31,7 @@ const FlagshipUpdateCard = () => {
             Flagship Update
           </h6>
           <button className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded hover:bg-[rgba(0,0,0,0.04)] transition-colors">
-            <img src="/icons/arrow_diagonal.svg" alt="View" className="w-8 h-8 sm:w-10 sm:h-10" />
+            <img src="/icons/arrow_diagonal.svg" alt="View" className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14" />
           </button>
         </div>
 

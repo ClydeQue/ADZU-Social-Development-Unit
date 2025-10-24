@@ -200,7 +200,7 @@ const WelcomePage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <div className="bg-white rounded-t-3xl shadow-2xl p-12 lg:p-20 pt-20 lg:pt-30 pb-0 flex flex-col items-center relative overflow-hidden min-h-[550px] lg:min-h-[650px]">
+                  <div className="bg-white rounded-t-3xl shadow-2xl p-12 lg:p-20 pt-20 lg:pt-30 pb-0 flex flex-col items-center relative overflow-hidden min-h-[550px] lg:min-h-[650px] 2xl:min-h-[800px]">
                     {/* SDU Background */}
                     <div className="absolute bottom-0 left-0 right-0 opacity-10 pointer-events-none">
                       <h1 
