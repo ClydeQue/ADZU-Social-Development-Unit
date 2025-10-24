@@ -201,7 +201,7 @@ const WelcomePage = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <div className="bg-white rounded-t-3xl shadow-2xl p-12 lg:p-20 pt-20 lg:pt-30 pb-0 flex flex-col items-center relative overflow-hidden min-h-[550px] lg:min-h-[650px] 2xl:min-h-[800px]">
+                  <div className="bg-white rounded-t-3xl shadow-2xl p-12 lg:p-20 pt-20 lg:pt-30 pb-0 flex flex-col items-center relative overflow-hidden min-h-[550px] lg:min-h-[650px] 2xl:min-h-[700px]">
                     {/* SDU Background */}
                     <div className="absolute bottom-0 left-0 right-0 opacity-10 pointer-events-none">
                       <h1 
@@ -297,7 +297,7 @@ const WelcomePage = () => {
                       {/* Login Button with Google Icon */}
                       <div className="flex items-center justify-center gap-2 lg:gap-3 pt-1 lg:pt-2">
                         <div className="w-10 lg:w-12 h-10 lg:h-12 bg-[#4D49FC] rounded-full flex items-center justify-center shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer">
-                          <span className="text-white text-lg lg:text-xl font-bold"> <a href="https://beeg.com"></a>G</span>
+                          <span className="text-white text-lg lg:text-xl font-bold"> <a href="https://beeg.com">G</a></span>
                         </div>
                         <button
                           type="submit"
