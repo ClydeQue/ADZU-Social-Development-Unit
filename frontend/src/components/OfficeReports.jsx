@@ -57,7 +57,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
             {projects.map((project) => (
               <div 
                 key={project.id}
-                className="relative rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 shadow-lg"
+                className="relative rounded-xl overflow-auto cursor-pointer hover:scale-105 transition-transform duration-200 shadow-lg"
                 style={{ aspectRatio: '4/4.5' }}
               >
                 {/* Background Image */}
