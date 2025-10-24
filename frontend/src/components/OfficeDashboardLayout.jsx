@@ -101,6 +101,8 @@ export default function OfficeDashboardLayout({
         <OfficeSidebar 
           officeColor={officeColor}
           basePath={basePath}
+          officeId={officeId}
+          officeName={dashboardData?.office?.name}
         />
 
         {/* Main */}

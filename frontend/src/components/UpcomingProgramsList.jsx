@@ -31,7 +31,7 @@ export default function UpcomingProgramsList({ upcomingPrograms }) {
               <div key={index} className="py-2">
                 <div className="flex items-start justify-between mb-1">
                   <p className="text-[10px] text-[#A09ED7] font-semibold uppercase tracking-wide">{program.category}</p>
-                  <div className="text-right">
+                  <div className="text-left">
                     <p className="text-[11px] text-[#A09ED7] font-semibold">Due</p>
                     <p className="text-[11px] text-[#A09ED7] font-semibold">{program.dueDate}</p>
                   </div>
@@ -45,7 +45,7 @@ export default function UpcomingProgramsList({ upcomingPrograms }) {
               <div className="py-2">
                 <div className="flex items-start justify-between mb-1">
                   <p className="text-[10px] text-[#A09ED7] font-semibold uppercase tracking-wide">ENGAGE CITIZENSHIP & DEMOCRACY BLG.</p>
-                  <div className="text-right">
+                  <div className="text-left">
                     <p className="text-[11px] text-[#A09ED7] font-semibold">Due</p>
                     <p className="text-[11px] text-[#FF0022] font-semibold">Oct 5, 2025</p>
                   </div>
@@ -56,7 +56,7 @@ export default function UpcomingProgramsList({ upcomingPrograms }) {
               <div className="py-2">
                 <div className="flex items-start justify-between mb-1">
                   <p className="text-[10px] text-[#A09ED7] font-semibold uppercase tracking-wide">LEADERSHIP AND GOVERNANCE</p>
-                  <div className="text-right">
+                  <div className="text-left">
                     <p className="text-[11px] text-[#A09ED7] font-semibold">Due</p>
                     <p className="text-[11px] text-[#FF0022] font-semibold">Sep 18, 2025</p>
                   </div>
@@ -67,7 +67,7 @@ export default function UpcomingProgramsList({ upcomingPrograms }) {
               <div className="py-2">
                 <div className="flex items-start justify-between mb-1">
                   <p className="text-[10px] text-[#A09ED7] font-semibold uppercase tracking-wide">ENGAGE CITIZENSHIP & DEMOCRACY BLG.</p>
-                  <div className="text-right">
+                  <div className="text-left">
                     <p className="text-[11px] text-[#A09ED7] font-semibold">Due</p>
                     <p className="text-[11px] text-[#FF0022] font-semibold">Aug 31, 2025</p>
                   </div>
@@ -78,7 +78,7 @@ export default function UpcomingProgramsList({ upcomingPrograms }) {
               <div className="py-2">
                 <div className="flex items-start justify-between mb-1">
                   <p className="text-[10px] text-[#A09ED7] font-semibold uppercase tracking-wide">LEADERSHIP AND GOVERNANCE</p>
-                  <div className="text-right">
+                  <div className="text-left">
                     <p className="text-[11px] text-[#A09ED7] font-semibold">Due</p>
                     <p className="text-[11px] text-[#FF0022] font-semibold">Sep 18, 2025</p>
                   </div>
@@ -89,7 +89,7 @@ export default function UpcomingProgramsList({ upcomingPrograms }) {
               <div className="py-2">
                 <div className="flex items-start justify-between mb-1">
                   <p className="text-[10px] text-[#A09ED7] font-semibold uppercase tracking-wide">LEADERSHIP AND GOVERNANCE</p>
-                  <div className="text-right">
+                  <div className="text-left">
                     <p className="text-[11px] text-[#A09ED7] font-semibold">Due</p>
                     <p className="text-[11px] text-[#FF0022] font-semibold">Sep 18, 2025</p>
                   </div>

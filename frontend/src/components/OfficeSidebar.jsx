@@ -5,8 +5,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import SDUTitleSidebar from '../utils/SDUTitleSidebar';
 import PropTypes from 'prop-types';
+import OfficeSidebarLogo from '@/components/officeSidebarLogo';
 
 /**
  * Office Sidebar Component
@@ -14,8 +14,10 @@ import PropTypes from 'prop-types';
  * @param {Object} props - Component props
  * @param {string} props.officeColor - Primary color for the office branding
  * @param {string} props.basePath - Base route path for the office (e.g., '/acca')
+ * @param {string} props.officeId - Office ID for mapping to logo
+ * @param {string} props.officeName - Office name for display
  */
-export default function OfficeSidebar({ officeColor = '#4D49FC', basePath }) {
+export default function OfficeSidebar({ officeColor = '#4D49FC', basePath, officeId, officeName }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -94,12 +96,12 @@ export default function OfficeSidebar({ officeColor = '#4D49FC', basePath }) {
       </div>
 
       {/* Desktop View: Sidebar */}
-      <div className="hidden md:block pl-6 pt-6 pb-6 w-[15rem] flex-shrink-0 bg-transparent h-full">
+      <div className="hidden md:block overflow-hidden pl-6 pt-6 pb-6 w-[15rem] flex-shrink-0 bg-transparent h-full">
         <div className="w-full flex-shrink-0 h-full relative">
           <div className="relative w-full box-border bg-[#F4F4F4] border-r-0 rounded-[15px] h-full overflow-y-auto">
             {/* Logo */}
-            <div className="p-3 py-4 flex items-center justify-center flex-shrink-0">
-              <SDUTitleSidebar />
+            <div className="p-3 py-6 flex items-center justify-center flex-shrink-0">
+              <OfficeSidebarLogo officeId={officeId} officeName={officeName} /> 
             </div>
           
 
@@ -169,4 +171,6 @@ export default function OfficeSidebar({ officeColor = '#4D49FC', basePath }) {
 OfficeSidebar.propTypes = {
   officeColor: PropTypes.string,
   basePath: PropTypes.string.isRequired,
+  officeId: PropTypes.string.isRequired,
+  officeName: PropTypes.string,
 };

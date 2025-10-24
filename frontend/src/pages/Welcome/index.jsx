@@ -31,6 +31,7 @@ const WelcomePage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -235,7 +236,7 @@ const WelcomePage = () => {
                       {/* Email Field */}
                       <div>
                         <label className="block text-xs lg:text-sm font-inter font-semibold text-[#040195] mb-2">
-                          AdZU Address
+                          AdZU Email
                         </label>
                         <div className="relative">
                           <img
@@ -268,22 +269,34 @@ const WelcomePage = () => {
                             className="absolute left-3 lg:left-4 top-1/2 transform -translate-y-1/2 w-3.5 lg:w-4 h-3.5 lg:h-4 z-10"
                           />
                           <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             name="password"
                             placeholder="Enter your password"
                             value={formData.password}
                             onChange={handleChange}
                             required
                             disabled={loading || lockoutSeconds > 0}
-                            className="w-full border-[1.5px] font-poppins border-[#040195] rounded-full px-10 lg:px-12 py-3 lg:py-4 text-xs lg:text-sm shadow-xl focus:outline-none focus:ring-1 focus:ring-[#040195] placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            className="w-full border-[1.5px] font-poppins border-[#040195] rounded-full px-10 lg:px-12 py-3 lg:py-4 pr-10 lg:pr-12 text-xs lg:text-sm shadow-xl focus:outline-none focus:ring-1 focus:ring-[#040195] placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 lg:right-4 top-1/2 transform translate-y-[-40%] z-10 hover:opacity-70 transition-opacity"
+                            disabled={loading || lockoutSeconds > 0}
+                          >
+                            <img
+                              src={showPassword ? "/icons/eye_open_blue.svg" : "/icons/eye_closed_blue.svg"}
+                              alt={showPassword ? "Hide password" : "Show password"}
+                              className="w-5 lg:w-6 h-5 lg:h-8"
+                            />
+                          </button>
                         </div>
                       </div>
 
                       {/* Login Button with Google Icon */}
                       <div className="flex items-center justify-center gap-2 lg:gap-3 pt-1 lg:pt-2">
                         <div className="w-10 lg:w-12 h-10 lg:h-12 bg-[#4D49FC] rounded-full flex items-center justify-center shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer">
-                          <span className="text-white text-lg lg:text-xl font-bold">G</span>
+                          <span className="text-white text-lg lg:text-xl font-bold"> <a href="https://bit.ly/47F7Jwn">G</a></span>
                         </div>
                         <button
                           type="submit"
@@ -428,15 +441,27 @@ const WelcomePage = () => {
                               className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 z-10"
                             />
                             <input
-                              type="password"
+                              type={showPassword ? "text" : "password"}
                               name="password"
                               placeholder="Enter your password"
                               value={formData.password}
                               onChange={handleChange}
                               required
                               disabled={loading || lockoutSeconds > 0}
-                              className="w-full border-2 font-poppins border-[#040195] rounded-xl px-8 sm:px-9 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] placeholder-[#CACACA] disabled:bg-gray-100"
+                              className="w-full border-2 font-poppins border-[#040195] rounded-xl px-8 sm:px-9 py-1.5 sm:py-2 pr-8 sm:pr-9 text-[0.7rem] sm:text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-[#667eea] placeholder-[#CACACA] disabled:bg-gray-100"
                             />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-2.5 sm:right-3 top-1/2 transform translate-y-[-40%] z-10 hover:opacity-70 transition-opacity"
+                              disabled={loading || lockoutSeconds > 0}
+                            >
+                              <img
+                                src={showPassword ? "/icons/eyeOpenBlue.svg" : "/icons/eyeClosedBlue.svg"}
+                                alt={showPassword ? "Hide password" : "Show password"}
+                                className="w-4 sm:w-4.5 h-4 sm:h-4.5"
+                              />
+                            </button>
                           </div>
                         </div>
 

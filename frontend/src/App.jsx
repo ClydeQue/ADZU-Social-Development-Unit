@@ -11,6 +11,7 @@ import WelcomePage from '@/pages/Welcome';
 import UnitDirectorDashboard from '@/pages/UnitDirectorDashboard';
 import UnitDirectorReports from '@/pages/UnitDirectorReports';
 import UnitDirectorCalendar from '@/pages/UnitDirectorCalendar';
+import UnitDirectorHelp from '@/pages/UnitDirectorHelp';
 
 // Office Dashboards (6 offices)
 import CCESDashboard from '@/pages/CCESDashboard';
@@ -66,6 +67,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="unit_director">
               <UnitDirectorCalendar />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/unit-director/help" 
+          element={
+            <ProtectedRoute requiredRole="unit_director">
+              <UnitDirectorHelp />
             </ProtectedRoute>
           } 
         />

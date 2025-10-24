@@ -66,7 +66,7 @@ const UpcomingActivitiesCard = () => {
                     className="w-full h-full object-contain p-1"
                   />
                 </div>
-                <div className="flex-grow min-w-0">
+                <div className="flex-grow  min-w-0">
                   <div className="text-[0.6rem] sm:text-[0.65rem] font-bold text-[#0401955e]">
                     {item.office}
                   </div>
@@ -74,7 +74,7 @@ const UpcomingActivitiesCard = () => {
                     {item.activity}
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-elf flex-shrink-0">
                   <div className="text-[0.6rem] sm:text-[0.65rem] font-bold text-[#0401955e]">
                     Due
                   </div>
