@@ -204,7 +204,6 @@ const WelcomePage = () => {
                   <div className="bg-white rounded-t-3xl shadow-2xl p-12 lg:p-20 pt-20 lg:pt-30 pb-0 flex flex-col items-center relative overflow-hidden min-h-[550px] lg:min-h-[650px] 2xl:min-h-[800px]">
                     {/* SDU Background */}
                     <div className="absolute bottom-0 left-0 right-0 opacity-10 pointer-events-none">
-                      <a href="https://beeg.com">
                       <h1 
                         className="text-[#1E22AA] font-inter text-[12rem] lg:text-[18rem] font-black w-full text-center"
                         style={{ 
@@ -223,7 +222,7 @@ const WelcomePage = () => {
                           u
                         </span>
                       </h1>
-                      </a>
+
                     </div>
 
                     {/* Title */}
