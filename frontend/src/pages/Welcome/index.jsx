@@ -297,7 +297,7 @@ const WelcomePage = () => {
                       {/* Login Button with Google Icon */}
                       <div className="flex items-center justify-center gap-2 lg:gap-3 pt-1 lg:pt-2">
                         <div className="w-10 lg:w-12 h-10 lg:h-12 bg-[#4D49FC] rounded-full flex items-center justify-center shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer">
-                          <span className="text-white text-lg lg:text-xl font-bold"> <a href="https://beeg.com">G</a></span>
+                          <span className="text-white text-lg lg:text-xl font-bold"> G</span>
                         </div>
                         <button
                           type="submit"
@@ -469,7 +469,7 @@ const WelcomePage = () => {
                         {/* Login Button */}
                         <div className="flex justify-center mb-2 sm:mb-3 pt-1 sm:pt-1.5">
                            <div className="w-10 lg:w-12 h-10 mr-2 lg:h-12 bg-[#4D49FC] rounded-full flex items-center justify-center shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer">
-                          <span className="text-white text-lg lg:text-xl font-bold"> <a href="https://beeg.com">G</a></span>
+                          <span className="text-white text-lg lg:text-xl font-bold"> G</span>
                         </div> 
                           <button
                             type="submit"
