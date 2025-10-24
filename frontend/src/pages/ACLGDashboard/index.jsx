@@ -4,7 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 /**
  * ACLG Dashboard
  * AdZU Center for Local Governance
- * Focus: Local governance programs, community development
  */
 export default function ACLGDashboard() {
   const { user } = useAuth();

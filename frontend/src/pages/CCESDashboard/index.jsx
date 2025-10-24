@@ -4,7 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 /**
  * CCES Dashboard
  * Center for Community Engagement and Service
- * Focus: Community outreach, volunteer programs, social development
  */
 export default function CCESDashboard() {
   const { user } = useAuth();

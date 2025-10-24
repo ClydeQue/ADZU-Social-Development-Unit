@@ -151,6 +151,5 @@ OfficeReports.propTypes = {
   officeId: PropTypes.string.isRequired,
   officeColor: PropTypes.string,
   officeLogo: PropTypes.string,
-  basePath: PropTypes.string.isRequired,
 };
 

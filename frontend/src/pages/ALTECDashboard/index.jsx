@@ -4,7 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 /**
  * ALTEC Dashboard
  * AdZU Language and Technology Center
- * Focus: Language programs, technology initiatives
  */
 export default function ALTECDashboard() {
   const { user } = useAuth();
@@ -12,7 +11,7 @@ export default function ALTECDashboard() {
 
   return (
     <OfficeDashboardLayout
-      officeColor="#7B1FA2"
+      officeColor="#040195"
       basePath="/office/altec"
       officeId={officeId}
     />

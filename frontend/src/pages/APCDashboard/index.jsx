@@ -4,7 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 /**
  * APC Dashboard
  * AdZU Peace Center
- * Focus: Peace education, conflict resolution programs
  */
 export default function APCDashboard() {
   const { user } = useAuth();
