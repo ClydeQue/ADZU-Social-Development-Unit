@@ -21,6 +21,7 @@ export default function ACESReports() {
           officeId={officeId} 
           officeColor="#388E3C" 
           officeLogo="/images/aces_logo_small.webp"
+          basePath="/office/aces"
         />
       </div>
     </OfficeDashboardLayout>

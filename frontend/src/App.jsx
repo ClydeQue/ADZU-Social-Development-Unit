@@ -16,18 +16,23 @@ import UnitDirectorHelp from '@/pages/UnitDirectorHelp';
 // Office Dashboards (6 offices)
 import CCESDashboard from '@/pages/CCESDashboard';
 import CCESReports from '@/pages/CCESDashboard/Reports';
+import CCESAddActivity from '@/pages/CCESDashboard/AddActivity';
 
 import ACCADashboard from '@/pages/ACCADashboard';
 import ACCAReports from '@/pages/ACCADashboard/Reports';
+import ACCAAddActivity from '@/pages/ACCADashboard/AddActivity';
 
 import ACESDashboard from '@/pages/ACESDashboard';
 import ACESReports from '@/pages/ACESDashboard/Reports';
+import ACESAddActivity from '@/pages/ACESDashboard/AddActivity';
 
 import ALTECDashboard from '@/pages/ALTECDashboard';
 import ALTECReports from '@/pages/ALTECDashboard/Reports';
+import ALTECAddActivity from '@/pages/ALTECDashboard/AddActivity';
 
 import APCDashboard from '@/pages/APCDashboard';
 import APCReports from '@/pages/APCDashboard/Reports';
+import APCAddActivity from '@/pages/APCDashboard/AddActivity';
 
 import ACLGDashboard from '@/pages/ACLGDashboard';
 import ACLGReports from '@/pages/ACLGDashboard/Reports';
@@ -90,10 +95,18 @@ const AppContent = () => {
           } 
         />
         <Route 
-          path="/office/cces/reports" 
+          path="/office/cces/projects" 
           element={
             <ProtectedRoute requiredRole="office_user">
               <CCESReports />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/office/cces/add-activity" 
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <CCESAddActivity />
             </ProtectedRoute>
           } 
         />
@@ -108,10 +121,18 @@ const AppContent = () => {
           } 
         />
         <Route 
-          path="/office/acca/reports" 
+          path="/office/acca/projects" 
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCAReports />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/office/acca/add-activity" 
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACCAAddActivity />
             </ProtectedRoute>
           } 
         />
@@ -126,10 +147,18 @@ const AppContent = () => {
           } 
         />
         <Route 
-          path="/office/aces/reports" 
+          path="/office/aces/projects" 
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACESReports />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/office/aces/add-activity" 
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACESAddActivity />
             </ProtectedRoute>
           } 
         />
@@ -144,10 +173,18 @@ const AppContent = () => {
           } 
         />
         <Route 
-          path="/office/altec/reports" 
+          path="/office/altec/projects" 
           element={
             <ProtectedRoute requiredRole="office_user">
               <ALTECReports />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/office/altec/add-activity" 
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ALTECAddActivity />
             </ProtectedRoute>
           } 
         />
@@ -162,10 +199,18 @@ const AppContent = () => {
           } 
         />
         <Route 
-          path="/office/apc/reports" 
+          path="/office/apc/projects" 
           element={
             <ProtectedRoute requiredRole="office_user">
               <APCReports />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/office/apc/add-activity" 
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <APCAddActivity />
             </ProtectedRoute>
           } 
         />
@@ -180,7 +225,7 @@ const AppContent = () => {
           } 
         />
         <Route 
-          path="/office/aclg/reports" 
+          path="/office/aclg/projects" 
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACLGReports />

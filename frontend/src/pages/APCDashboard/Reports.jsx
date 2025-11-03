@@ -21,6 +21,7 @@ export default function APCReports() {
           officeId={officeId} 
           officeColor="#040195" 
           officeLogo="/images/apc_logo_small.webp"
+          basePath="/office/apc"
         />
       </div>
     </OfficeDashboardLayout>

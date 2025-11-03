@@ -21,6 +21,7 @@ export default function CCESReports() {
           officeId={officeId} 
           officeColor="#040195" 
           officeLogo="/images/cces_logo_small.webp"
+          basePath="/office/cces"
         />
       </div>
     </OfficeDashboardLayout>

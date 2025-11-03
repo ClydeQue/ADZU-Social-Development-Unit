@@ -50,6 +50,15 @@ class OfficeService {
   async getOfficeActivities(officeId) {
     return await api.get(`office/${officeId}/activities`);
   }
+
+  /**
+   * Delete activities by IDs
+   */
+  async deleteActivities(activityIds) {
+    return await api.delete('office/activities', { 
+      data: { activity_ids: activityIds } 
+    });
+  }
 }
 
 export default new OfficeService();

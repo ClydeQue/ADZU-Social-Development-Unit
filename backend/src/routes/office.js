@@ -347,4 +347,66 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
   }
 });
 
+// Delete multiple activities
+router.delete("/activities", authenticateToken, requireRole("office_user"), async (req, res) => {
+  try {
+    const { activity_ids } = req.body;
+    const userOfficeId = req.user.office_id;
+
+    if (!activity_ids || !Array.isArray(activity_ids) || activity_ids.length === 0) {
+      return res.status(400).json({ error: "activity_ids array is required" });
+    }
+
+    // First verify all activities belong to the user's office through programs
+    const { data: activities, error: fetchError } = await supabase
+      .from("activities")
+      .select(`
+        id,
+        program_id,
+        programs!inner(office_id)
+      `)
+      .in("id", activity_ids);
+
+    if (fetchError) throw fetchError;
+
+    // Check if all activities belong to user's office
+    const unauthorizedActivity = activities.find(
+      (activity) => activity.programs?.office_id !== userOfficeId
+    );
+
+    if (unauthorizedActivity) {
+      return res.status(403).json({ 
+        error: "You can only delete activities from your own office" 
+      });
+    }
+
+    // First, delete related notifications
+    const { error: notificationDeleteError } = await supabase
+      .from("notifications")
+      .delete()
+      .in("activity_id", activity_ids);
+
+    if (notificationDeleteError) {
+      console.error("Error deleting related notifications:", notificationDeleteError);
+      throw notificationDeleteError;
+    }
+
+    // Now delete the activities
+    const { error: deleteError } = await supabase
+      .from("activities")
+      .delete()
+      .in("id", activity_ids);
+
+    if (deleteError) throw deleteError;
+
+    res.json({ 
+      message: "Activities deleted successfully",
+      deleted_count: activity_ids.length 
+    });
+  } catch (error) {
+    console.error("Delete activities error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;

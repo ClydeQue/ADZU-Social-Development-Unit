@@ -21,6 +21,7 @@ export default function ALTECReports() {
           officeId={officeId} 
           officeColor="#7B1FA2" 
           officeLogo="/images/altec_logo_small.webp"
+          basePath="/office/altec"
         />
       </div>
     </OfficeDashboardLayout>

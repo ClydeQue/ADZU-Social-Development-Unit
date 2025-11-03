@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import OfficeService from '@/services/officeService';
 
@@ -10,7 +10,10 @@ import OfficeService from '@/services/officeService';
  */
 export default function OfficeReports({ officeId, officeColor = '#4D49FC', officeLogo, basePath }) {
   const [sortBy, setSortBy] = useState('');
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Fetch projects data (programs and activities)
   const { data: projectsData, isLoading } = useQuery({
@@ -19,6 +22,52 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
     enabled: !!officeId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Toggle delete mode
+  const toggleDeleteMode = () => {
+    setDeleteMode(!deleteMode);
+    setSelectedItems([]); // Clear selections when toggling
+  };
+
+  // Toggle item selection
+  const toggleItemSelection = (itemId) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  // Handle delete selected items
+  const handleDelete = async () => {
+    if (selectedItems.length === 0) return;
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''}?`
+    );
+
+    if (confirmed) {
+      try {
+        // Call API to delete items
+        await OfficeService.deleteActivities(selectedItems);
+        
+        // Invalidate and refetch the projects data
+        queryClient.invalidateQueries(['office-projects', officeId]);
+        
+        // Show success message
+        const itemCount = selectedItems.length;
+        alert(` Successfully deleted ${itemCount} item${itemCount > 1 ? 's' : ''}!`);
+        
+        // Clear selections and exit delete mode
+        setSelectedItems([]);
+        setDeleteMode(false);
+      } catch (error) {
+        console.error('Error deleting activities:', error);
+        alert('Failed to delete activities. Please try again.');
+      }
+    }
+  };
 
   // Transform data into projects format
   const projects = projectsData?.recent_activities?.map((activity) => {
@@ -52,69 +101,111 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
       {/* Projects Grid with Action Buttons on Right */}
       {projects.length > 0 ? (
         <div className="flex gap-4 h-full">
-          {/* Grid Container - Full Height */}
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
-            {projects.map((project) => (
-              <div 
-                key={project.id}
-                className="relative rounded-xl overflow-auto cursor-pointer hover:scale-105 transition-transform duration-200 shadow-lg"
-                style={{ aspectRatio: '4/4.5' }}
-              >
-                {/* Background Image */}
+          {/* Grid Container - Full Height with padding to prevent border cutoff */}
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 auto-rows-min content-start overflow-auto p-1">
+            {projects.map((project) => {
+              const isSelected = selectedItems.includes(project.id);
+              
+              return (
                 <div 
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ 
-                    backgroundImage: `url(${project.image})`,
-                    backgroundColor: officeColor 
+                  key={project.id}
+                  className="relative rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200 shadow-lg h-52"
+                  style={{
+                    border: deleteMode ? '2px solid #EF5350' : '2px solid transparent',
                   }}
-                />
+                  onClick={() => deleteMode && toggleItemSelection(project.id)}
+                >
+                  {/* Checkbox in Delete Mode */}
+                  {deleteMode && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <div 
+                        className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                          isSelected 
+                            ? 'bg-red-500 border-red-500' 
+                            : 'bg-white border-white'
+                        }`}
+                      >
+                        {isSelected && (
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-                {/* Gradient Overlay - Reversed */}
-                <div className="absolute inset-0 bg-gradient-to-t from-indigo-600 to-white/0 to-57% rounded-xl"></div>
+                  {/* Background Image */}
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ 
+                      backgroundImage: `url(${project.image})`,
+                      backgroundColor: officeColor 
+                    }}
+                  />
 
-                {/* Content - All at Bottom */}
-                <div className="relative h-full flex flex-col justify-end p-4">
-                  {/* Program Type */}
-                  <div className="mb-1">
-                    <span className="text-white text-[0.65rem] font-semibold tracking-wide uppercase truncate block">
-                      {project.programType}
-                    </span>
-                  </div>
+                  {/* Gradient Overlay - Reversed */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-600 to-white/0 to-57% rounded-xl"></div>
 
-                  {/* Activity Name */}
-                  <div>
-                    <h3 className="text-white text-lg font-bold uppercase leading-tight truncate">
-                      {project.activityName}
-                    </h3>
+                  {/* Content - All at Bottom */}
+                  <div className="relative h-full flex flex-col justify-end p-3">
+                    {/* Program Type */}
+                    <div className="mb-0.5">
+                      <span className="text-white text-[0.6rem] font-semibold tracking-wide uppercase truncate block">
+                        {project.programType}
+                      </span>
+                    </div>
+
+                    {/* Activity Name */}
+                    <div>
+                      <h3 className="text-white text-base font-bold uppercase leading-tight truncate">
+                        {project.activityName}
+                      </h3>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Vertical Action Buttons - Right Side */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <button 
               onClick={() => navigate(`${basePath}/add-activity`)}
-              className="p-4 text-white font-bold hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
+              className="p-3 text-white font-bold hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
               style={{ backgroundColor: '#4D49FC', borderRadius: '10px' }}
               title="Create New Project"
             >
-              <img src="/icons/add.svg" alt="Add" className="w-6 h-6" />
+              <img src="/icons/add.svg" alt="Add" className="w-5 h-5" />
             </button>
             <button 
+              onClick={toggleDeleteMode}
               className="p-2 text-white hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
-              style={{ backgroundColor: '#4D49FC', borderRadius: '10px' }}
-              title="Delete"
+              style={{ 
+                backgroundColor: deleteMode ? '#EF5350' : '#4D49FC', 
+                borderRadius: '10px' 
+              }}
+              title={deleteMode ? "Cancel Delete Mode" : "Delete Mode"}
             >
-              <img src="/icons/trash.svg" alt="Delete" className="w-5 h-5" />
+              <img src="/icons/trash.svg" alt="Delete" className="w-4 h-4" />
             </button>
+            {deleteMode && selectedItems.length > 0 && (
+              <button 
+                onClick={handleDelete}
+                className="p-2 text-white hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
+                style={{ backgroundColor: '#EF5350', borderRadius: '10px' }}
+                title={`Delete ${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''}`}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
             <button 
               className="p-2 text-white hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
               style={{ backgroundColor: '#4D49FC', borderRadius: '10px' }}
               title="Refresh"
             >
-              <img src="/icons/refresh.svg" alt="Refresh" className="w-5 h-5" />
+              <img src="/icons/refresh.svg" alt="Refresh" className="w-4 h-4" />
             </button>
           </div>
         </div>

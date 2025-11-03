@@ -100,7 +100,7 @@ const checkLoginRateLimit = (req, res, next) => {
     
     resetAttempts: () => {
       loginAttempts.delete(normalizedEmail);
-      console.log(`✅ Attempts reset: ${normalizedEmail}`);
+      console.log(`Attempts reset: ${normalizedEmail}`);
     }
   };
 

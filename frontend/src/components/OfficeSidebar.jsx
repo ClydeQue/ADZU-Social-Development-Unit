@@ -40,7 +40,7 @@ export default function OfficeSidebar({ officeColor = '#4D49FC', basePath, offic
   // Menu items - customized per office
     const menuItems = [
     { icon: <GridViewIcon />, text: 'Overview', path: `${basePath}/dashboard` },
-    { icon: <AssignmentIcon />, text: 'Projects', path: `${basePath}/reports` },
+    { icon: <AssignmentIcon />, text: 'Projects', path: `${basePath}/projects` },
   ];
 
   // General items
