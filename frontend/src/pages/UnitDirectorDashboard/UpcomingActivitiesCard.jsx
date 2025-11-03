@@ -36,7 +36,7 @@ const UpcomingActivitiesCard = () => {
     <div className="border border-[#E5E7EB] rounded-xl flex-1 overflow-auto bg-white shadow-none">
       <div className="p-3 sm:p-4 h-full flex flex-col">
         <div className="flex justify-between items-center mb-2 sm:mb-3 flex-shrink-0">
-          <h6 className="text-[#040195] text-base sm:text-lg font-semibold leading-[1.6]">
+          <h6 className="text-[#040195] text-base sm:text-lg font-semibold leading-[1.5]">
             Upcoming
           </h6>
         
