@@ -7,7 +7,10 @@ import {
   ChevronRight as ChevronRightIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
+import { useAuth } from '@/context/AuthContext';
 import UnitDirectorService from '@/services/unitDirectorService';
+import NotificationDropdown from '@/components/NotificationDropdown';
+import InboxDropdown from '@/components/InboxDropdown';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -38,6 +41,7 @@ const STATUS_COLORS = {
 };
 
 export default function UnitDirectorCalendar() {
+  const { user } = useAuth();
   const calendarRef = useRef(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -118,13 +122,6 @@ export default function UnitDirectorCalendar() {
     }
   };
 
-  const handleToday = () => {
-    const calendarApi = calendarRef.current?.getApi();
-    if (calendarApi) {
-      calendarApi.today();
-    }
-  };
-
   // Format month and year for display
   const monthYear = currentDate.toLocaleDateString('en-US', { 
     month: 'long',
@@ -137,36 +134,54 @@ export default function UnitDirectorCalendar() {
         <Sidebar />
         <main className="flex-grow p-2 flex flex-col overflow-hidden">
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
-            {/* Calendar Content */}
-            <div className="bg-white rounded-[20px] p-4 mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
-              {/* Calendar Header */}
-              <div className="flex items-center justify-between mb-2">
+            {/* Single Container for Header and Calendar */}
+            <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-2 sm:mx-3 xl:mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 mb-2 xl:mb-3 flex-shrink-0">
+                {/* Month and Navigation */}
                 <div className="flex items-center gap-3">
-                  <h1 className="text-[#040195] text-xl font-bold tracking-wide">
+                  <h1 className="text-[#040195] text-lg sm:text-xl xl:text-2xl font-bold tracking-wide">
                     {monthYear.split(' ')[0]}
                   </h1>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={handlePrevious}
-                      className="w-7 h-7 flex items-center justify-center bg-[#F4F4F4] hover:bg-[#E8EAFF] rounded transition-colors"
+                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors"
                     >
                       <ChevronLeftIcon className="text-[#040195]" fontSize="small" />
                     </button>
                     <button
                       onClick={handleNext}
-                      className="w-7 h-7 flex items-center justify-center bg-[#F4F4F4] hover:bg-[#E8EAFF] rounded transition-colors"
+                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors"
                     >
                       <ChevronRightIcon className="text-[#040195]" fontSize="small" />
                     </button>
                   </div>
                 </div>
 
-                <button
-                  onClick={handleToday}
-                  className="px-3 py-1.5 bg-[#5B6FED] text-white rounded-lg hover:bg-[#4A5DD9] transition-colors text-xs font-medium"
-                >
-                  Today
-                </button>
+                {/* Icons - Using actual components */}
+                <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+                  {/* Inbox */}
+                  <InboxDropdown />
+
+                  {/* Notifications */}
+                  <NotificationDropdown />
+
+                  {/* Avatar - Same style as Overview */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 rounded-full bg-white text-[#5B6FED] flex items-center justify-center font-medium text-xs sm:text-sm xl:text-base">
+                      {user?.name?.charAt(0) || "U"}
+                    </div>
+                    <div className="hidden sm:block">
+                      <div className="text-xs xl:text-sm font-semibold text-[rgba(0,0,0,0.87)]">
+                        {user?.name || "Unit Director"}
+                      </div>
+                      <div className="text-[10px] xl:text-xs text-[rgba(0,0,0,0.6)]">
+                        {user?.email}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* FullCalendar */}
@@ -239,23 +254,6 @@ export default function UnitDirectorCalendar() {
                     }}
                   />
                 )}
-              </div>
-
-              {/* Office Legend */}
-              <div className="mt-2 pt-2 border-t border-gray-200">
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-xs font-medium text-gray-600">Offices:</span>
-                  {Object.entries(OFFICE_LOGOS).map(([acronym, logo]) => (
-                    <div key={acronym} className="flex items-center gap-1">
-                      <img 
-                        src={logo} 
-                        alt={acronym}
-                        className="w-3.5 h-3.5 object-contain"
-                      />
-                      <span className="text-[10px] text-gray-700">{acronym}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
