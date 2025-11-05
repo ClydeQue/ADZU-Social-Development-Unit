@@ -134,9 +134,9 @@ const PORT = process.env.PORT || 5001;
 // For local development only - Vercel handles this in production
 if (process.env.NODE_ENV !== "production") {
   const server = app.listen(PORT, () => {
-    console.log(`🚀 AdZU SDU API Server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`AdZU SDU API Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`Health check: http://localhost:${PORT}/api/health`);
   });
 
   // Graceful shutdown for local development
@@ -181,9 +181,9 @@ async function testDatabaseConnection() {
 
     if (error) throw error;
 
-    console.log("✅ Connected to Supabase database");
+    console.log("Connected to Supabase database");
   } catch (error) {
-    console.error("❌ Database connection error:", error.message);
+    console.error("Database connection error:", error.message);
   }
 }
 

@@ -44,7 +44,7 @@ const checkLoginRateLimit = (req, res, next) => {
   // 1. FIRST Check if account is locked out (highest priority)
   if (record.lockedUntil && now < record.lockedUntil) {
     const remainingSeconds = Math.ceil((record.lockedUntil - now) / 1000);
-    console.log(`🔒 Account locked: ${normalizedEmail} - ${remainingSeconds}s remaining`);
+    console.log(`Account locked: ${normalizedEmail} - ${remainingSeconds}s remaining`);
     return res.status(429).json({
       success: false,
       message: `Account locked. Please try again in ${remainingSeconds} seconds.`,
@@ -65,7 +65,7 @@ const checkLoginRateLimit = (req, res, next) => {
     const timeSinceLastRequest = now - record.lastRequestTime;
     if (timeSinceLastRequest < REQUEST_DELAY) {
       const waitSeconds = Math.ceil((REQUEST_DELAY - timeSinceLastRequest) / 1000);
-      console.log(`⏱️  Too fast! ${normalizedEmail} needs to wait ${waitSeconds}s`);
+      console.log(`Too fast! ${normalizedEmail} needs to wait ${waitSeconds}s`);
       return res.status(429).json({
         success: false,
         message: `Too fast! Please wait ${waitSeconds} second${waitSeconds > 1 ? 's' : ''} before trying again.`,
@@ -86,7 +86,7 @@ const checkLoginRateLimit = (req, res, next) => {
       
       if (record.attempts >= MAX_ATTEMPTS) {
         record.lockedUntil = now + LOCKOUT_DURATION;
-        console.log(`🔒 Locked out: ${normalizedEmail} (${record.attempts} attempts)`);
+        console.log(`Locked out: ${normalizedEmail} (${record.attempts} attempts)`);
       }
       
       loginAttempts.set(normalizedEmail, record);

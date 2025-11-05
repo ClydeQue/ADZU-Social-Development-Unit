@@ -104,8 +104,17 @@ ehthumbs.db
 .vscode/
 .history/
 
-# SQL seed files and documentation
+# Documentation files - not pushed to repo
+*README.md
+*_README.md
+DEVELOPER_README.md
+OFFICE_DIRECTOR_GUIDE.md
+UNIT_DIRECTOR_GUIDE.md
+USER_MANUAL.md
+
+# SQL scripts - not pushed to repo
 *.sql
-*.md
-!README.md
+scripts/*.sql
+
+# Test credentials
 test-credentials.js

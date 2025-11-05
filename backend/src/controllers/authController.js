@@ -24,7 +24,7 @@ class AuthController {
         });
       }
 
-      console.log(`🔐 Login attempt: ${email}`);
+      console.log(`Login attempt: ${email}`);
 
       // Get user from unified office_credentials table
       // Note: offices join is LEFT JOIN (office_id can be NULL for unit_director)
@@ -44,7 +44,7 @@ class AuthController {
         .limit(1);
 
       if (error) {
-        console.error("❌ Database error:", error);
+        console.error("Database error:", error);
         console.error("   Error details:", JSON.stringify(error, null, 2));
         return res.status(500).json({
           success: false,
@@ -54,7 +54,7 @@ class AuthController {
       }
 
       if (!users || users.length === 0) {
-        console.log(`❌ User not found: ${email}`);
+        console.log(`User not found: ${email}`);
         
         // Record failed attempt
         if (req.loginRateLimiter) {
@@ -74,14 +74,14 @@ class AuthController {
       }
 
       const user = users[0];
-      console.log(`👤 Found user: ${user.name} (${user.user_type})`);
+      console.log(`Found user: ${user.name} (${user.user_type})`);
 
       // Verify password with bcrypt (salt rounds 12)
       const isValidPassword = await bcrypt.compare(password, user.password);
-      console.log(`🔑 Password verification: ${isValidPassword}`);
+      console.log(`Password verification: ${isValidPassword}`);
 
       if (!isValidPassword) {
-        console.log(`❌ Invalid password for: ${email}`);
+        console.log(`Invalid password for: ${email}`);
         
         // Record failed attempt
         if (req.loginRateLimiter) {
@@ -143,7 +143,7 @@ class AuthController {
       const accessToken = jwtService.generateAccessToken(tokenPayload);
       const refreshToken = jwtService.generateRefreshToken(user.id);
 
-      console.log(`✅ Login successful: ${user.email} (${user.user_type})`);
+      console.log(`Login successful: ${user.email} (${user.user_type})`);
 
       // Set refresh token as httpOnly cookie
       res.cookie("refreshToken", refreshToken, {
@@ -183,7 +183,7 @@ class AuthController {
         },
       });
     } catch (error) {
-      console.error("❌ Login error:", error);
+      console.error("Login error:", error);
       res.status(500).json({
         success: false,
         message: "Authentication failed",
@@ -195,7 +195,7 @@ class AuthController {
   // UNIT DIRECTOR LOGIN - Uses same unified login
   // ========================================
   static async loginUnitDirector(req, res) {
-    console.log("🔄 Using unified login for Unit Director");
+    console.log("Using unified login for Unit Director");
     return AuthController.loginOffice(req, res);
   }
 
@@ -273,7 +273,7 @@ class AuthController {
       // Generate new access token
       const newAccessToken = jwtService.generateAccessToken(tokenPayload);
 
-      console.log("✅ Access token refreshed successfully");
+      console.log("Access token refreshed successfully");
 
       // Prepare user data to send back (same structure as login)
       const userData = {
@@ -301,7 +301,7 @@ class AuthController {
         },
       });
     } catch (error) {
-      console.error("❌ Token refresh error:", error);
+      console.error("Token refresh error:", error);
       res.status(500).json({
         success: false,
         message: "Token refresh failed",
@@ -317,20 +317,20 @@ class AuthController {
       if (refreshToken) {
         // Revoke refresh token
         jwtService.revokeRefreshToken(refreshToken);
-        console.log("🔓 Refresh token revoked");
+        console.log("Refresh token revoked");
       }
 
       // Clear cookie
       res.clearCookie("refreshToken");
 
-      console.log("✅ Logout successful");
+      console.log("Logout successful");
 
       res.json({
         success: true,
         message: "Logged out successfully",
       });
     } catch (error) {
-      console.error("❌ Logout error:", error);
+      console.error("Logout error:", error);
       res.status(500).json({
         success: false,
         message: "Logout failed",

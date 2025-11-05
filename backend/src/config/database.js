@@ -6,10 +6,10 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error("Missing Supabase environment variables:");
-  console.error("SUPABASE_URL:", supabaseUrl ? "✅ Set" : "❌ Missing");
+  console.error("SUPABASE_URL:", supabaseUrl ? "Set" : "Missing");
   console.error(
     "SUPABASE_SERVICE_ROLE_KEY:",
-    supabaseServiceKey ? "✅ Set" : "❌ Missing"
+    supabaseServiceKey ? "Set" : "Missing"
   );
 
   // Don't exit in serverless - just throw an error
@@ -31,10 +31,10 @@ const testConnection = async () => {
       throw error;
     }
 
-    console.log("✅ Successfully connected to Supabase database");
+    console.log("Successfully connected to Supabase database");
     return true;
   } catch (error) {
-    console.error("❌ Database connection error:", error);
+    console.error("Database connection error:", error);
     throw error;
   }
 };
@@ -82,10 +82,10 @@ const validateDatabaseConnection = async () => {
       );
     }
 
-    console.log("✅ Successfully connected to Supabase database");
-    console.log("✅ Verified access to activities and notifications tables");
+    console.log("Successfully connected to Supabase database");
+    console.log("Verified access to activities and notifications tables");
   } catch (error) {
-    console.error("❌ Database connection/validation error:", error);
+    console.error("Database connection/validation error:", error);
     // Don't throw here - let the application continue but log the error
   }
 };

@@ -49,7 +49,7 @@ const authenticateToken = (req, res, next) => {
   };
 
   console.log(
-    `✅ Authenticated: ${req.user.userType} - ${req.user.name} ${
+    `Authenticated: ${req.user.userType} - ${req.user.name} ${
       req.user.office_id ? `(Office: ${req.user.office_id})` : "(All Offices)"
     }`
   );
@@ -73,7 +73,7 @@ const requireRole = (allowedRoles) => {
 
     if (!allowed.includes(userRole)) {
       console.log(
-        `🚫 Access denied: ${userRole} tried to access ${allowed.join(
+        `Access denied: ${userRole} tried to access ${allowed.join(
           "|"
         )} resource`
       );
@@ -106,7 +106,7 @@ const requireOfficeAccess = (req, res, next) => {
 
   // Unit Director has access to ALL offices
   if (userType === "unit_director") {
-    console.log("✅ Unit Director: Access granted to all offices");
+    console.log("Unit Director: Access granted to all offices");
     req.canAccessAllOffices = true;
     return next();
   }
@@ -116,7 +116,7 @@ const requireOfficeAccess = (req, res, next) => {
 
   if (requestedOfficeId && requestedOfficeId !== userOfficeId) {
     console.log(
-      `🚫 Access denied: Office user ${userOfficeId} cannot access office ${requestedOfficeId}`
+      `Access denied: Office user ${userOfficeId} cannot access office ${requestedOfficeId}`
     );
     return res.status(403).json({
       error: "Access denied",
@@ -126,7 +126,7 @@ const requireOfficeAccess = (req, res, next) => {
     });
   }
 
-  console.log(`✅ Office user: Access granted to office ${userOfficeId}`);
+  console.log(`Office user: Access granted to office ${userOfficeId}`);
   req.canAccessAllOffices = false;
   req.userOfficeId = userOfficeId;
   next();
@@ -156,11 +156,11 @@ const filterByOffice = (req, res, next) => {
     ) {
       req.body.office_id = userOfficeId;
     }
-    console.log(`🔒 Query filtered to office: ${userOfficeId}`);
+    console.log(`Query filtered to office: ${userOfficeId}`);
   } else if (userType === "unit_director") {
     // No filter for Unit Director (access all offices)
     req.officeFilter = null;
-    console.log("🔓 No office filter (Unit Director)");
+    console.log("No office filter (Unit Director)");
   }
 
   next();

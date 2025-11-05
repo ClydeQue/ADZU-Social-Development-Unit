@@ -194,8 +194,8 @@ export default function UnitDirectorCalendar() {
                     events={events}
                     eventClick={handleEventClick}
                     datesSet={handleDatesSet}
-                    height="100%"
-                    contentHeight="auto"
+                    height="parent"
+                    aspectRatio={1.5}
                     nowIndicator={true}
                     editable={false}
                     selectable={true}
@@ -209,21 +209,28 @@ export default function UnitDirectorCalendar() {
                     eventContent={(eventInfo) => {
                       const event = eventInfo.event;
                       const logo = event.extendedProps.office_logo;
+                      const programTitle = event.extendedProps.program_title;
                       
                       return (
-                        <div className="h-full w-full flex items-center gap-1 px-1 py-0.5 overflow-hidden cursor-pointer">
-                          {/* Office Logo */}
+                        <div className="h-full w-full flex items-center gap-1.5 px-2 py-1 overflow-hidden cursor-pointer">
+                          {/* Office Logo - White filtered */}
                           {logo && (
                             <img 
                               src={logo} 
                               alt={event.extendedProps.office_acronym}
-                              className="w-3 h-3 flex-shrink-0 object-contain"
+                              className="w-4 h-4 flex-shrink-0 object-contain"
+                              style={{ filter: 'brightness(0) invert(1)' }}
                             />
                           )}
                           
-                          {/* Activity Name Only - Compact */}
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-[10px] text-white truncate leading-tight">
+                          {/* Two-line text layout */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            {/* Program name - super small text above */}
+                            <div className="text-[8px] text-white/80 truncate leading-tight uppercase">
+                              {programTitle || 'Program'}
+                            </div>
+                            {/* Activity name - bigger bold text below */}
+                            <div className="font-bold text-[11px] text-white truncate leading-tight">
                               {event.title}
                             </div>
                           </div>
@@ -357,6 +364,11 @@ export default function UnitDirectorCalendar() {
 
       {/* Custom CSS for FullCalendar */}
       <style>{`
+        .calendar-container {
+          height: 100%;
+          overflow: hidden;
+        }
+
         .calendar-container .fc {
           font-family: inherit;
           height: 100% !important;
@@ -371,19 +383,18 @@ export default function UnitDirectorCalendar() {
           background-color: #040195;
           color: white;
           font-weight: 600;
-          padding: 4px 2px;
+          padding: 6px 2px;
           text-transform: uppercase;
-          font-size: 0.65rem;
+          font-size: 0.7rem;
           letter-spacing: 0.3px;
         }
 
         .calendar-container .fc-daygrid-day {
-          height: auto !important;
-          min-height: 60px !important;
+          min-height: 80px;
         }
 
         .calendar-container .fc-daygrid-day-frame {
-          min-height: 60px !important;
+          min-height: 80px;
         }
 
         .calendar-container .fc-daygrid-day-events {
@@ -395,55 +406,50 @@ export default function UnitDirectorCalendar() {
         }
 
         .calendar-container .fc-event {
-          border-radius: 6px !important;
+          border-radius: 9999px !important;
           border: none !important;
           margin-bottom: 1px !important;
           padding: 0 !important;
           font-size: 10px !important;
+          min-height: 28px !important;
         }
 
         .calendar-container .fc-event-main {
           padding: 0 !important;
         }
 
+        .calendar-container .fc-event img {
+          filter: brightness(0) invert(1) !important;
+        }
+
         .calendar-container .fc-daygrid-day-number {
           color: #040195;
           font-weight: 600;
           padding: 2px 4px;
-          font-size: 0.7rem;
+          font-size: 0.75rem;
         }
 
+        /* Today highlighting - Gold/yellow color */
         .calendar-container .fc-daygrid-day.fc-day-today {
-          background-color: #E8EAFF !important;
+          background-color: #FFF9E6 !important;
         }
 
         .calendar-container .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-          background-color: #040195;
+          background-color: #FFB300;
           color: white;
           border-radius: 50%;
-          width: 22px;
-          height: 22px;
+          width: 24px;
+          height: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
           margin: 2px;
+          font-weight: 700;
         }
 
         .calendar-container .fc-scrollgrid {
           border-radius: 8px;
           overflow: hidden;
-        }
-
-        .calendar-container .fc-daygrid-body {
-          height: 100% !important;
-        }
-
-        .calendar-container .fc-scrollgrid-sync-table {
-          height: 100% !important;
-        }
-
-        .calendar-container .fc-view-harness {
-          height: 100% !important;
         }
 
         .calendar-container .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
@@ -459,6 +465,14 @@ export default function UnitDirectorCalendar() {
         /* Remove scrollbars from calendar */
         .calendar-container .fc-scroller {
           overflow: hidden !important;
+        }
+
+        .calendar-container .fc-scroller-liquid-absolute {
+          overflow: hidden !important;
+        }
+
+        .calendar-container .fc-view-harness {
+          height: 100% !important;
         }
       `}</style>
     </div>
