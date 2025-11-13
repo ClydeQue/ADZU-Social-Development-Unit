@@ -94,9 +94,9 @@ export default function OfficeDashboardLayout({
   const weekday = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
 
   return (
-    <div className="flex bg-[#EAE9E9] min-h-screen max-h-screen p-2 sm:p-4 xl:p-[35px] overflow-hidden">
+    <div className="flex bg-[#EAE9E9] min-h-screen md:max-h-screen p-2 sm:p-4 xl:p-[35px] md:overflow-hidden">
       {/* Container */}
-      <div className="bg-white rounded-[20px] flex flex-1 overflow-hidden">
+      <div className="bg-white rounded-[20px] flex flex-1 md:overflow-hidden">
         {/* Sidebar */}
         <OfficeSidebar 
           officeColor={officeColor}
@@ -106,7 +106,7 @@ export default function OfficeDashboardLayout({
         />
 
         {/* Main */}
-        <main className="flex-grow pt-2 sm:pt-4 xl:pt-4 pb-2 sm:pb-6 xl:pb-4 p-1 sm:p-2 flex flex-col overflow-hidden">
+        <main className="flex-grow pt-2 sm:pt-4 xl:pt-4 pb-16 md:pb-2 sm:md:pb-6 xl:md:pb-4 p-1 sm:p-2 flex flex-col md:overflow-hidden">
           {/* XL Container */}
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
             {/* Header/Navbar */}
@@ -259,7 +259,7 @@ export default function OfficeDashboardLayout({
             </div>
 
             {/* Main Content */}
-            <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-2 sm:mx-3 xl:mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-2 sm:mx-3 xl:mx-4 flex-1 md:overflow-hidden flex flex-col md:min-h-0">
               {/* Date badges */}
               <div className="flex justify-end items-center mb-2 xl:mb-3 flex-shrink-0">
                 <div className="flex gap-1.5 xl:gap-2 flex-wrap">
@@ -277,7 +277,7 @@ export default function OfficeDashboardLayout({
 
               {/* Content Section */}
               {children || (
-                <div className="flex-1 flex gap-3 min-h-0 overflow-hidden">
+                <div className="flex-1 flex flex-col lg:flex-row gap-3 md:min-h-0 md:overflow-hidden overflow-y-auto pb-2">
                   {dashboardLoading ? (
                     <div className="flex-1 flex items-center justify-center">
                       <div className="flex flex-col items-center gap-3">
@@ -295,7 +295,7 @@ export default function OfficeDashboardLayout({
                       {/* Right Section - Stats and Timeline */}
                       <div className="flex-[3] min-w-0 flex flex-col gap-3">
                         {/* Top Row - Stats Cards */}
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {/* Completed Card */}
                           <div className="bg-[#1E0A7A] rounded-[20px] p-4 shadow-md flex flex-col relative overflow-hidden">
                             <div className="flex justify-between items-start mb-2">

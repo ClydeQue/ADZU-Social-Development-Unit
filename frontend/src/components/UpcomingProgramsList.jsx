@@ -6,9 +6,9 @@ import PropTypes from 'prop-types';
  */
 export default function UpcomingProgramsList({ upcomingPrograms }) {
   return (
-    <div className="flex-[2] min-w-0">
+    <div className="flex-[2] min-w-0 w-full lg:w-auto">
       <div 
-        className="h-full rounded-[20px] flex flex-col shadow-lg relative bg-white overflow-hidden"
+        className="h-full min-h-[400px] rounded-[20px] flex flex-col shadow-lg relative bg-white overflow-hidden"
       >
         {/* Upcoming Title Container with Shadow Effects */}
         <div className="relative mb-4">

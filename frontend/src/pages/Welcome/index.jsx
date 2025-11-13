@@ -148,10 +148,26 @@ const WelcomePage = () => {
         <div className="text-white text-xl">Loading...</div>
       </div>}>
         <div className="fixed inset-0 w-full h-full overflow-hidden z-10 bg-[#040195]">
-          <div className="absolute top-4 left-4 sm:top-8 sm:left-8 md:top-15 md:left-20 z-40">
-            <div className="flex items-center text-white">
-              <img src="/logos/logoLeftHeader.webp" alt="Logo Header" className="w-24 sm:w-28 md:w-40 md:mr-3" />
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-6 md:top-10 md:left-15 z-40">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <img 
+                src="/logos/adzu-logo-solo.webp" 
+                alt="AdZU Logo" 
+                className="h-10 sm:h-12 md:h-16 w-auto object-contain" 
+              />
+              <img 
+                src="/logos/sdu-logo-white.webp" 
+                alt="SDU Logo" 
+                className="h-10 sm:h-12 md:h-22 w-auto md:w-22 object-contain" 
+              />
             </div>
+          </div>
+
+          {/* Copyright Text */}
+          <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 md:bottom-8 md:left-10 z-50">
+            <p className="text-white text-xs sm:text-sm opacity-90">
+              Copyright © 2025 Ateneo de Zamboanga University. All rights reserved.
+            </p>
           </div>
 
           <div className="absolute inset-0 w-full h-full">

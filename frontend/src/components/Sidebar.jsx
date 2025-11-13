@@ -1,7 +1,6 @@
-import { GridView as GridViewIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import { GridView as GridViewIcon } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import SDUTitleSidebar from '../utils/SDUTitleSidebar';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -105,8 +104,12 @@ export default function Sidebar() {
         <div className="w-full flex-shrink-0 h-full relative">
           <div className="relative w-full box-border  bg-[#F4F4F4] border-r-0 rounded-[15px] h-full">
             {/* Logo */}
-            <div className="p-3 py-4 flex items-center justify-center">
-              <SDUTitleSidebar />
+            <div className="p-1 flex items-center justify-center">
+              <img 
+                src="/logos/sdu-logo-colored.webp" 
+                alt="SDU Logo" 
+                className="h-35 w-auto object-contain"
+              />
             </div>
 
             <div className=" my-10 space-y-2 ">
@@ -117,17 +120,18 @@ export default function Sidebar() {
 
               {/* Menu Items */}
               {menuItems.map((item) => (
-                <div key={item.text} className="mb-0.5 px-6  relative">
+                <div key={item.text} className="mb-0.5 hover:bg-[#d6d2f1] transition-all duration-200 px-6 relative ">
                   {/* Active highlight bar on the left logic */}
                   {isActive(item.path) && (
-                    <div className="absolute left-0 top-0 bottom-0 w-3.5 bg-[#4D49FC] rounded-r-lg" />
+                    <div className="absolute left-0 top-0 bottom-0 w-3.5  bg-[#4D49FC]  rounded-r-lg" />
                   )}
+
                   <button
                     onClick={() => handleNavigation(item.path)}
-                    className={`w-full rounded-xl py-[9.6px]  flex items-center transition-all duration-200 ${
+                    className={`w-full rounded-xl py-[9.6px]    flex items-center transition-all duration-200 ${
                       isActive(item.path) 
                         ? 'bg-transparent text-[#4D49FC] cursor-pointer' 
-                        : 'bg-transparent text-[#040195] hover:bg-[#F4F4F4] cursor-pointer'
+                        : 'bg-transparent text-[#040195] cursor-pointer'
                     }`}
                   >
                     <div className={`min-w-[36px] ${isActive(item.path) ? 'text-[#4D49FC]' : 'text-[#040195]'}`}>
@@ -151,10 +155,10 @@ export default function Sidebar() {
               </div>
 
               {generalItems.map((item) => (
-                <div key={item.text} className="mb-0.5 px-6 ">
+                <div key={item.text} className="mb-0.5 px-6 hover:bg-[#d6d2f1] transition-all duration-200  ">
                   <button
                     onClick={item.action === 'logout' ? handleLogout : () => handleNavigation(item.path)}
-                    className="w-full rounded-xl py-[9.6px] cursor-pointer  flex items-center bg-transparent text-[#040195] hover:bg-[#F4F4F4] transition-all duration-200"
+                    className="w-full rounded-xl py-[9.6px] cursor-pointer  flex items-center bg-transparent text-[#040195] "
                   >
                     <div className="text-[#1E22AA] min-w-[34px]">
                       {item.icon}
