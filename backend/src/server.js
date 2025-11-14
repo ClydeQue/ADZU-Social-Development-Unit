@@ -11,6 +11,7 @@ const unitDirectorRoutes = require("./routes/unitDirector");
 const officeRoutes = require("./routes/office");
 const programsRoutes = require("./routes/programs"); // Programs & Activities routes
 const notificationRoutes = require("./routes/notifications");
+const settingsRoutes = require("./routes/settings");
 
 const app = express();
 
@@ -87,6 +88,8 @@ app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/programs", programsRoutes); // Programs & Activities API
 app.use("/api/notifications", notificationRoutes); // Notifications API
+app.use('/api/unit-director', unitDirectorRoutes);
+app.use("/api/settings", settingsRoutes); // settings API
 
 // Health check endpoint
 app.get("/", (req, res) => {

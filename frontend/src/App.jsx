@@ -1,49 +1,54 @@
-
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline } from '@mui/material';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { AnimatePresence, motion } from 'framer-motion';
-import Loader from '@/components/Loader';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { CssBaseline } from "@mui/material";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { AnimatePresence, motion } from "framer-motion";
+import Loader from "@/components/Loader";
 
 // Pages
-import WelcomePage from '@/pages/Welcome';
-import UnitDirectorDashboard from '@/pages/UnitDirectorDashboard';
-import UnitDirectorReports from '@/pages/UnitDirectorReports';
-import UnitDirectorCalendar from '@/pages/UnitDirectorCalendar';
-import UnitDirectorHelp from '@/pages/UnitDirectorHelp';
+import WelcomePage from "@/pages/Welcome";
+import UnitDirectorDashboard from "@/pages/UnitDirectorDashboard";
+import UnitDirectorReports from "@/pages/UnitDirectorReports";
+import UnitDirectorCalendar from "@/pages/UnitDirectorCalendar";
+import UnitDirectorHelp from "@/pages/UnitDirectorHelp";
+import UnitDirectorSettings from "@/pages/UnitDirectorSettings";
 
 // Office Dashboards (6 offices)
-import CCESDashboard from '@/pages/CCESDashboard';
-import CCESReports from '@/pages/CCESDashboard/Reports';
-import CCESAddActivity from '@/pages/CCESDashboard/AddActivity';
+import CCESDashboard from "@/pages/CCESDashboard";
+import CCESReports from "@/pages/CCESDashboard/Reports";
+import CCESAddActivity from "@/pages/CCESDashboard/AddActivity";
 
-import ACCADashboard from '@/pages/ACCADashboard';
-import ACCAReports from '@/pages/ACCADashboard/Reports';
-import ACCAAddActivity from '@/pages/ACCADashboard/AddActivity';
+import ACCADashboard from "@/pages/ACCADashboard";
+import ACCAReports from "@/pages/ACCADashboard/Reports";
+import ACCAAddActivity from "@/pages/ACCADashboard/AddActivity";
 
-import ACESDashboard from '@/pages/ACESDashboard';
-import ACESReports from '@/pages/ACESDashboard/Reports';
-import ACESAddActivity from '@/pages/ACESDashboard/AddActivity';
+import ACESDashboard from "@/pages/ACESDashboard";
+import ACESReports from "@/pages/ACESDashboard/Reports";
+import ACESAddActivity from "@/pages/ACESDashboard/AddActivity";
 
-import ALTECDashboard from '@/pages/ALTECDashboard';
-import ALTECReports from '@/pages/ALTECDashboard/Reports';
-import ALTECAddActivity from '@/pages/ALTECDashboard/AddActivity';
+import ALTECDashboard from "@/pages/ALTECDashboard";
+import ALTECReports from "@/pages/ALTECDashboard/Reports";
+import ALTECAddActivity from "@/pages/ALTECDashboard/AddActivity";
 
-import APCDashboard from '@/pages/APCDashboard';
-import APCReports from '@/pages/APCDashboard/Reports';
-import APCAddActivity from '@/pages/APCDashboard/AddActivity';
+import APCDashboard from "@/pages/APCDashboard";
+import APCReports from "@/pages/APCDashboard/Reports";
+import APCAddActivity from "@/pages/APCDashboard/AddActivity";
 
-import ACLGDashboard from '@/pages/ACLGDashboard';
-import ACLGReports from '@/pages/ACLGDashboard/Reports';
-import ACLGAddActivity from '@/pages/ACLGDashboard/AddActivity';
+import ACLGDashboard from "@/pages/ACLGDashboard";
+import ACLGReports from "@/pages/ACLGDashboard/Reports";
+import ACLGAddActivity from "@/pages/ACLGDashboard/AddActivity";
 
-import './App.css';
+import "./App.css";
 
 // Simple app content without navigation guard
 const AppContent = () => {
   const { showTransitionLoader } = useAuth();
-  
+
   return (
     <>
       <Routes>
@@ -51,194 +56,201 @@ const AppContent = () => {
         <Route path="/" element={<WelcomePage />} />
 
         {/* Protected Unit Director Routes */}
-        <Route 
-          path="/unit-director/dashboard" 
+        <Route
+          path="/unit-director/dashboard"
           element={
             <ProtectedRoute requiredRole="unit_director">
               <UnitDirectorDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/unit-director/reports" 
+        <Route
+          path="/unit-director/reports"
           element={
             <ProtectedRoute requiredRole="unit_director">
               <UnitDirectorReports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/unit-director/calendar" 
+        <Route
+          path="/unit-director/calendar"
           element={
             <ProtectedRoute requiredRole="unit_director">
               <UnitDirectorCalendar />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/unit-director/help" 
+        <Route
+          path="/unit-director/help"
           element={
             <ProtectedRoute requiredRole="unit_director">
               <UnitDirectorHelp />
             </ProtectedRoute>
-          } 
+          }
+        />
+        <Route
+          path="/unit-director/settings"
+          element={
+            <ProtectedRoute requiredRole="unit_director">
+          <UnitDirectorSettings />
+            </ProtectedRoute>}
         />
 
         {/* Protected Office Routes - Each office has its own dashboard */}
         {/* CCES Routes */}
-        <Route 
-          path="/office/cces/dashboard" 
+        <Route
+          path="/office/cces/dashboard"
           element={
             <ProtectedRoute requiredRole="office_user">
               <CCESDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/cces/projects" 
+        <Route
+          path="/office/cces/projects"
           element={
             <ProtectedRoute requiredRole="office_user">
               <CCESReports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/cces/add-activity" 
+        <Route
+          path="/office/cces/add-activity"
           element={
             <ProtectedRoute requiredRole="office_user">
               <CCESAddActivity />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* ACCA Routes */}
-        <Route 
-          path="/office/acca/dashboard" 
+        <Route
+          path="/office/acca/dashboard"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCADashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/acca/projects" 
+        <Route
+          path="/office/acca/projects"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCAReports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/acca/add-activity" 
+        <Route
+          path="/office/acca/add-activity"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCAAddActivity />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* ACES Routes */}
-        <Route 
-          path="/office/aces/dashboard" 
+        <Route
+          path="/office/aces/dashboard"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACESDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/aces/projects" 
+        <Route
+          path="/office/aces/projects"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACESReports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/aces/add-activity" 
+        <Route
+          path="/office/aces/add-activity"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACESAddActivity />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* ALTEC Routes */}
-        <Route 
-          path="/office/altec/dashboard" 
+        <Route
+          path="/office/altec/dashboard"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ALTECDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/altec/projects" 
+        <Route
+          path="/office/altec/projects"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ALTECReports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/altec/add-activity" 
+        <Route
+          path="/office/altec/add-activity"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ALTECAddActivity />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* APC Routes */}
-        <Route 
-          path="/office/apc/dashboard" 
+        <Route
+          path="/office/apc/dashboard"
           element={
             <ProtectedRoute requiredRole="office_user">
               <APCDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/apc/projects" 
+        <Route
+          path="/office/apc/projects"
           element={
             <ProtectedRoute requiredRole="office_user">
               <APCReports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/apc/add-activity" 
+        <Route
+          path="/office/apc/add-activity"
           element={
             <ProtectedRoute requiredRole="office_user">
               <APCAddActivity />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* ACLG Routes */}
-        <Route 
-          path="/office/aclg/dashboard" 
+        <Route
+          path="/office/aclg/dashboard"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACLGDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/aclg/projects" 
+        <Route
+          path="/office/aclg/projects"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACLGReports />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/office/aclg/add-activity" 
+        <Route
+          path="/office/aclg/add-activity"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACLGAddActivity />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* Catch all unknown routes */}
@@ -254,7 +266,7 @@ const AppContent = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
             className="fixed inset-0 bg-[#040195] z-[9999] flex items-center justify-center"
-            style={{ pointerEvents: 'none' }}
+            style={{ pointerEvents: "none" }}
           >
             <Loader />
           </motion.div>
@@ -263,7 +275,6 @@ const AppContent = () => {
     </>
   );
 };
-
 
 function App() {
   return (

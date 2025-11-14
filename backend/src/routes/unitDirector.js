@@ -21,21 +21,21 @@ router.get(
       // Calculate statistics based on activity status
       // Status values: "completed", "in progress", "pending", etc.
       const statistics = {
-        completed: activities.filter((a) => 
-          a.status && a.status.toLowerCase() === "completed"
+        completed: activities.filter(
+          (a) => a.status && a.status.toLowerCase() === "completed"
         ).length,
-        in_progress: activities.filter((a) => 
-          a.status && (
-            a.status.toLowerCase() === "in progress" || 
-            a.status.toLowerCase() === "ongoing" ||
-            a.status.toLowerCase() === "in-progress"
-          )
+        in_progress: activities.filter(
+          (a) =>
+            a.status &&
+            (a.status.toLowerCase() === "in progress" ||
+              a.status.toLowerCase() === "ongoing" ||
+              a.status.toLowerCase() === "in-progress")
         ).length,
-        pending: activities.filter((a) => 
-          a.status && (
-            a.status.toLowerCase() === "pending" || 
-            a.status.toLowerCase() === "planned"
-          )
+        pending: activities.filter(
+          (a) =>
+            a.status &&
+            (a.status.toLowerCase() === "pending" ||
+              a.status.toLowerCase() === "planned")
         ).length,
       };
 
@@ -201,7 +201,7 @@ router.get(
       // You can create a notifications table later
       const notifications = {
         unread: 0,
-        items: []
+        items: [],
       };
 
       res.json(notifications);
@@ -225,7 +225,7 @@ router.get(
       // You can create a messages table later
       const messages = {
         unread: 0,
-        items: []
+        items: [],
       };
 
       res.json(messages);
@@ -293,6 +293,29 @@ router.get(
       res.json({ activities: transformedActivities });
     } catch (error) {
       console.error("Unit director activities error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Get all offices (for Unit Director Settings)
+router.get(
+  "/offices",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      // Fetch all offices from your Supabase "offices" table
+      const { data: offices, error } = await supabase
+        .from("offices")
+        .select("id, acronym, name, director, email")
+        .order("acronym", { ascending: true });
+
+      if (error) throw error;
+
+      res.json({ offices });
+    } catch (error) {
+      console.error("Unit director offices error:", error);
       res.status(500).json({ error: "Server error" });
     }
   }

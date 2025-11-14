@@ -27,7 +27,7 @@ export default defineConfig({
   },
   server: {
     host: true, // Allow ngrok muna for test dev
-    allowedHosts: ["localhost", "127.0.0.1", "be4357f6b0b6.ngrok-free.app"],
+    allowedHosts: ["localhost"],
   },
   build: {
     chunkSizeWarningLimit: 1000,
@@ -42,7 +42,9 @@ export default defineConfig({
         },
         // Optimize asset file naming
         assetFileNames: (assetInfo) => {
-          if (/\.(png|jpe?g|webp|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
+          if (
+            /\.(png|jpe?g|webp|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)
+          ) {
             return `assets/images/[name]-[hash][extname]`;
           }
           if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {

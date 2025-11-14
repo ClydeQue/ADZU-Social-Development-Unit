@@ -46,7 +46,7 @@ export default function Sidebar() {
   const generalItems = [
     { 
       text: 'Settings', 
-      icon: <img src="/icons/settings.svg" alt="Calendar" className="w-6 h-6" />, 
+      icon: <img src="/icons/settings.svg" alt="Settings" className="w-6 h-6" />, 
       path: '/unit-director/settings' 
     },
     { 

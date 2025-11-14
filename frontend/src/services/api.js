@@ -121,7 +121,7 @@ class ApiService {
 
   async post(endpoint, body, options = {}) {
     return axiosInstance.post(endpoint, body, options);
-  }
+  } 
 
   async put(endpoint, body, options = {}) {
     return axiosInstance.put(endpoint, body, options);
