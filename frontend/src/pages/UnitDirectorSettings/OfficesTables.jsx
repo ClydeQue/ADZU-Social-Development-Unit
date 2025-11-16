@@ -18,11 +18,9 @@ export default function OfficesTable({ offices, onEditOffice }) {
 
       {/* Header Row */}
       <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[35px_150px_1.5fr_1.2fr_1.5fr_120px] gap-3 items-center">
-        <div>#</div>
+        <div className="text-xs font-semibold">No.</div>
         <div className="text-xs font-semibold">Acronym</div>
         <div className="text-xs font-semibold">Office Name</div>
-        <div className="text-xs font-semibold">Director</div>
-        <div className="text-xs font-semibold">Email</div>
         <div></div>
       </div>
 

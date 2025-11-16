@@ -25,7 +25,7 @@ router.get("/all", async (req, res) => {
 router.get(
   "/all-with-programs",
   authenticateToken,
-  requireRole("unit_director"),
+  requireRole(["unit_director"]),
   async (req, res) => {
     try {
       const { data: offices, error } = await supabase
@@ -400,7 +400,7 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
 router.delete(
   "/activities",
   authenticateToken,
-  requireRole("office_user"),
+  requireRole(["office_user"]),
   async (req, res) => {
     try {
       const { activity_ids } = req.body;
@@ -478,7 +478,7 @@ router.delete(
 router.post(
   "/:officeId/programs",
   authenticateToken,
-  requireRole("unit_director"),
+  requireRole(["unit_director"]),
   async (req, res) => {
     try {
       const { officeId } = req.params;
@@ -513,7 +513,7 @@ router.post(
 router.put(
   "/programs/:programId",
   authenticateToken,
-  requireRole("unit_director"),
+  requireRole(["unit_director"]),
   async (req, res) => {
     try {
       const { programId } = req.params;
@@ -545,7 +545,7 @@ router.put(
 router.delete(
   "/programs/:programId",
   authenticateToken,
-  requireRole("unit_director"),
+  requireRole(["unit_director"]),
   async (req, res) => {
     try {
       const { programId } = req.params;

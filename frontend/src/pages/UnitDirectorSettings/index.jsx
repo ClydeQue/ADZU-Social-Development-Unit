@@ -8,7 +8,7 @@ import EditOfficeDialog from "./EditOfficeDialog";
 import api from "@/services/api";
 
 export default function UnitDirectorSettings() {
-  const [sortBy, setSortBy] = useState("");
+  const [sortBy, setSortBy] = useState("office");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOffice, setSelectedOffice] = useState(null);
 
@@ -43,17 +43,13 @@ export default function UnitDirectorSettings() {
       })) || [];
 
     // Apply sorting
-    if (sortBy && transformed.length > 0) {
+    if (transformed.length > 0) {
       transformed = [...transformed].sort((a, b) => {
         switch (sortBy) {
-          case "recent":
-            return 0; // No date available for offices
-          case "oldest":
-            return 0; // No date available for offices
           case "office":
-            return a.office.localeCompare(b.office);
+            return a.acronym.localeCompare(b.acronym);
           case "program":
-            return a.program.localeCompare(b.program);
+            return a.name.localeCompare(b.name);
           default:
             return 0;
         }
@@ -92,33 +88,14 @@ export default function UnitDirectorSettings() {
             />
 
             <div className="bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
-              {/* Sort and Delete Controls */}
-              <div className="flex gap-3 items-center mb-4">
-                {/* Sort by Dropdown */}
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-white px-6 py-2.5 pr-10 rounded-full text-sm font-semibold text-[#040195] border-none shadow-md focus:outline-none focus:ring-2 focus:ring-[#4D49FC] cursor-pointer"
-                    style={{ fontFamily: "Inter, sans-serif" }}
-                  >
-                    <option value="">Sort by</option>
-                    <option value="office">Office</option>
-                    <option value="program">Name</option>
-                  </select>
-                  {/* Dropdown Arrow - bx-chevron-down */}
-                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <img src="/icons/dropdown_arrow.svg" alt="" />
-                  </div>
-                </div>
-
-                {/* Delete Button - bxs-trash */}
-                <button
-                  className="bg-white p-1 rounded-full shadow-md hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#4D49FC]"
-                  title="Delete selected"
+              {/* Title */}
+              <div className="mb-4">
+                <h2
+                  className="text-2xl font-bold text-[#040195]"
+                  style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  <img src="/icons/bxs_trash.svg" alt="" width={25} />
-                </button>
+                  OFFICES
+                </h2>
               </div>
 
               {/* Reports Table */}

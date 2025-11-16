@@ -40,6 +40,19 @@ class unitDirectorSettings {
     const response = await api.delete(`office/programs/${programId}`);
     return response;
   }
+
+  /**
+   * Change office account password
+   */
+  async changeOfficePassword(officeId, newPassword) {
+    const response = await api.put(
+      `settings/office/${officeId}/change-password`,
+      {
+        newPassword,
+      }
+    );
+    return response;
+  }
 }
 
 export default new unitDirectorSettings();

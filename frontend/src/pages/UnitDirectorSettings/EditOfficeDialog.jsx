@@ -9,6 +9,10 @@ export default function EditOfficeDialog({ office, onClose }) {
   const [showAddProgramForm, setShowAddProgramForm] = useState(false);
   const [showEditProgramForm, setShowEditProgramForm] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [programToDelete, setProgramToDelete] = useState(null);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [newProgram, setNewProgram] = useState({
     title: "",
     description: "",
@@ -73,6 +77,19 @@ export default function EditOfficeDialog({ office, onClose }) {
     },
   });
 
+  // Change password mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: (newPassword) =>
+      unitDirectorSettings.changeOfficePassword(office.id, newPassword),
+    onSuccess: () => {
+      setPasswordData({ newPassword: "", confirmPassword: "" });
+      alert("Password changed successfully!");
+    },
+    onError: (error) => {
+      alert(`Failed to change password: ${error.message || "Unknown error"}`);
+    },
+  });
+
   const handleAddProgram = () => {
     if (!newProgram.title.trim()) return;
     addProgramMutation.mutate(newProgram);
@@ -85,6 +102,10 @@ export default function EditOfficeDialog({ office, onClose }) {
 
   const handleUpdateProgram = () => {
     if (!selectedProgram || !selectedProgram.title.trim()) return;
+    setShowSaveConfirm(true);
+  };
+
+  const confirmUpdateProgram = () => {
     updateProgramMutation.mutate({
       programId: selectedProgram.id,
       programData: {
@@ -93,12 +114,38 @@ export default function EditOfficeDialog({ office, onClose }) {
         is_fixed: selectedProgram.is_fixed,
       },
     });
+    setShowSaveConfirm(false);
   };
 
   const handleDeleteProgram = (programId) => {
-    if (confirm("Are you sure you want to delete this program?")) {
-      deleteProgramMutation.mutate(programId);
+    setProgramToDelete(programId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteProgram = () => {
+    if (programToDelete) {
+      deleteProgramMutation.mutate(programToDelete);
     }
+    setShowDeleteConfirm(false);
+    setProgramToDelete(null);
+  };
+
+  const handleChangePassword = () => {
+    // Validation
+    if (!passwordData.newPassword || passwordData.newPassword.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    setShowPasswordConfirm(true);
+  };
+
+  const confirmChangePassword = () => {
+    changePasswordMutation.mutate(passwordData.newPassword);
+    setShowPasswordConfirm(false);
   };
 
   if (!office) return null;
@@ -429,6 +476,17 @@ export default function EditOfficeDialog({ office, onClose }) {
                           >
                             Edit
                           </button>
+                          <button
+                            onClick={() => handleDeleteProgram(program.id)}
+                            disabled={
+                              updateProgramMutation.isPending ||
+                              deleteProgramMutation.isPending
+                            }
+                            className="px-3 py-1 bg-red-600 text-white rounded-md text-[0.65rem] font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+                            title="Delete program"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
                     ))
@@ -625,6 +683,26 @@ export default function EditOfficeDialog({ office, onClose }) {
                     : "✗ Passwords do not match"}
                 </div>
               )}
+
+              {/* Change Password Button */}
+              <div className="mt-6">
+                <button
+                  onClick={handleChangePassword}
+                  disabled={
+                    !passwordData.newPassword ||
+                    !passwordData.confirmPassword ||
+                    passwordData.newPassword !== passwordData.confirmPassword ||
+                    passwordData.newPassword.length < 6 ||
+                    changePasswordMutation.isPending
+                  }
+                  className="w-full px-6 py-3 bg-[#4D49FC] text-white rounded-lg font-semibold hover:bg-[#3D39EC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  {changePasswordMutation.isPending
+                    ? "Changing Password..."
+                    : "Change Password"}
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -636,16 +714,142 @@ export default function EditOfficeDialog({ office, onClose }) {
             className="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
-            Cancel
-          </button>
-          <button
-            className="px-6 py-2.5 bg-[#4D49FC] text-white rounded-lg font-semibold hover:bg-[#3D39EC] transition-colors"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            {activeSection === "program" ? "Save Changes" : "Change Password"}
+            Close
           </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
+            <div className="bg-red-600 text-white px-6 py-4 rounded-t-xl">
+              <h3
+                className="text-lg font-bold"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Confirm Delete
+              </h3>
+            </div>
+            <div className="p-6">
+              <p
+                className="text-gray-700 mb-6"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Are you sure you want to delete this program? This action cannot
+                be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setProgramToDelete(null);
+                  }}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteProgram}
+                  disabled={deleteProgramMutation.isPending}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  {deleteProgramMutation.isPending ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Changes Confirmation Modal */}
+      {showSaveConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
+            <div className="bg-[#4D49FC] text-white px-6 py-4 rounded-t-xl">
+              <h3
+                className="text-lg font-bold"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Confirm Save Changes
+              </h3>
+            </div>
+            <div className="p-6">
+              <p
+                className="text-gray-700 mb-6"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Are you sure you want to save these changes to the program?
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowSaveConfirm(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmUpdateProgram}
+                  disabled={updateProgramMutation.isPending}
+                  className="px-4 py-2 bg-[#4D49FC] text-white rounded-lg font-semibold hover:bg-[#3D39EC] transition-colors disabled:opacity-50"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  {updateProgramMutation.isPending
+                    ? "Saving..."
+                    : "Save Changes"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Change Confirmation Modal */}
+      {showPasswordConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
+            <div className="bg-[#4D49FC] text-white px-6 py-4 rounded-t-xl">
+              <h3
+                className="text-lg font-bold"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Confirm Password Change
+              </h3>
+            </div>
+            <div className="p-6">
+              <p
+                className="text-gray-700 mb-6"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Are you sure you want to change the password for this office
+                account?
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowPasswordConfirm(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmChangePassword}
+                  disabled={changePasswordMutation.isPending}
+                  className="px-4 py-2 bg-[#4D49FC] text-white rounded-lg font-semibold hover:bg-[#3D39EC] transition-colors disabled:opacity-50"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  {changePasswordMutation.isPending
+                    ? "Changing..."
+                    : "Confirm Change"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
