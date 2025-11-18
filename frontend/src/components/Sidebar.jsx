@@ -74,10 +74,10 @@ export default function Sidebar() {
                 isActive(item.path) ? 'bg-[#E8EAFF]' : 'bg-transparent hover:bg-[#E8EAFF]'
               }`}
             >
-              <div className={`mb-0.5 ${isActive(item.path) ? 'text-[#1E22AA]' : 'text-[#6B7280]'}`}>
+              <div className={`mb-0.5 ${isActive(item.path) ? 'text-[#4D49FC]' : 'text-[#6B7280]'}`}>
                 {item.icon}
               </div>
-              <span className={`text-[0.65rem] ${isActive(item.path) ? 'font-semibold text-[#1E22AA]' : 'font-medium text-[#6B7280]'}`}>
+              <span className={`text-[0.65rem] ${isActive(item.path) ? 'font-semibold text-[#4D49FC]' : 'font-medium text-[#6B7280]'}`}>
                 {item.text}
               </span>
               {item.badge && (

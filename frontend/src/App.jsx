@@ -22,26 +22,32 @@ import UnitDirectorSettings from "@/pages/UnitDirectorSettings";
 import CCESDashboard from "@/pages/CCESDashboard";
 import CCESReports from "@/pages/CCESDashboard/Reports";
 import CCESAddActivity from "@/pages/CCESDashboard/AddActivity";
+import CCESEditActivity from "@/pages/CCESDashboard/EditActivity";
 
 import ACCADashboard from "@/pages/ACCADashboard";
 import ACCAReports from "@/pages/ACCADashboard/Reports";
 import ACCAAddActivity from "@/pages/ACCADashboard/AddActivity";
+import ACCAEditActivity from "@/pages/ACCADashboard/EditActivity";
 
 import ACESDashboard from "@/pages/ACESDashboard";
 import ACESReports from "@/pages/ACESDashboard/Reports";
 import ACESAddActivity from "@/pages/ACESDashboard/AddActivity";
+import ACESEditActivity from "@/pages/ACESDashboard/EditActivity";
 
 import ALTECDashboard from "@/pages/ALTECDashboard";
 import ALTECReports from "@/pages/ALTECDashboard/Reports";
 import ALTECAddActivity from "@/pages/ALTECDashboard/AddActivity";
+import ALTECEditActivity from "@/pages/ALTECDashboard/EditActivity";
 
 import APCDashboard from "@/pages/APCDashboard";
 import APCReports from "@/pages/APCDashboard/Reports";
 import APCAddActivity from "@/pages/APCDashboard/AddActivity";
+import APCEditActivity from "@/pages/APCDashboard/EditActivity";
 
 import ACLGDashboard from "@/pages/ACLGDashboard";
 import ACLGReports from "@/pages/ACLGDashboard/Reports";
 import ACLGAddActivity from "@/pages/ACLGDashboard/AddActivity";
+import ACLGEditActivity from "@/pages/ACLGDashboard/EditActivity";
 
 import "./App.css";
 
@@ -122,6 +128,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/office/cces/edit-activity/:activityId"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <CCESEditActivity />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ACCA Routes */}
         <Route
@@ -145,6 +159,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCAAddActivity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/acca/edit-activity/:activityId"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACCAEditActivity />
             </ProtectedRoute>
           }
         />
@@ -174,6 +196,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/office/aces/edit-activity/:activityId"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACESEditActivity />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ALTEC Routes */}
         <Route
@@ -197,6 +227,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <ALTECAddActivity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/altec/edit-activity/:activityId"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ALTECEditActivity />
             </ProtectedRoute>
           }
         />
@@ -226,6 +264,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/office/apc/edit-activity/:activityId"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <APCEditActivity />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ACLG Routes */}
         <Route
@@ -249,6 +295,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACLGAddActivity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/aclg/edit-activity/:activityId"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACLGEditActivity />
             </ProtectedRoute>
           }
         />
