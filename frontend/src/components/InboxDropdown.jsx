@@ -1,21 +1,39 @@
 import { useState, useRef, useEffect } from "react";
-import { Email as EmailIcon } from "@mui/icons-material";
+import PropTypes from "prop-types";
+import { Email as EmailIcon, Edit as EditIcon } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
+import MessageService from "@/services/messageService";
+import ComposeMessageDialog from "./ComposeMessageDialog";
+import MessageThreadDialog from "./MessageThreadDialog";
 
 /**
  * Inbox Dropdown Component
  * Displays inbox messages with filtering options
  */
-function InboxDropdown() {
+function InboxDropdown({ onMessageClick }) {
   const [showInbox, setShowInbox] = useState(false);
   const [inboxFilter, setInboxFilter] = useState("all"); // 'all' or 'unread'
+  const [showCompose, setShowCompose] = useState(false);
+  const [showThread, setShowThread] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
   const inboxRef = useRef(null);
 
-  // Mock data - will be replaced with actual API call later
-  const [messages] = useState([
-    // This will be populated from API
-  ]);
+  // Fetch messages
+  const {
+    data: messagesData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["messages"],
+    queryFn: MessageService.getMessages,
+    select: (data) => data || { messages: [], unread: 0 },
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  });
 
-  const unreadCount = messages.filter(m => m.unread).length;
+  const messages = messagesData?.messages || [];
+  const unreadCount = messagesData?.unread || 0;
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -29,10 +47,32 @@ function InboxDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Handle conversation click
+  const handleConversationClick = async (message) => {
+    // Mark as read
+    try {
+      if (message.unread) {
+        await MessageService.markAsRead(message.id);
+        refetch();
+      }
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+    }
+
+    // Open thread dialog
+    setSelectedContact({
+      id: message.otherPartyId,
+      name: message.sender,
+      type: message.isSent ? message.receiverType : message.senderType,
+      office: message.office,
+    });
+    setShowThread(true);
+    setShowInbox(false);
+  };
+
   // Filter messages
-  const filteredMessages = inboxFilter === "unread" 
-    ? messages.filter(m => m.unread) 
-    : messages;
+  const filteredMessages =
+    inboxFilter === "unread" ? messages.filter((m) => m.unread) : messages;
 
   return (
     <div className="relative font-inter" ref={inboxRef}>
@@ -57,9 +97,19 @@ function InboxDropdown() {
         <div className="absolute right-0 top-full mt-2 w-100 bg-white rounded-xl shadow-2xl z-50 border border-gray-100">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-100">
-            <h3 className="text-base font-bold text-[#040195] mb-2">
-              Inbox
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-base font-bold text-[#040195]">Inbox</h3>
+              <button
+                onClick={() => {
+                  setShowCompose(true);
+                  setShowInbox(false);
+                }}
+                className="p-1.5 bg-[#4D49FC] text-white rounded-full hover:bg-[#3D39EC] transition-colors"
+                title="Compose message"
+              >
+                <EditIcon sx={{ fontSize: 16 }} />
+              </button>
+            </div>
             <div className="flex gap-1.5">
               <button
                 onClick={() => setInboxFilter("all")}
@@ -86,10 +136,19 @@ function InboxDropdown() {
 
           {/* Messages List */}
           <div className="max-h-[400px] overflow-y-auto">
-            {filteredMessages.length > 0 ? (
+            {isLoading ? (
+              <div className="px-4 py-8 text-center">
+                <p className="text-xs text-gray-400">Loading messages...</p>
+              </div>
+            ) : error ? (
+              <div className="px-4 py-8 text-center">
+                <p className="text-xs text-red-500">Error loading messages</p>
+              </div>
+            ) : filteredMessages.length > 0 ? (
               filteredMessages.map((message) => (
                 <div
                   key={message.id}
+                  onClick={() => handleConversationClick(message)}
                   className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
                 >
                   <div className="flex items-start gap-3">
@@ -109,10 +168,7 @@ function InboxDropdown() {
                           <p className="text-xs font-bold text-gray-900 mb-0.5">
                             {message.sender}
                           </p>
-                          <p className="text-xs text-gray-600 line-clamp-2 mb-1">
-                            {message.subject}
-                          </p>
-                          <p className="text-[10px] text-gray-400">
+                          <p className="text-[10px] text-gray-400 line-clamp-2">
                             {message.preview}
                           </p>
                         </div>
@@ -133,12 +189,14 @@ function InboxDropdown() {
               ))
             ) : (
               <div className="px-4 py-8 text-center">
-                <EmailIcon 
+                <EmailIcon
                   className="text-gray-300 mx-auto mb-2"
                   sx={{ fontSize: 48 }}
                 />
                 <p className="text-xs text-gray-400">
-                  {inboxFilter === "unread" ? "No unread messages" : "No messages"}
+                  {inboxFilter === "unread"
+                    ? "No unread messages"
+                    : "No messages"}
                 </p>
               </div>
             )}
@@ -154,8 +212,30 @@ function InboxDropdown() {
           )}
         </div>
       )}
+
+      {/* Compose Message Dialog */}
+      {showCompose && (
+        <ComposeMessageDialog onClose={() => setShowCompose(false)} />
+      )}
+
+      {/* Message Thread Dialog */}
+      {showThread && selectedContact && (
+        <MessageThreadDialog
+          contact={selectedContact}
+          onClose={() => {
+            setShowThread(false);
+            setSelectedContact(null);
+            refetch();
+          }}
+        />
+      )}
     </div>
   );
 }
+
+// PropTypes validation
+InboxDropdown.propTypes = {
+  onMessageClick: PropTypes.func,
+};
 
 export default InboxDropdown;

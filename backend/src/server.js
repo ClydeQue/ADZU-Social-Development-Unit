@@ -12,6 +12,7 @@ const officeRoutes = require("./routes/office");
 const programsRoutes = require("./routes/programs"); // Programs & Activities routes
 const notificationRoutes = require("./routes/notifications");
 const settingsRoutes = require("./routes/settings");
+const messagesRoutes = require("./routes/messages"); // Messages routes
 
 const app = express();
 
@@ -61,20 +62,26 @@ const allowedOrigins = [
 // Custom CORS middleware that ALWAYS adds headers (including on errors)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  
+
   // Set CORS headers for allowed origins
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Requested-With"
+    );
   }
-  
+
   // Handle preflight
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-  
+
   next();
 });
 // Body parsing middleware
@@ -88,8 +95,9 @@ app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/programs", programsRoutes); // Programs & Activities API
 app.use("/api/notifications", notificationRoutes); // Notifications API
-app.use('/api/unit-director', unitDirectorRoutes);
+app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/settings", settingsRoutes); // settings API
+app.use("/api/messages", messagesRoutes); // Messages API
 
 // Health check endpoint
 app.get("/", (req, res) => {
