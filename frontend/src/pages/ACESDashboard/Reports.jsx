@@ -19,8 +19,7 @@ export default function ACESReports() {
       <div className="h-full flex flex-col p-3">
         <OfficeReports 
           officeId={officeId} 
-          officeColor="#388E3C" 
-          officeLogo="/images/aces_logo_small.webp"
+          officeColor="#040195" 
           basePath="/office/aces"
         />
       </div>

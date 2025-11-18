@@ -34,6 +34,8 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
     start_date: '',
     end_date: '',
     participants_count: '',
+    male_participants: '',
+    female_participants: '',
     venue: '',
     objectives: '',
     implementing_partners: '',
@@ -43,6 +45,8 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
     notes: '',
     allocated_budget: '',
     liquidated_budget: '',
+    budget_amount: '',
+    budget_type: 'external',
     partner_name: '',
     partner_type: '',
     partner_nature: '',
@@ -61,6 +65,8 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
         start_date: activity.start_date || '',
         end_date: activity.end_date || '',
         participants_count: activity.participants_count || '',
+        male_participants: activity.male_participants || '',
+        female_participants: activity.female_participants || '',
         venue: activity.venue || '',
         objectives: activity.objectives || '',
         implementing_partners: activity.implementing_partners || '',
@@ -70,6 +76,8 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
         notes: activity.notes || '',
         allocated_budget: activity.allocated_budget || '',
         liquidated_budget: activity.liquidated_budget || '',
+        budget_amount: activity.budget_amount || '',
+        budget_type: activity.budget_type || 'external',
         partner_name: activity.partner_name || '',
         partner_type: activity.partner_type || '',
         partner_nature: activity.partner_nature || '',
@@ -279,18 +287,33 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
             </div>
 
             {/* Participants */}
-            <div>
-              <label className="block text-sm font-bold text-[#040195] mb-2">
-                Number of Participants
-              </label>
-              <input
-                type="number"
-                value={formData.participants_count}
-                onChange={(e) => handleInputChange('participants_count', e.target.value)}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                placeholder="Enter participant count"
-                min="0"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-[#040195] mb-2">
+                  Male Participants
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.male_participants}
+                  onChange={(e) => handleInputChange('male_participants', e.target.value)}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                  placeholder="Enter count"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#040195] mb-2">
+                  Female Participants
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.female_participants}
+                  onChange={(e) => handleInputChange('female_participants', e.target.value)}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                  placeholder="Enter count"
+                />
+              </div>
             </div>
           </div>
 

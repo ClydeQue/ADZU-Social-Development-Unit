@@ -27,6 +27,8 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
     initiation: '',
     implementation: '',
     participantsNo: '',
+    male_participants: '',
+    female_participants: '',
     classification: '',
     phase: '',
     venue: {
@@ -40,8 +42,8 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
     },
     objectives: '',
     partners: [{ name: '', type: '', nature: '' }],
-    budgetApproved: '',
-    budgetUtilized: '',
+    budgetAmount: '',
+    budgetType: 'external',
     thumbnail: null,
     sdgs: []
   });
@@ -286,17 +288,33 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
             </div>
 
             {/* Number of Participants */}
-            <div>
-              <label className="block text-sm font-bold text-[#040195] mb-2">
-                Number of Participants
-              </label>
-              <input
-                type="number"
-                value={formData.participantsNo}
-                onChange={(e) => handleInputChange('participantsNo', e.target.value)}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                placeholder="Enter number"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-[#040195] mb-2">
+                  Male Participants
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.male_participants}
+                  onChange={(e) => handleInputChange('male_participants', e.target.value)}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                  placeholder="Enter count"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#040195] mb-2">
+                  Female Participants
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.female_participants}
+                  onChange={(e) => handleInputChange('female_participants', e.target.value)}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                  placeholder="Enter count"
+                />
+              </div>
             </div>
 
             {/* Classification and Phase */}
@@ -475,27 +493,30 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Budget Approved
+                  Budget Amount
                 </label>
                 <input
                   type="number"
-                  value={formData.budgetApproved}
-                  onChange={(e) => handleInputChange('budgetApproved', e.target.value)}
+                  value={formData.budgetAmount}
+                  onChange={(e) => handleInputChange('budgetAmount', e.target.value)}
                   className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
                   placeholder="₱0.00"
+                  min="0"
+                  step="0.01"
                 />
               </div>
               <div>
                 <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Budget Utilized
+                  Budget Type
                 </label>
-                <input
-                  type="number"
-                  value={formData.budgetUtilized}
-                  onChange={(e) => handleInputChange('budgetUtilized', e.target.value)}
+                <select
+                  value={formData.budgetType}
+                  onChange={(e) => handleInputChange('budgetType', e.target.value)}
                   className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                  placeholder="₱0.00"
-                />
+                >
+                  <option value="external">External Fund</option>
+                  <option value="internal">Internal Fund</option>
+                </select>
               </div>
             </div>
           </div>
