@@ -326,26 +326,66 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
   }
 });
 
-// Get office activities for calendar
-router.get("/:officeId/activities", authenticateToken, async (req, res) => {
+// ============ ACTIVITY ROUTES (must come before /:officeId/activities) ============
+
+// Create new activity
+router.post("/activities", authenticateToken, async (req, res) => {
   try {
-    const { officeId } = req.params;
+    const activityData = req.body;
+    const userId = req.user.id;
+
+    console.log("Create activity request:", { activityData, userId });
+
+    // Validate required fields
+    if (!activityData.activity_name || !activityData.program_id) {
+      return res.status(400).json({ 
+        error: "activity_name and program_id are required" 
+      });
+    }
+
+    // Verify the program belongs to the user's office
+    const { data: program, error: programError } = await supabase
+      .from("programs")
+      .select("id, office_id")
+      .eq("id", activityData.program_id)
+      .single();
+
+    if (programError || !program) {
+      return res.status(404).json({ error: "Program not found" });
+    }
 
     // Check if user has access to this office
-    if (
-      req.user.userType !== "unit_director" &&
-      req.user.office_id != officeId
-    ) {
+    if (req.user.userType !== "unit_director" && req.user.office_id != program.office_id) {
       return res.status(403).json({ error: "Access denied" });
     }
 
-    // Get all programs for this office
-    const { data: programs, error: programsError } = await supabase
-      .from("programs")
-      .select("id")
-      .eq("office_id", officeId);
+    // Prepare activity data with proper types
+    const newActivity = {
+      program_id: activityData.program_id,
+      activity_name: activityData.activity_name,
+      start_date: activityData.start_date || null,
+      end_date: activityData.end_date || null,
+      participants_count: activityData.participants_count ? parseInt(activityData.participants_count) : 0,
+      venue: activityData.venue || null,
+      venue_street: activityData.venue_street || null,
+      venue_barangay: activityData.venue_barangay || null,
+      venue_city: activityData.venue_city || null,
+      venue_province: activityData.venue_province || null,
+      objectives: activityData.objectives || null,
+      implementing_partners: activityData.implementing_partners || null,
+      partner_name: activityData.partner_name || null,
+      partner_type: activityData.partner_type || null,
+      partner_nature: activityData.partner_nature || null,
+      budget: activityData.budget ? parseFloat(activityData.budget) : null,
+      allocated_budget: activityData.allocated_budget ? parseFloat(activityData.allocated_budget) : 0,
+      liquidated_budget: activityData.liquidated_budget ? parseFloat(activityData.liquidated_budget) : 0,
+      sdg_number: activityData.sdg_number ? parseInt(activityData.sdg_number) : null,
+      status: activityData.status || 'pending',
+      notes: activityData.notes || null,
+      created_by: userId,
+    };
 
-    if (programsError) throw programsError;
+    console.log("Prepared activity data:", newActivity);
 
     const programIds = programs.map((p) => p.id);
     let activities = [];
@@ -370,29 +410,23 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
         .in("program_id", programIds)
         .order("start_date", { ascending: true });
 
-      if (activitiesError) throw activitiesError;
-      activities = activitiesData || [];
+    if (createError) {
+      console.error("Create error:", createError);
+      throw createError;
     }
 
-    // Transform to calendar format
-    const transformedActivities = activities.map((activity) => ({
-      id: activity.id,
-      title: activity.activity_name,
-      start: activity.start_date,
-      end: activity.end_date,
-      status: activity.status || "pending",
-      venue: activity.venue,
-      participants_count: activity.participants_count,
-      objectives: activity.objectives,
-      notes: activity.notes,
-      program_id: activity.programs?.id,
-      program_title: activity.programs?.title || "Untitled Program",
-    }));
+    console.log("Activity created successfully:", createdActivity);
 
-    res.json({ activities: transformedActivities });
+    res.status(201).json({ 
+      message: "Activity created successfully",
+      activity: createdActivity 
+    });
   } catch (error) {
-    console.error("Get office activities error:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Create activity error:", error);
+    res.status(500).json({ 
+      error: "Server error",
+      details: error.message 
+    });
   }
 });
 
@@ -579,5 +613,188 @@ router.delete(
     }
   }
 );
+
+// Get single activity by ID
+router.get("/activities/:activityId", authenticateToken, async (req, res) => {
+  try {
+    const { activityId } = req.params;
+
+    const { data: activity, error } = await supabase
+      .from("activities")
+      .select(`
+        *,
+        programs(id, title, office_id)
+      `)
+      .eq("id", activityId)
+      .single();
+
+    if (error) throw error;
+
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    // Check if user has access to this office
+    if (req.user.userType !== "unit_director" && req.user.office_id != activity.programs.office_id) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    res.json({ activity });
+  } catch (error) {
+    console.error("Get activity error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Update activity
+router.put("/activities/:activityId", authenticateToken, async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const updateData = req.body;
+
+    console.log("Update activity request:", { activityId, updateData });
+
+    // First, get the activity to check permissions
+    const { data: existingActivity, error: fetchError } = await supabase
+      .from("activities")
+      .select("id, programs(office_id)")
+      .eq("id", activityId)
+      .single();
+
+    if (fetchError) {
+      console.error("Fetch error:", fetchError);
+      throw fetchError;
+    }
+
+    if (!existingActivity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    // Check if user has access to this office
+    if (req.user.userType !== "unit_director" && req.user.office_id != existingActivity.programs.office_id) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Prepare update data with only valid fields
+    const allowedFields = [
+      'activity_name', 'program_id', 'start_date', 'end_date',
+      'participants_count', 'venue', 'objectives', 'implementing_partners',
+      'budget', 'sdg_number', 'status', 'notes', 'allocated_budget',
+      'liquidated_budget', 'partner_name', 'partner_type', 'partner_nature',
+      'venue_street', 'venue_barangay', 'venue_city', 'venue_province'
+    ];
+
+    const sanitizedData = {};
+    allowedFields.forEach(field => {
+      if (updateData[field] !== undefined && updateData[field] !== '') {
+        // Handle numeric fields
+        if (['participants_count', 'budget', 'sdg_number', 'allocated_budget', 'liquidated_budget'].includes(field)) {
+          const numValue = updateData[field] === null ? null : Number(updateData[field]);
+          sanitizedData[field] = isNaN(numValue) ? null : numValue;
+        } else {
+          sanitizedData[field] = updateData[field];
+        }
+      }
+    });
+
+    console.log("Sanitized data:", sanitizedData);
+
+    // Update the activity
+    const { data: updatedActivity, error: updateError } = await supabase
+      .from("activities")
+      .update({
+        ...sanitizedData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", activityId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("Update error:", updateError);
+      throw updateError;
+    }
+
+    console.log("Activity updated successfully:", updatedActivity);
+
+    res.json({ 
+      message: "Activity updated successfully",
+      activity: updatedActivity 
+    });
+  } catch (error) {
+    console.error("Update activity error:", error);
+    res.status(500).json({ 
+      error: "Server error",
+      details: error.message 
+    });
+  }
+});
+
+// ============ OFFICE-SPECIFIC ROUTES ============
+
+// Get office activities for calendar
+router.get("/:officeId/activities", authenticateToken, async (req, res) => {
+  try {
+    const { officeId } = req.params;
+
+    // Check if user has access to this office
+    if (req.user.userType !== "unit_director" && req.user.office_id != officeId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Get all programs for this office
+    const { data: programs, error: programsError } = await supabase
+      .from("programs")
+      .select("id")
+      .eq("office_id", officeId);
+
+    if (programsError) throw programsError;
+
+    const programIds = programs.map(p => p.id);
+    let activities = [];
+    
+    if (programIds.length > 0) {
+      const { data: activitiesData, error: activitiesError } = await supabase
+        .from("activities")
+        .select(`
+          id,
+          activity_name,
+          start_date,
+          end_date,
+          status,
+          venue,
+          participants_count,
+          objectives,
+          notes,
+          programs(id, title)
+        `)
+        .in("program_id", programIds)
+        .order("start_date", { ascending: true });
+
+      if (activitiesError) throw activitiesError;
+      activities = activitiesData || [];
+    }
+
+    // Transform to calendar format
+    const transformedActivities = activities.map((activity) => ({
+      id: activity.id,
+      title: activity.activity_name,
+      start: activity.start_date,
+      end: activity.end_date,
+      status: activity.status || "pending",
+      venue: activity.venue,
+      participants_count: activity.participants_count,
+      objectives: activity.objectives,
+      notes: activity.notes,
+      program_id: activity.programs?.id,
+      program_title: activity.programs?.title || "Untitled Program",
+    }));
+
+    res.json({ activities: transformedActivities });
+  } catch (error) {
+    console.error("Get office activities error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

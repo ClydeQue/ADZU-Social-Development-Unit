@@ -101,7 +101,7 @@ const ReportsTable = ({ reports }) => {
                   onClick={() => markAsViewed(report.id)}
                   className="px-3 py-0.5 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#3D39EC] transition-colors whitespace-nowrap"
                 >
-                  Edit
+                  View
                 </button>
                 <button 
                   onClick={() => markAsViewed(report.id)}

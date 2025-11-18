@@ -59,6 +59,28 @@ class OfficeService {
       data: { activity_ids: activityIds } 
     });
   }
+
+  /**
+   * Get single activity by ID
+   */
+  async getActivity(activityId) {
+    const response = await api.get(`office/activities/${activityId}`);
+    return response.activity;
+  }
+
+  /**
+   * Update activity by ID
+   */
+  async updateActivity(activityId, activityData) {
+    return await api.put(`office/activities/${activityId}`, activityData);
+  }
+
+  /**
+   * Create new activity
+   */
+  async createActivity(activityData) {
+    return await api.post('office/activities', activityData);
+  }
 }
 
 export default new OfficeService();

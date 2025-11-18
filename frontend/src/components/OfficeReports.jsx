@@ -75,12 +75,22 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
     
     return {
       id: activity.id,
-      programType: program?.title || 'Program',
+      programId: program?.id,
+      programTitle: program?.title || 'Program',
       activityName: activity.activity_name || 'Activity',
       image: activity.image_url || '/reports/default.webp',
       status: activity.status,
+      startDate: activity.start_date,
+      endDate: activity.end_date,
     };
   }) || [];
+
+  // Handle clicking on a project card
+  const handleProjectClick = (projectId) => {
+    if (!deleteMode) {
+      navigate(`${basePath}/edit-activity/${projectId}`);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -113,7 +123,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
                   style={{
                     border: deleteMode ? '2px solid #EF5350' : '2px solid transparent',
                   }}
-                  onClick={() => deleteMode && toggleItemSelection(project.id)}
+                  onClick={() => deleteMode ? toggleItemSelection(project.id) : handleProjectClick(project.id)}
                 >
                   {/* Checkbox in Delete Mode */}
                   {deleteMode && (
@@ -151,7 +161,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
                     {/* Program Type */}
                     <div className="mb-0.5">
                       <span className="text-white text-[0.6rem] font-semibold tracking-wide uppercase truncate block">
-                        {project.programType}
+                        {project.programTitle}
                       </span>
                     </div>
 
@@ -242,5 +252,6 @@ OfficeReports.propTypes = {
   officeId: PropTypes.string.isRequired,
   officeColor: PropTypes.string,
   officeLogo: PropTypes.string,
+  basePath: PropTypes.string.isRequired,
 };
 
