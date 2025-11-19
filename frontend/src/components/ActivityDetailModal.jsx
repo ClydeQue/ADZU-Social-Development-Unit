@@ -11,31 +11,17 @@ import { getOfficeLogo } from '@/utils/officeLogos';
 export default function ActivityDetailModal({ activity, onClose, officeColor = '#4D49FC', basePath }) {
   const navigate = useNavigate();
 
-  // Debug: Log activity data structure
-  useEffect(() => {
-    if (activity) {
-      console.log('Activity data:', activity);
-      console.log('Programs data:', activity.programs);
-      console.log('Office acronym:', activity.programs?.offices?.acronym);
-    }
-  }, [activity]);
-
-  // Close modal on escape key
+  // Listen for escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+      }
     };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
   }, [onClose]);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, []);
 
   if (!activity) return null;
 
@@ -92,42 +78,34 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', overflow: 'hidden' }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
     >
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-2xl p-5 shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         {/* Header Section with Program Logo/Image */}
         <div 
-          className="relative p-6 flex items-center justify-between"
+          className="relative p-3 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between"
         >
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
             {/* Logo/Icon Container */}
-            <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-              {activity.image_url ? (
-                <img 
-                  src={activity.image_url} 
-                  alt={activity.activity_name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div 
-                className="w-full h-full flex items-center justify-center"
-                style={{ display: activity.image_url ? 'none' : 'flex' }}
-              >
-                <span className="text-6xl font-black" style={{ color: officeColor }}>
-                  #
-                </span>
-              </div>
+            <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+              <img 
+                src={activity.image_url || '/reports/default.webp'} 
+                alt={activity.activity_name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/reports/default.webp';
+                }}
+              />
             </div>
 
             {/* Program Title and Description */}
@@ -144,21 +122,21 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
                   {activity.programs?.offices?.acronym || activity.programs?.offices?.name || 'Office'}
                 </span>
               </div>
-              <h2 className="text-[#4D49FC] text-3xl font-black mb-2 leading-tight uppercase">
+              <h2 className="text-[#4D49FC]  w-80 lg:w-100  text-xl sm:text-3xl font-black mb-2 leading-tight uppercase">
                 {activity.activity_name}
               </h2>
-              <div className="text-[#040195] text-sm font-semibold mb-1">
+              <div className="text-[#040195] text-xs sm:text-sm font-semibold mb-1">
                 {activity.programs?.title || 'Program Title'}
               </div>
-              <p className="text-[#040195] text-xs leading-relaxed">
+              <p className="text-[#040195] text-xs leading-relaxed line-clamp-2 sm:line-clamp-none">
                 {activity.objectives || 'Activity description'}
               </p>
             </div>
           </div>
 
           {/* Status Badge */}
-          <div className="absolute top-6 right-6">
-            <div className={`px-4  rounded-full text-center mb-2 ${getStatusStyle(activity.status).bg}`}>
+          <div className="sm:absolute sm:top-6 sm:right-6 w-full sm:w-auto mt-3 sm:mt-0">
+            <div className={`px-3 sm:px-4 py-1.5 sm:py-0 rounded-full text-center mb-2 ${getStatusStyle(activity.status).bg}`}>
               <span className={`text-xs font-bold uppercase tracking-wider ${getStatusStyle(activity.status).text}`}>
                 {activity.status || 'NO STATUS'}
               </span>
@@ -181,23 +159,23 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
         </div>
 
         {/* Thick Rounded Divider */}
-        <div className="mx-6 my-4 h-1 bg-[#040195] rounded-full"></div>
+        <div className="mx-3 sm:mx-6 my-3 sm:my-2 h-1 bg-[#040195] rounded-full"></div>
 
         {/* Content Section */}
-        <div className="p-6 pt-0">
+        <div className="p-3 sm:p-6 pt-0">
           {/* Row 1: Objectives (Left) and SDG Goals (Right) */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
-            <div className="col-span-2">
-              <h3 className="text-sm font-bold text-[#040195] mb-2 uppercase">OBJECTIVES</h3>
-              <p className="text-[#040195] text-sm leading-relaxed">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+            <div className="sm:col-span-2">
+              <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">OBJECTIVES</h3>
+              <p className="text-[#040195] text-xs sm:text-sm leading-relaxed">
                 {activity.objectives || 'To provide voters with insightful, in-depth information on candidates\' visions, plans, solutions for ZC\'s issues.'}
               </p>
             </div>
             
             {/* SDG Goals - Right Side */}
             {sdgs.length > 0 && (
-              <div className="border-l-2 border-[#040195] pl-6">
-                <h3 className="text-sm font-bold text-[#040195] mb-3 uppercase">SDG Goals</h3>
+              <div className="sm:border-l-2 border-t-2 sm:border-t-0 border-[#040195] pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
+                <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-3 uppercase">SDG Goals</h3>
                 <div className="flex gap-2 flex-wrap">
                   {sdgs.map((sdg) => (
                     <div 
@@ -214,13 +192,13 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
             )}
           </div>
 
-          <hr className="my-6 border-[#040195]" />
+          <hr className="my-4 sm:my-6 border-[#040195]" />
 
           {/* Row 2: Three Columns - Venue, Participant Demographics, Sex */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
             {/* Column 1: Venue */}
             <div>
-              <h3 className="text-sm font-bold text-[#040195] mb-2 uppercase">VENUE</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">VENUE</h3>
               <div className="text-[#040195] text-xs leading-relaxed">
                 {activity.venue_street && <div>{activity.venue_street}</div>}
                 {activity.venue_barangay && <div>Zone {activity.venue_barangay}</div>}
@@ -234,7 +212,7 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
 
             {/* Column 2: Participant Demographics */}
             <div>
-              <h3 className="text-sm font-bold text-[#040195] mb-2 uppercase">PARTICIPANT DEMOGRAPHICS</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">PARTICIPANT DEMOGRAPHICS</h3>
               <div className="text-[#040195] text-xs leading-relaxed space-y-1">
                 <div className="flex items-center">
                   <span className="font-semibold flex-1 text-left">TOTAL</span>
@@ -254,20 +232,20 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
             </div>
 
             {/* Column 3: Sex */}
-            <div className="border-l-2 border-[#040195] pl-6">
-              <h3 className="text-sm font-bold text-[#040195] mb-2 uppercase">SEX</h3>
+            <div className="sm:border-l-2 border-t-2 sm:border-t-0 border-[#040195] pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
+              <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">SEX</h3>
               <div className="text-[#040195] text-xs leading-relaxed space-y-1">
-                <div className="flex items-start">
+                <div className="flex items-center">
                   <span className="font-semibold flex-1 text-left">MALE</span>
                   <span className="mx-2">:</span>
-                  <span className="flex-1 text-left">
+                  <span className="flex-2 text-left">
                     {activity.male_participants || 0}
                   </span>
                 </div>
                 <div className="flex items-center">
                   <span className="font-semibold flex-1 text-left">FEMALE</span>
                   <span className="mx-2">:</span>
-                  <span className="flex-1 text-left">
+                  <span className="flex-2 text-left">
                     {activity.female_participants || 0}
                   </span>
                 </div>
@@ -275,11 +253,11 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
             </div>
           </div>
 
-          <hr className="my-6 border-[#040195]" />
+          <hr className="my-4 sm:my-6 border-[#040195]" />
 
           {/* Row 3: Partners */}
-          <div className="mb-6">
-            <h3 className="text-sm font-bold text-[#040195] mb-2 uppercase">PARTNERS</h3>
+          <div className="mb-4 sm:mb-6">
+            <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">PARTNERS</h3>
             {(activity.partner_name || activity.implementing_partners) ? (
               <div className="text-[#040195] text-xs leading-relaxed">
                 {activity.partner_name ? (
@@ -301,11 +279,11 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
             )}
               </div>
 
-          <hr className="my-6 border-[#040195]" />
+          <hr className="my-4 sm:my-6 border-[#040195]" />
 
           {/* Row 4: Budget Overview */}
-          <div className="mb-6">
-            <h3 className="text-sm font-bold text-[#040195] mb-2 uppercase">BUDGET OVERVIEW</h3>
+          <div className="mb-4 sm:mb-6">
+            <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">BUDGET OVERVIEW</h3>
             {activity.budget_amount ? (
               <div className="text-[#040195] text-xs leading-relaxed flex items-center">
                 <span className="flex-1 text-left">{formatBudget(activity.budget_amount)}</span>
@@ -340,9 +318,9 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
           {/* Notes - Optional Row */}
           {activity.notes && (
             <>
-              <hr className="my-6 border-[#040195]" />
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-[#040195] mb-2 uppercase">NOTES</h3>
+              <hr className="my-4 sm:my-6 border-[#040195]" />
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">NOTES</h3>
                 <p className="text-[#040195] text-xs leading-relaxed">
                   {activity.notes}
                 </p>
@@ -352,11 +330,11 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
         </div>
 
         {/* Footer Actions */}
-        <div className=" border-[#040195] p-2 flex justify-end">
+        <div className="border-[#040195] p-2 flex justify-end">
           <button
             onClick={handleEdit}
-            className="px-5 py-2 text-white font-bold hover:opacity-90 transition-opacity 
-            rounded-xl shadow-xl flex items-center gap-2"
+            className="px-4 sm:px-5 py-2 text-white text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity 
+            rounded-xl shadow-xl flex items-center gap-2 w-full sm:w-auto justify-center"
             style={{ backgroundColor: "#4D49FC" }}
           >
             VIEW FULL REPORT
