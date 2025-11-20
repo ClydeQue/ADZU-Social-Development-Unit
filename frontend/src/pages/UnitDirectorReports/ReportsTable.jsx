@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/services/api';
+import ReportDetailModal from './ReportDetailModal';
  
 const ReportsTable = ({ reports }) => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [viewedReports, setViewedReports] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   const toggleRow = (id) => {
     setSelectedRows(prev => 
@@ -22,6 +26,34 @@ const ReportsTable = ({ reports }) => {
       setViewedReports(prev => [...prev, id]);
     }
   };
+
+  // Fetch full activity details when a report is selected for viewing
+  const { data: activityData, isLoading: isLoadingActivity, error: activityError } = useQuery({
+    queryKey: ['activity', selectedReport],
+    queryFn: async () => {
+      if (!selectedReport) return null;
+      console.log('Fetching activity:', selectedReport);
+      const response = await api.get(`unit-director/activities/${selectedReport}`);
+      console.log('Activity response:', response);
+      // Backend returns { activity: {...} }
+      return response.activity || response;
+    },
+    enabled: !!selectedReport,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
+  const handleViewReport = (reportId) => {
+    console.log('View report clicked:', reportId);
+    markAsViewed(reportId);
+    setSelectedReport(reportId);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedReport(null);
+  };
+
+  const currentReport = reports.find(r => r.id === selectedReport);
 
   return (
     <div 
@@ -98,7 +130,7 @@ const ReportsTable = ({ reports }) => {
               <div className="text-[#4D49FC] text-[0.7rem] whitespace-nowrap">{report.submitted}</div>
               <div className="flex justify-end gap-1.5">
                 <button 
-                  onClick={() => markAsViewed(report.id)}
+                  onClick={() => handleViewReport(report.id)}
                   className="px-3 py-0.5 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#3D39EC] transition-colors whitespace-nowrap"
                 >
                   View
@@ -115,6 +147,42 @@ const ReportsTable = ({ reports }) => {
         })}
         </div>
       </div>
+
+      {/* Report Detail Modal */}
+      {selectedReport && currentReport && (
+        isLoadingActivity ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg p-8 shadow-xl">
+              <div className="text-[#4D49FC] text-lg font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Loading report details...
+              </div>
+            </div>
+          </div>
+        ) : activityError ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={handleCloseModal}>
+            <div className="bg-white rounded-lg p-8 shadow-xl max-w-md">
+              <div className="text-red-600 text-lg font-semibold mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Error Loading Report
+              </div>
+              <p className="text-gray-700 mb-4">
+                {activityError?.message || 'Failed to load activity details'}
+              </p>
+              <button 
+                onClick={handleCloseModal}
+                className="px-4 py-2 bg-[#4D49FC] text-white rounded-md hover:bg-[#3D39EC] transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ) : activityData ? (
+          <ReportDetailModal
+            report={currentReport}
+            activity={activityData}
+            onClose={handleCloseModal}
+          />
+        ) : null
+      )}
     </div>
   );
 };

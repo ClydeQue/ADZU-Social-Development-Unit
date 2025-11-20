@@ -326,7 +326,7 @@ const WelcomePage = () => {
                       {error && (
                         <div className="mt-3 lg:mt-4">
                           {lockoutSeconds > 0 ? (
-                            <div className="text-red-600 text-xs lg:text-sm font-medium text-center">
+                            <div className ="text-red-600 text-xs lg:text-sm font-medium text-center">
                               <div>Too many failed attempts</div>
                               <div className="mt-1">Try again in <span className="font-bold">{lockoutSeconds}</span>s</div>
                             </div>
