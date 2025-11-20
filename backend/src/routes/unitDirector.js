@@ -321,4 +321,44 @@ router.get(
   }
 );
 
+// Get single activity by ID (for Unit Director to view any activity)
+router.get(
+  "/activities/:activityId",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { activityId } = req.params;
+
+      const { data: activity, error } = await supabase
+        .from("activities")
+        .select(`
+          *,
+          programs(
+            id, 
+            title, 
+            office_id,
+            offices(id, name, acronym)
+          )
+        `)
+        .eq("id", activityId)
+        .single();
+
+      if (error) {
+        console.error("Get activity query error:", error);
+        throw error;
+      }
+
+      if (!activity) {
+        return res.status(404).json({ error: "Activity not found" });
+      }
+
+      res.json({ activity });
+    } catch (error) {
+      console.error("Unit director get activity error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 module.exports = router;
