@@ -20,7 +20,6 @@ export default function ACCAReports() {
         <OfficeReports 
           officeId={officeId} 
           officeColor="#040195" 
-          officeLogo="/images/acca_logo_small.webp"
           basePath="/office/acca"
         />
       </div>

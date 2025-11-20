@@ -338,8 +338,8 @@ router.post("/activities", authenticateToken, async (req, res) => {
 
     // Validate required fields
     if (!activityData.activity_name || !activityData.program_id) {
-      return res.status(400).json({
-        error: "activity_name and program_id are required",
+      return res.status(400).json({ 
+        error: "activity_name and program_id are required" 
       });
     }
 
@@ -355,10 +355,7 @@ router.post("/activities", authenticateToken, async (req, res) => {
     }
 
     // Check if user has access to this office
-    if (
-      req.user.userType !== "unit_director" &&
-      req.user.office_id != program.office_id
-    ) {
+    if (req.user.userType !== "unit_director" && req.user.office_id != program.office_id) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -368,9 +365,9 @@ router.post("/activities", authenticateToken, async (req, res) => {
       activity_name: activityData.activity_name,
       start_date: activityData.start_date || null,
       end_date: activityData.end_date || null,
-      participants_count: activityData.participants_count
-        ? parseInt(activityData.participants_count)
-        : 0,
+      participants_count: activityData.participants_count ? parseInt(activityData.participants_count) : 0,
+      male_participants: activityData.male_participants ? parseInt(activityData.male_participants) : 0,
+      female_participants: activityData.female_participants ? parseInt(activityData.female_participants) : 0,
       venue: activityData.venue || null,
       venue_street: activityData.venue_street || null,
       venue_barangay: activityData.venue_barangay || null,
@@ -382,16 +379,12 @@ router.post("/activities", authenticateToken, async (req, res) => {
       partner_type: activityData.partner_type || null,
       partner_nature: activityData.partner_nature || null,
       budget: activityData.budget ? parseFloat(activityData.budget) : null,
-      allocated_budget: activityData.allocated_budget
-        ? parseFloat(activityData.allocated_budget)
-        : 0,
-      liquidated_budget: activityData.liquidated_budget
-        ? parseFloat(activityData.liquidated_budget)
-        : 0,
-      sdg_number: activityData.sdg_number
-        ? parseInt(activityData.sdg_number)
-        : null,
-      status: activityData.status || "pending",
+      allocated_budget: activityData.allocated_budget ? parseFloat(activityData.allocated_budget) : 0,
+      liquidated_budget: activityData.liquidated_budget ? parseFloat(activityData.liquidated_budget) : 0,
+      budget_amount: activityData.budget_amount ? parseFloat(activityData.budget_amount) : null,
+      budget_type: activityData.budget_type || null,
+      sdg_number: activityData.sdg_number ? parseInt(activityData.sdg_number) : null,
+      status: activityData.status || 'pending',
       notes: activityData.notes || null,
       created_by: userId,
     };
@@ -401,7 +394,7 @@ router.post("/activities", authenticateToken, async (req, res) => {
     // Create the activity
     const { data: createdActivity, error: createError } = await supabase
       .from("activities")
-      .insert([newActivity])
+      .insert(newActivity)
       .select()
       .single();
 
@@ -412,15 +405,15 @@ router.post("/activities", authenticateToken, async (req, res) => {
 
     console.log("Activity created successfully:", createdActivity);
 
-    res.status(201).json({
+    res.status(201).json({ 
       message: "Activity created successfully",
-      activity: createdActivity,
+      activity: createdActivity 
     });
   } catch (error) {
     console.error("Create activity error:", error);
-    res.status(500).json({
+    res.status(500).json({ 
       error: "Server error",
-      details: error.message,
+      details: error.message 
     });
   }
 });
@@ -616,26 +609,31 @@ router.get("/activities/:activityId", authenticateToken, async (req, res) => {
 
     const { data: activity, error } = await supabase
       .from("activities")
-      .select(
-        `
+      .select(`
         *,
-        programs(id, title, office_id)
-      `
-      )
+        programs(
+          id, 
+          title, 
+          office_id,
+          offices(id, name, acronym)
+        )
+      `)
       .eq("id", activityId)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Get activity query error:", error);
+      throw error;
+    }
 
     if (!activity) {
       return res.status(404).json({ error: "Activity not found" });
     }
 
+    console.log("Activity data:", JSON.stringify(activity, null, 2));
+
     // Check if user has access to this office
-    if (
-      req.user.userType !== "unit_director" &&
-      req.user.office_id != activity.programs.office_id
-    ) {
+    if (req.user.userType !== "unit_director" && req.user.office_id != activity.programs.office_id) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -671,53 +669,27 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     }
 
     // Check if user has access to this office
-    if (
-      req.user.userType !== "unit_director" &&
-      req.user.office_id != existingActivity.programs.office_id
-    ) {
+    if (req.user.userType !== "unit_director" && req.user.office_id != existingActivity.programs.office_id) {
       return res.status(403).json({ error: "Access denied" });
     }
 
     // Prepare update data with only valid fields
     const allowedFields = [
-      "activity_name",
-      "program_id",
-      "start_date",
-      "end_date",
-      "participants_count",
-      "venue",
-      "objectives",
-      "implementing_partners",
-      "budget",
-      "sdg_number",
-      "status",
-      "notes",
-      "allocated_budget",
-      "liquidated_budget",
-      "partner_name",
-      "partner_type",
-      "partner_nature",
-      "venue_street",
-      "venue_barangay",
-      "venue_city",
-      "venue_province",
+      'activity_name', 'program_id', 'start_date', 'end_date',
+      'participants_count', 'male_participants', 'female_participants',
+      'venue', 'objectives', 'implementing_partners',
+      'budget', 'sdg_number', 'status', 'notes', 'allocated_budget',
+      'liquidated_budget', 'budget_amount', 'budget_type',
+      'partner_name', 'partner_type', 'partner_nature',
+      'venue_street', 'venue_barangay', 'venue_city', 'venue_province'
     ];
 
     const sanitizedData = {};
-    allowedFields.forEach((field) => {
-      if (updateData[field] !== undefined && updateData[field] !== "") {
+    allowedFields.forEach(field => {
+      if (updateData[field] !== undefined && updateData[field] !== '') {
         // Handle numeric fields
-        if (
-          [
-            "participants_count",
-            "budget",
-            "sdg_number",
-            "allocated_budget",
-            "liquidated_budget",
-          ].includes(field)
-        ) {
-          const numValue =
-            updateData[field] === null ? null : Number(updateData[field]);
+        if (['participants_count', 'male_participants', 'female_participants', 'budget', 'sdg_number', 'allocated_budget', 'liquidated_budget', 'budget_amount'].includes(field)) {
+          const numValue = updateData[field] === null ? null : Number(updateData[field]);
           sanitizedData[field] = isNaN(numValue) ? null : numValue;
         } else {
           sanitizedData[field] = updateData[field];
@@ -745,15 +717,15 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
 
     console.log("Activity updated successfully:", updatedActivity);
 
-    res.json({
+    res.json({ 
       message: "Activity updated successfully",
-      activity: updatedActivity,
+      activity: updatedActivity 
     });
   } catch (error) {
     console.error("Update activity error:", error);
-    res.status(500).json({
+    res.status(500).json({ 
       error: "Server error",
-      details: error.message,
+      details: error.message 
     });
   }
 });
@@ -766,10 +738,7 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
     const { officeId } = req.params;
 
     // Check if user has access to this office
-    if (
-      req.user.userType !== "unit_director" &&
-      req.user.office_id != officeId
-    ) {
+    if (req.user.userType !== "unit_director" && req.user.office_id != officeId) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -781,14 +750,13 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
 
     if (programsError) throw programsError;
 
-    const programIds = programs.map((p) => p.id);
+    const programIds = programs.map(p => p.id);
     let activities = [];
-
+    
     if (programIds.length > 0) {
       const { data: activitiesData, error: activitiesError } = await supabase
         .from("activities")
-        .select(
-          `
+        .select(`
           id,
           activity_name,
           start_date,
@@ -799,8 +767,7 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
           objectives,
           notes,
           programs(id, title)
-        `
-        )
+        `)
         .in("program_id", programIds)
         .order("start_date", { ascending: true });
 

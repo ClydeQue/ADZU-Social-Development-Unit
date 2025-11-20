@@ -3,15 +3,16 @@ import PropTypes from 'prop-types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import OfficeService from '@/services/officeService';
+import ActivityDetailModal from './ActivityDetailModal';
 
 /**
  * Reusable Office Projects Component
  * Displays programs and activities in a grid card layout
  */
-export default function OfficeReports({ officeId, officeColor = '#4D49FC', officeLogo, basePath }) {
-  const [sortBy, setSortBy] = useState('');
+export default function OfficeReports({ officeId, officeColor = '#4D49FC', basePath }) {
   const [deleteMode, setDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedActivityId, setSelectedActivityId] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -21,6 +22,13 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
     queryFn: () => OfficeService.getOfficeReports(officeId),
     enabled: !!officeId,
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Fetch detailed activity data when an activity is selected
+  const { data: selectedActivity } = useQuery({
+    queryKey: ['activity', selectedActivityId],
+    queryFn: () => OfficeService.getActivity(selectedActivityId),
+    enabled: !!selectedActivityId,
   });
 
   // Toggle delete mode
@@ -88,8 +96,13 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
   // Handle clicking on a project card
   const handleProjectClick = (projectId) => {
     if (!deleteMode) {
-      navigate(`${basePath}/edit-activity/${projectId}`);
+      setSelectedActivityId(projectId);
     }
+  };
+
+  // Close the activity detail modal
+  const closeModal = () => {
+    setSelectedActivityId(null);
   };
 
   if (isLoading) {
@@ -107,8 +120,19 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
   }
 
   return (
-    <div className="h-full flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
-      {/* Projects Grid with Action Buttons on Right */}
+    <>
+      {/* Activity Detail Modal */}
+      {selectedActivityId && selectedActivity && (
+        <ActivityDetailModal
+          activity={selectedActivity}
+          onClose={closeModal}
+          officeColor={officeColor}
+          basePath={basePath}
+        />
+      )}
+
+      <div className="h-full flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
+        {/* Projects Grid with Action Buttons on Right */}
       {projects.length > 0 ? (
         <div className="flex gap-4 h-full">
           {/* Grid Container - Full Height with padding to prevent border cutoff */}
@@ -244,14 +268,14 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', offic
           </p>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
 OfficeReports.propTypes = {
   officeId: PropTypes.string.isRequired,
   officeColor: PropTypes.string,
-  officeLogo: PropTypes.string,
   basePath: PropTypes.string.isRequired,
 };
 

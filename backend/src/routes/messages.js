@@ -29,21 +29,32 @@ router.get("/all", authenticateToken, async (req, res) => {
 
     if (error) throw error;
 
-    // Get user names
+    // Get user names and office info
     const userIds = new Set();
     messages?.forEach((msg) => {
       userIds.add(msg.sender_id);
       userIds.add(msg.receiver_id);
     });
 
-    const { data: users } = await supabase
-      .from("office_credentials")
-      .select("id, name, user_type")
-      .in("id", Array.from(userIds));
+    let users = [];
+    if (userIds.size > 0) {
+      const { data: fetchedUsers } = await supabase
+        .from("office_credentials")
+        .select("id, name, user_type, office_id, offices(name, acronym)")
+        .in("id", Array.from(userIds));
+      users = fetchedUsers || [];
+    }
 
     const userMap = {};
     users?.forEach((u) => {
-      userMap[u.id] = u;
+      const displayName =
+        u.user_type === "unit_director"
+          ? "Unit Director"
+          : u.offices?.name || u.name;
+      userMap[u.id] = {
+        name: displayName,
+        user_type: u.user_type,
+      };
     });
 
     // Format all messages
@@ -113,22 +124,34 @@ router.get("/", authenticateToken, async (req, res) => {
 
     console.log(`Found ${messages?.length || 0} messages`);
 
-    // Get sender and receiver names separately
+    // Get sender and receiver names with office info
     const userIds = new Set();
     messages?.forEach((msg) => {
       userIds.add(msg.sender_id);
       userIds.add(msg.receiver_id);
     });
 
-    // Fetch user names
-    const { data: users } = await supabase
-      .from("office_credentials")
-      .select("id, name, user_type")
-      .in("id", Array.from(userIds));
+    // Fetch user names with office details
+    let users = [];
+    if (userIds.size > 0) {
+      const { data: fetchedUsers } = await supabase
+        .from("office_credentials")
+        .select("id, name, user_type, office_id, offices(name, acronym)")
+        .in("id", Array.from(userIds));
+      users = fetchedUsers || [];
+    }
 
     const userMap = {};
     users?.forEach((u) => {
-      userMap[u.id] = u;
+      const displayName =
+        u.user_type === "unit_director"
+          ? "Unit Director"
+          : u.offices?.name || u.name;
+      userMap[u.id] = {
+        name: displayName,
+        user_type: u.user_type,
+        office: u.offices?.name,
+      };
     });
 
     // Format messages for frontend
@@ -153,12 +176,19 @@ router.get("/", authenticateToken, async (req, res) => {
           createdAt: msg.created_at,
           isSent: isSender,
           otherPartyId: otherPartyId,
+          office: otherParty?.office,
         };
       }) || [];
 
     // Group by other party and get only the latest message from each
+    // Filter out messages where sender and receiver are the same (shouldn't happen but just in case)
     const conversationMap = new Map();
     formattedMessages.forEach((msg) => {
+      // Skip if messaging yourself
+      if (msg.senderId === msg.receiverId) {
+        return;
+      }
+
       const existing = conversationMap.get(msg.otherPartyId);
       if (!existing || new Date(msg.createdAt) > new Date(existing.createdAt)) {
         conversationMap.set(msg.otherPartyId, msg);
@@ -187,7 +217,8 @@ router.get("/", authenticateToken, async (req, res) => {
 // Send a new message
 router.post("/", authenticateToken, async (req, res) => {
   try {
-    let { receiverId, receiverType, subject, message } = req.body;
+    let { receiverId, receiverType, subject, message, clientTimestamp } =
+      req.body;
     const senderId = req.user.id;
     const senderType = req.user.userType;
 
@@ -238,28 +269,41 @@ router.post("/", authenticateToken, async (req, res) => {
     }
 
     // Validate messaging rules:
-    // - Office users can only message unit_director
+    // - Office users can ONLY message unit_director
     // - Unit director can message any office user
-    if (senderType !== "unit_director" && receiverType !== "unit_director") {
+    // - At least one party must be unit_director
+    if (senderType === "office_user" && receiverType !== "unit_director") {
       return res.status(403).json({
         error: "Office users can only send messages to Unit Director",
       });
     }
 
-    // Create message
+    if (senderType !== "unit_director" && receiverType !== "unit_director") {
+      return res.status(403).json({
+        error: "Messages must involve Unit Director",
+      });
+    }
+
+    // Create message with client timestamp
+    const messageData = {
+      sender_id: senderId,
+      sender_type: senderType,
+      receiver_id: receiverId,
+      receiver_type: receiverType,
+      subject: subject,
+      message: message,
+      is_read: false,
+    };
+
+    // Use client timestamp if provided (ensures correct local time)
+    if (clientTimestamp) {
+      messageData.created_at = clientTimestamp;
+      messageData.updated_at = clientTimestamp;
+    }
+
     const { data: newMessage, error } = await supabase
       .from("messages")
-      .insert([
-        {
-          sender_id: senderId,
-          sender_type: senderType,
-          receiver_id: receiverId,
-          receiver_type: receiverType,
-          subject: subject,
-          message: message,
-          is_read: false,
-        },
-      ])
+      .insert([messageData])
       .select()
       .single();
 

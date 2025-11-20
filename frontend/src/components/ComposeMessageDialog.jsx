@@ -59,7 +59,7 @@ export default function ComposeMessageDialog({ onClose, replyTo }) {
 
   const handleSend = () => {
     // Validation
-    if (!formData.receiverId) {
+    if (user?.userType === "unit_director" && !formData.receiverId) {
       alert("Please select a recipient");
       return;
     }

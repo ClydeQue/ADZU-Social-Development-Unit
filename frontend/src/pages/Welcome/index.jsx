@@ -298,7 +298,7 @@ const WelcomePage = () => {
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 lg:right-4 top-1/2 transform translate-y-[-40%] z-10 hover:opacity-70 transition-opacity"
+                            className="absolute right-3 lg:right-4 top-1/2 transform translate-y-[-40%] z-10 hover:cursor-pointer"
                             disabled={loading || lockoutSeconds > 0}
                           >
                             <img
@@ -312,9 +312,7 @@ const WelcomePage = () => {
 
                       {/* Login Button with Google Icon */}
                       <div className="flex items-center justify-center gap-2 lg:gap-3 pt-1 lg:pt-2">
-                        <div className="w-10 lg:w-12 h-10 lg:h-12 bg-[#4D49FC] rounded-full flex items-center justify-center shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer">
-                          <span className="text-white text-lg lg:text-xl font-bold"> G</span>
-                        </div>
+                     
                         <button
                           type="submit"
                           disabled={loading || lockoutSeconds > 0}

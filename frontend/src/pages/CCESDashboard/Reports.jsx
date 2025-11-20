@@ -20,7 +20,6 @@ export default function CCESReports() {
         <OfficeReports 
           officeId={officeId} 
           officeColor="#040195" 
-          officeLogo="/images/cces_logo_small.webp"
           basePath="/office/cces"
         />
       </div>

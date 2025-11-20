@@ -19,8 +19,7 @@ export default function ACLGReports() {
       <div className="h-full flex flex-col p-3">
         <OfficeReports 
           officeId={officeId} 
-          officeColor="#1976D2" 
-          officeLogo="/images/aclg_logo_small.webp"
+          officeColor="#040195" 
           basePath="/office/aclg"
         />
       </div>

@@ -18,7 +18,7 @@ function InboxDropdown({ onMessageClick }) {
   const [selectedContact, setSelectedContact] = useState(null);
   const inboxRef = useRef(null);
 
-  // Fetch messages
+  // Fetch messages (only when component is mounted)
   const {
     data: messagesData,
     isLoading,
@@ -30,6 +30,7 @@ function InboxDropdown({ onMessageClick }) {
     select: (data) => data || { messages: [], unread: 0 },
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: true,
+    retry: false, // Don't retry on error to avoid blocking login
   });
 
   const messages = messagesData?.messages || [];

@@ -37,14 +37,22 @@ class MessageService {
    * @param {string} receiverType - Type of receiver (unit_director or office_user)
    * @param {string} subject - Message subject
    * @param {string} message - Message content
+   * @param {string} clientTimestamp - Device's current timestamp
    */
-  async sendMessage(receiverId, receiverType, subject, message) {
+  async sendMessage(
+    receiverId,
+    receiverType,
+    subject,
+    message,
+    clientTimestamp
+  ) {
     try {
       const response = await api.post("messages", {
         receiverId,
         receiverType,
         subject,
         message,
+        clientTimestamp,
       });
       return response;
     } catch (error) {

@@ -19,8 +19,7 @@ export default function ALTECReports() {
       <div className="h-full flex flex-col p-3">
         <OfficeReports 
           officeId={officeId} 
-          officeColor="#7B1FA2" 
-          officeLogo="/images/altec_logo_small.webp"
+          officeColor="#040195" 
           basePath="/office/altec"
         />
       </div>

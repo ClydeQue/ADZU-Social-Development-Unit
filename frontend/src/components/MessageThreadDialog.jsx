@@ -25,6 +25,7 @@ export default function MessageThreadDialog({ contact, onClose }) {
   const { data: allMessagesData } = useQuery({
     queryKey: ["allMessages"],
     queryFn: MessageService.getAllMessages,
+    refetchOnWindowFocus: true,
   });
 
   // Filter messages for this conversation
@@ -46,7 +47,8 @@ export default function MessageThreadDialog({ contact, onClose }) {
         data.receiverId,
         data.receiverType,
         data.subject,
-        data.message
+        data.message,
+        data.clientTimestamp
       ),
     onSuccess: () => {
       queryClient.invalidateQueries(["allMessages"]);
@@ -82,11 +84,15 @@ export default function MessageThreadDialog({ contact, onClose }) {
       return;
     }
 
+    // Get device's current time in ISO format
+    const clientTimestamp = new Date().toISOString();
+
     sendMessageMutation.mutate({
       receiverId: contact.id,
       receiverType: contact.type,
       subject: subject.trim(),
       message: messageText.trim(),
+      clientTimestamp: clientTimestamp,
     });
   };
 
@@ -113,11 +119,13 @@ export default function MessageThreadDialog({ contact, onClose }) {
               className="text-xl font-bold"
               style={{ fontFamily: "Inter, sans-serif" }}
             >
-              {contact.name}
+              {contact.office || contact.name}
             </h2>
-            <p className="text-xs text-white text-opacity-80">
-              {contact.office || ""}
-            </p>
+            {contact.office && contact.name !== contact.office && (
+              <p className="text-xs text-white text-opacity-80">
+                {contact.name}
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -162,7 +170,7 @@ export default function MessageThreadDialog({ contact, onClose }) {
                           }`}
                           style={{ fontFamily: "Inter, sans-serif" }}
                         >
-                          {isSent ? contact.name : message.sender}
+                          {isSent ? "You" : message.sender}
                         </p>
                         {isSent && (
                           <button
@@ -174,14 +182,50 @@ export default function MessageThreadDialog({ contact, onClose }) {
                           </button>
                         )}
                       </div>
-                      <p
-                        className={`text-sm mb-1 whitespace-pre-wrap ${
-                          isSent ? "text-white" : "text-gray-700"
-                        }`}
-                        style={{ fontFamily: "Inter, sans-serif" }}
-                      >
-                        {message.message}
-                      </p>
+                      {message.subject && (
+                        <div className="mb-2">
+                          <p
+                            className={`text-[9px] uppercase tracking-wide mb-0.5 ${
+                              isSent
+                                ? "text-white text-opacity-60"
+                                : "text-gray-400"
+                            }`}
+                            style={{ fontFamily: "Inter, sans-serif" }}
+                          >
+                            Subject:
+                          </p>
+                          <p
+                            className={`text-xs font-semibold ${
+                              isSent
+                                ? "text-white text-opacity-90"
+                                : "text-gray-700"
+                            }`}
+                            style={{ fontFamily: "Inter, sans-serif" }}
+                          >
+                            {message.subject}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <p
+                          className={`text-[9px] uppercase tracking-wide mb-0.5 ${
+                            isSent
+                              ? "text-white text-opacity-60"
+                              : "text-gray-400"
+                          }`}
+                          style={{ fontFamily: "Inter, sans-serif" }}
+                        >
+                          Message:
+                        </p>
+                        <p
+                          className={`text-sm mb-1 whitespace-pre-wrap ${
+                            isSent ? "text-white" : "text-gray-700"
+                          }`}
+                          style={{ fontFamily: "Inter, sans-serif" }}
+                        >
+                          {message.message}
+                        </p>
+                      </div>
                       <p
                         className={`text-[9px] ${
                           isSent
