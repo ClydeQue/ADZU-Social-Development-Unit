@@ -20,18 +20,26 @@ router.get("/all", authenticateToken, async (req, res) => {
     if (userType === "unit_director") {
       query = query.or(`receiver_id.eq.${userId},sender_id.eq.${userId}`);
     } else {
-      query = query.or(
-        `and(sender_id.eq.${userId},receiver_type.eq.unit_director),and(receiver_id.eq.${userId},sender_type.eq.unit_director)`
-      );
+      // Office users can ONLY see messages where THEY are involved
+      // Either they sent it OR they received it
+      query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
     }
 
     const { data: messages, error } = await query;
 
     if (error) throw error;
 
+    // EXTRA SECURITY: For office users, filter out any messages where they are NOT involved
+    let filteredMessages = messages;
+    if (userType !== "unit_director") {
+      filteredMessages = messages?.filter(
+        (msg) => msg.sender_id === userId || msg.receiver_id === userId
+      );
+    }
+
     // Get user names and office info
     const userIds = new Set();
-    messages?.forEach((msg) => {
+    filteredMessages?.forEach((msg) => {
       userIds.add(msg.sender_id);
       userIds.add(msg.receiver_id);
     });
@@ -59,7 +67,7 @@ router.get("/all", authenticateToken, async (req, res) => {
 
     // Format all messages
     const formattedMessages =
-      messages?.map((msg) => {
+      filteredMessages?.map((msg) => {
         const isSender = msg.sender_id === userId;
 
         return {
@@ -109,10 +117,9 @@ router.get("/", authenticateToken, async (req, res) => {
       // Unit Director sees all messages sent to them or sent by them
       query = query.or(`receiver_id.eq.${userId},sender_id.eq.${userId}`);
     } else {
-      // Office users see messages between them and unit director
-      query = query.or(
-        `and(sender_id.eq.${userId},receiver_type.eq.unit_director),and(receiver_id.eq.${userId},sender_type.eq.unit_director)`
-      );
+      // Office users can ONLY see messages where THEY are involved
+      // Either they sent it OR they received it
+      query = query.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
     }
 
     const { data: messages, error } = await query;
@@ -124,9 +131,17 @@ router.get("/", authenticateToken, async (req, res) => {
 
     console.log(`Found ${messages?.length || 0} messages`);
 
+    // EXTRA SECURITY: For office users, filter out any messages where they are NOT involved
+    let filteredMessages = messages;
+    if (userType !== "unit_director") {
+      filteredMessages = messages?.filter(
+        (msg) => msg.sender_id === userId || msg.receiver_id === userId
+      );
+    }
+
     // Get sender and receiver names with office info
     const userIds = new Set();
-    messages?.forEach((msg) => {
+    filteredMessages?.forEach((msg) => {
       userIds.add(msg.sender_id);
       userIds.add(msg.receiver_id);
     });
@@ -156,7 +171,7 @@ router.get("/", authenticateToken, async (req, res) => {
 
     // Format messages for frontend
     const formattedMessages =
-      messages?.map((msg) => {
+      filteredMessages?.map((msg) => {
         const isSender = msg.sender_id === userId;
         const otherPartyId = isSender ? msg.receiver_id : msg.sender_id;
         const otherParty = userMap[otherPartyId];
