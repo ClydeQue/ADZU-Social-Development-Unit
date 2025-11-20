@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { getOfficeLogo } from '@/utils/officeLogos';
 
+
 /**
  * Activity Detail Modal Component
  * Displays detailed information about an activity in a centered floating modal

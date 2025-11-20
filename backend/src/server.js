@@ -42,10 +42,11 @@ app.use(
 // Rate limiting - for production to prevent abuse on authentication endpoints
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs for general endpoints
+  max: 500, // Increased from 100 to 500 requests per 15 minutes
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  skip: (req) => req.method === 'OPTIONS', // Skip rate limiting for preflight requests
 });
 
 app.use(limiter);
@@ -75,11 +76,12 @@ app.use((req, res, next) => {
       "Access-Control-Allow-Headers",
       "Content-Type, Authorization, X-Requested-With"
     );
+    res.setHeader("Access-Control-Max-Age", "86400"); // Cache preflight for 24 hours
   }
 
-  // Handle preflight
+  // Handle preflight - return 204 instead of 200 for better caching
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    return res.status(204).end();
   }
 
   next();
