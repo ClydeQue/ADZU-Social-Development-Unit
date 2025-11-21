@@ -11,7 +11,7 @@ const NotificationService = {
   async getNotifications() {
     try {
       console.log("Fetching notifications...");
-      const response = await api.get("/notifications");
+      const response = await api.get("api/notifications");
       console.log("Notifications response:", response);
       // Ensure we always return a valid data structure
       return response || { items: [], unread: 0 };
@@ -34,7 +34,7 @@ const NotificationService = {
    */
   async markAsRead(notificationId) {
     try {
-      const response = await api.put(`/notifications/${notificationId}/read`);
+      const response = await api.put(`api/notifications/${notificationId}/read`);
       return response;
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -50,7 +50,7 @@ const NotificationService = {
     try {
       console.log("Testing notifications endpoint...");
       // Use POST instead of GET to send user context in body
-      const response = await api.post("/notifications/test", {
+      const response = await api.post("api/notifications/test", {
         userContext: {
           timestamp: new Date().toISOString(),
           action: "test-notification",
