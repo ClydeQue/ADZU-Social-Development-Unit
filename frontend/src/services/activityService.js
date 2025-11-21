@@ -11,7 +11,7 @@ class ActivityService {
    * Get activities for a program
    */
   async getActivitiesByProgram(programId) {
-    const response = await api.get(`/api/programs/${programId}/activities`);
+    const response = await api.get(`api/programs/${programId}/activities`);
     return response.data;
   }
 
@@ -19,7 +19,7 @@ class ActivityService {
    * Get activity by ID
    */
   async getActivityById(programId, activityId) {
-    const response = await api.get(`/api/programs/${programId}/activities/${activityId}`);
+    const response = await api.get(`api/programs/${programId}/activities/${activityId}`);
     return response.data;
   }
 
@@ -29,7 +29,7 @@ class ActivityService {
    * @param {object} activityData - Activity data with office-specific attributes
    */
   async createActivity(programId, activityData) {
-    const response = await api.post(`/api/programs/${programId}/activities`, activityData);
+    const response = await api.post(`api/programs/${programId}/activities`, activityData);
     return response.data;
   }
 
@@ -41,7 +41,7 @@ class ActivityService {
    */
   async updateActivity(programId, activityId, activityData) {
     const response = await api.put(
-      `/api/programs/${programId}/activities/${activityId}`, 
+      `api/programs/${programId}/activities/${activityId}`, 
       activityData
     );
     return response.data;
@@ -51,7 +51,7 @@ class ActivityService {
    * Delete activity
    */
   async deleteActivity(programId, activityId) {
-    return await api.delete(`/api/programs/${programId}/activities/${activityId}`);
+    return await api.delete(`api/programs/${programId}/activities/${activityId}`);
   }
 
   /**
@@ -59,7 +59,7 @@ class ActivityService {
    */
   async getMyActivities(filters = {}) {
     const queryParams = new URLSearchParams(filters).toString();
-    const endpoint = queryParams ? `/api/activities/my?${queryParams}` : "/api/activities/my";
+    const endpoint = queryParams ? `api/activities/my?${queryParams}` : "api/activities/my";
     const response = await api.get(endpoint);
     return response.data;
   }
@@ -71,8 +71,8 @@ class ActivityService {
   async getActivitiesByOffice(officeId, filters = {}) {
     const queryParams = new URLSearchParams(filters).toString();
     const endpoint = queryParams 
-      ? `/api/office/${officeId}/activities?${queryParams}` 
-      : `/api/office/${officeId}/activities`;
+      ? `api/office/${officeId}/activities?${queryParams}` 
+      : `api/office/${officeId}/activities`;
     const response = await api.get(endpoint);
     return response.data;
   }
@@ -82,7 +82,7 @@ class ActivityService {
    */
   async bulkCreateActivities(programId, activitiesArray) {
     const response = await api.post(
-      `/api/programs/${programId}/activities/bulk`, 
+      `api/programs/${programId}/activities/bulk`, 
       { activities: activitiesArray }
     );
     return response.data;

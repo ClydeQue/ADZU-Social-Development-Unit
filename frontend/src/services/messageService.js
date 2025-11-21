@@ -10,7 +10,7 @@ class MessageService {
    */
   async getMessages() {
     try {
-      const response = await api.get("/api/messages");
+      const response = await api.get("api/messages");
       return response;
     } catch (error) {
       console.error("Get messages error:", error);
@@ -23,7 +23,7 @@ class MessageService {
    */
   async getAllMessages() {
     try {
-      const response = await api.get("/api/messages/all");
+      const response = await api.get("api/messages/all");
       return response;
     } catch (error) {
       console.error("Get all messages error:", error);
@@ -47,7 +47,7 @@ class MessageService {
     clientTimestamp
   ) {
     try {
-      const response = await api.post("/api/messages", {
+      const response = await api.post("api/messages", {
         receiverId,
         receiverType,
         subject,
@@ -67,7 +67,7 @@ class MessageService {
    */
   async markAsRead(messageId) {
     try {
-      const response = await api.put(`/api/messages/${messageId}/read`);
+      const response = await api.put(`api/messages/${messageId}/read`);
       return response;
     } catch (error) {
       console.error("Mark message as read error:", error);
@@ -81,7 +81,7 @@ class MessageService {
    */
   async deleteMessage(messageId) {
     try {
-      const response = await api.delete(`/api/messages/${messageId}`);
+      const response = await api.delete(`api/messages/${messageId}`);
       return response;
     } catch (error) {
       console.error("Delete message error:", error);
@@ -94,7 +94,7 @@ class MessageService {
    */
   async getOffices() {
     try {
-      const response = await api.get("/api/messages/offices");
+      const response = await api.get("api/messages/offices");
       return response;
     } catch (error) {
       console.error("Get offices error:", error);

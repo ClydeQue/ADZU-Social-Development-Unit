@@ -21,7 +21,7 @@ class ProgramService {
    * Get programs for current office user
    */
   async getPrograms() {
-    const response = await api.get("/api/programs");
+    const response = await api.get("api/programs");
     return response.data;
   }
 
@@ -38,7 +38,7 @@ class ProgramService {
    * Get program by ID
    */
   async getProgramById(programId) {
-    const response = await api.get(`/api/programs/${programId}`);
+    const response = await api.get(`api/programs/${programId}`);
     return response.program;
   }
 
@@ -47,7 +47,7 @@ class ProgramService {
    * Note: In the future, programs may be fixed per office
    */
   async createProgram(programData) {
-    const response = await api.post("/api/programs", programData);
+    const response = await api.post("api/programs", programData);
     return response.program;
   }
 
@@ -55,7 +55,7 @@ class ProgramService {
    * Update program
    */
   async updateProgram(programId, programData) {
-    const response = await api.put(`/api/programs/${programId}`, programData);
+    const response = await api.put(`api/programs/${programId}`, programData);
     return response.program;
   }
 
