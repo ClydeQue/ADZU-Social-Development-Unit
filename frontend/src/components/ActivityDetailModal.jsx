@@ -89,7 +89,7 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)', overflow: 'hidden' }}
+      style={{ backgroundColor: 'rgba(4, 1, 149, 0.4)', overflow: 'hidden' }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
