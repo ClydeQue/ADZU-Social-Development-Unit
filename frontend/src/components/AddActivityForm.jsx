@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Add as AddIcon } from '@mui/icons-material';
 import OfficeService from '@/services/officeService';
 import PropTypes from 'prop-types';
+import { SDG_GOALS, getSDGIcon } from '@/utils/sdgData';
 
 /**
  * Reusable Add Activity Form Component
@@ -49,26 +49,6 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
   });
 
   const [showNewProgramInput, setShowNewProgramInput] = useState(false);
-
-  const sdgOptions = [
-    { id: 1, label: '1 - No Poverty' },
-    { id: 2, label: '2 - Zero Hunger' },
-    { id: 3, label: '3 - Good Health and Well Being' },
-    { id: 4, label: '4 - Quality Education' },
-    { id: 5, label: '5 - Gender Equality' },
-    { id: 6, label: '6 - Clean Water and Sanitation' },
-    { id: 7, label: '7 - Affordable and Clean Energy' },
-    { id: 8, label: '8 - Decent Work and Economic Growth' },
-    { id: 9, label: '9 - Industry, Innovation, and Infrastructure' },
-    { id: 10, label: '10 - Reduced Inequalities' },
-    { id: 11, label: '11 - Sustainable Cities and Communities' },
-    { id: 12, label: '12 - Responsible Consumption and Production' },
-    { id: 13, label: '13 - Climate Action' },
-    { id: 14, label: '14 - Life Below Water' },
-    { id: 15, label: '15 - Life On Land' },
-    { id: 16, label: '16 - Peace, Justice, and Strong Institutions' },
-    { id: 17, label: '17 - Partnership for the Goals' }
-  ];
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -125,70 +105,53 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
     navigate(`${basePath}/projects`);
   };
 
-  const handleUpdate = () => {
-    // TODO: Implement update functionality
-    console.log('Update clicked');
-  };
-
   return (
-    <div className="h-full flex flex-col p-3 overflow-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Header Section */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl font-black" style={{ color: officeColor, fontFamily: 'Inter, sans-serif' }}>
-            #ActivityName
+    <div className="h-full flex flex-col p-6 overflow-auto bg-gray-50">
+      <form onSubmit={handleSubmit} className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+        {/* Header with Hashtag and Action Buttons */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl font-bold" style={{ color: officeColor }}>
+            #{formData.projectName || 'dAZurv'}
           </h1>
-          
-          <div className="flex items-center gap-3">
+          <div className="flex gap-3">
             <button
               type="button"
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 text-[#4D49FC] rounded-lg font-semibold hover:bg-[#4D49FC] hover:text-white transition-colors"
-              style={{ borderColor: officeColor, color: officeColor }}
+              className="p-3 rounded-full bg-[#4D49FC] text-white hover:opacity-90 transition-opacity"
+              title="Refresh"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
-            
             <button
               type="button"
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 text-[#4D49FC] rounded-lg font-semibold hover:bg-[#4D49FC] hover:text-white transition-colors"
-              style={{ borderColor: officeColor, color: officeColor }}
+              className="p-3 rounded-full bg-[#4D49FC] text-white hover:opacity-90 transition-opacity"
+              title="Save"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
             </button>
-
             <button
               type="button"
-              onClick={handleUpdate}
-              className="px-6 py-2 text-white rounded-lg font-bold hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: officeColor }}
+              onClick={() => navigate(basePath)}
+              className="px-6 py-2.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] font-semibold hover:bg-gray-50 transition-colors"
             >
-              UPDATE
+              CANCEL
             </button>
-
             <button
               type="submit"
-              className="px-6 py-2 text-white rounded-lg font-bold hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: officeColor }}
+              className="px-6 py-2.5 rounded-lg bg-[#4D49FC] text-white font-semibold hover:opacity-90 transition-opacity"
             >
-              SUBMIT
+              UPDATE
             </button>
           </div>
         </div>
 
-        <p className="text-xs text-gray-400 text-right mb-4">
-          UPDATED | {new Date().toLocaleDateString()} - {new Date().toLocaleTimeString()}
-        </p>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Left Column */}
-          <div className="col-span-2 space-y-4">
-            {/* Project Name */}
+        {/* Form Grid Layout */}
+        <div className="space-y-6">
+          {/* Row 1: Project Name, Program/Component, Status */}
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-bold text-[#040195] mb-2">
                 Project Name
@@ -197,81 +160,141 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 type="text"
                 value={formData.projectName}
                 onChange={(e) => handleInputChange('projectName', e.target.value)}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                placeholder="Enter project name"
-                style={{ focusBorderColor: officeColor }}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                placeholder="ndAZurv"
+                required
               />
             </div>
 
-            {/* Program/Component */}
             <div>
               <label className="block text-sm font-bold text-[#040195] mb-2">
                 Program / Component
               </label>
               <div className="flex gap-2">
                 {programsLoading ? (
-                  <div className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-400">
-                    Loading programs...
+                  <div className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-400">
+                    Loading...
                   </div>
                 ) : (
-                  <>
-                    <select
-                      value={formData.programId}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === 'new') {
-                          setShowNewProgramInput(true);
-                          handleInputChange('programId', '');
-                        } else {
-                          setShowNewProgramInput(false);
-                          handleInputChange('programId', value);
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                      style={{ focusBorderColor: officeColor }}
-                    >
-                      <option value="">Select a program</option>
-                      {programs.map((program) => (
-                        <option key={program.id} value={program.id}>
-                          {program.title}
-                        </option>
-                      ))}
-                      <option value="new">+ Add New Program</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowNewProgramInput(true)}
-                      className="px-4 py-2 border-2 rounded-lg hover:bg-gray-50 transition-colors"
-                      style={{ borderColor: officeColor, color: officeColor }}
-                    >
-                      <AddIcon />
-                    </button>
-                  </>
+                  <select
+                    required
+                    value={formData.programId}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === 'new') {
+                        setShowNewProgramInput(true);
+                        handleInputChange('programId', '');
+                      } else {
+                        setShowNewProgramInput(false);
+                        handleInputChange('programId', value);
+                      }
+                    }}
+                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none bg-white"
+                  >
+                    <option value="">Select program</option>
+                    {programs.map((program) => (
+                      <option key={program.id} value={program.id}>
+                        {program.title}
+                      </option>
+                    ))}
+                  </select>
                 )}
               </div>
-              {showNewProgramInput && (
-                <input
-                  type="text"
-                  value={formData.programComponent}
-                  onChange={(e) => handleInputChange('programComponent', e.target.value)}
-                  className="w-full mt-2 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                  placeholder="Enter new program name"
-                  style={{ focusBorderColor: officeColor }}
-                />
-              )}
             </div>
 
-            {/* Timeline */}
-            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-[#040195] mb-2">
+                Status
+              </label>
+              <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-300 rounded-lg text-center font-bold text-[#040195]">
+                NO STATUS
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: Description (col-span-2), Phase */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <label className="block text-sm font-bold text-[#040195] mb-2">
+                Description
+              </label>
+              <textarea
+                value={formData.objectives}
+                onChange={(e) => handleInputChange('objectives', e.target.value)}
+                rows={4}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none resize-none text-sm"
+                placeholder="It brings you in-depth conversations about candidates shaping Zamboanga's future..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#040195] mb-2">
+                Phase
+              </label>
+              <select
+                value={formData.phase}
+                onChange={(e) => handleInputChange('phase', e.target.value)}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none bg-white"
+                required
+              >
+                <option value="">Select phase</option>
+                <option value="Planning">Planning</option>
+                <option value="Implementation">Implementation</option>
+                <option value="Evaluation">Evaluation</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 3: Objectives, Participant Demographics (2 inputs), Inception & Implementation (side by side) */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-[#040195] mb-2">
+                Objectives
+              </label>
+              <textarea
+                value={formData.objectives}
+                onChange={(e) => handleInputChange('objectives', e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none resize-none text-sm"
+                placeholder="To provide voters with insightful information..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#040195] mb-2">
+                Participant Demographics
+              </label>
+              <div className="space-y-2">
+                <input
+                  type="number"
+                  value={formData.participantsNo}
+                  onChange={(e) => handleInputChange('participantsNo', e.target.value)}
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-center text-sm"
+                  placeholder="Total Numbers"
+                />
+                <input
+                  type="text"
+                  value={formData.classification}
+                  onChange={(e) => handleInputChange('classification', e.target.value)}
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
+                  placeholder="Classification"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Initiation
+                  Inception
                 </label>
                 <input
                   type="date"
                   value={formData.initiation}
                   onChange={(e) => handleInputChange('initiation', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
                 />
               </div>
               <div>
@@ -282,300 +305,268 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                   type="date"
                   value={formData.implementation}
                   onChange={(e) => handleInputChange('implementation', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
                 />
-              </div>
-            </div>
-
-            {/* Number of Participants */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Male Participants
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.male_participants}
-                  onChange={(e) => handleInputChange('male_participants', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                  placeholder="Enter count"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Female Participants
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.female_participants}
-                  onChange={(e) => handleInputChange('female_participants', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                  placeholder="Enter count"
-                />
-              </div>
-            </div>
-
-            {/* Classification and Phase */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Classification
-                </label>
-                <select
-                  value={formData.classification}
-                  onChange={(e) => handleInputChange('classification', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                >
-                  <option value="">Select classification</option>
-                  <option value="Academic">Academic</option>
-                  <option value="Extension">Extension</option>
-                  <option value="Research">Research</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Phase
-                </label>
-                <select
-                  value={formData.phase}
-                  onChange={(e) => handleInputChange('phase', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                >
-                  <option value="">Select phase</option>
-                  <option value="Planning">Planning</option>
-                  <option value="Implementation">Implementation</option>
-                  <option value="Evaluation">Evaluation</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Venue */}
-            <div>
-              <label className="block text-sm font-bold text-[#040195] mb-2">
-                Venue
-              </label>
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="Street"
-                    value={formData.venue.street}
-                    onChange={(e) => handleVenueChange('street', e.target.value)}
-                    className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Room"
-                    value={formData.venue.room}
-                    onChange={(e) => handleVenueChange('room', e.target.value)}
-                    className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                  />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Building"
-                  value={formData.venue.building}
-                  onChange={(e) => handleVenueChange('building', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="Barangay"
-                    value={formData.venue.barangay}
-                    onChange={(e) => handleVenueChange('barangay', e.target.value)}
-                    className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Municipality"
-                    value={formData.venue.municipality}
-                    onChange={(e) => handleVenueChange('municipality', e.target.value)}
-                    className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="City"
-                    value={formData.venue.city}
-                    onChange={(e) => handleVenueChange('city', e.target.value)}
-                    className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Province"
-                    value={formData.venue.province}
-                    onChange={(e) => handleVenueChange('province', e.target.value)}
-                    className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Objectives */}
-            <div>
-              <label className="block text-sm font-bold text-[#040195] mb-2">
-                Objectives
-              </label>
-              <textarea
-                value={formData.objectives}
-                onChange={(e) => handleInputChange('objectives', e.target.value)}
-                rows={4}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none resize-none"
-                placeholder="Enter objectives"
-              />
-            </div>
-
-            {/* Partners */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-bold text-[#040195]">
-                  Partners
-                </label>
-                <button
-                  type="button"
-                  onClick={addPartner}
-                  className="text-sm font-semibold hover:opacity-80"
-                  style={{ color: officeColor }}
-                >
-                  + Add Partner
-                </button>
-              </div>
-              <div className="space-y-3">
-                {formData.partners.map((partner, index) => (
-                  <div key={index} className="flex gap-2 items-start">
-                    <input
-                      type="text"
-                      placeholder="Partner Name"
-                      value={partner.name}
-                      onChange={(e) => handlePartnerChange(index, 'name', e.target.value)}
-                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                    />
-                    <select
-                      value={partner.type}
-                      onChange={(e) => handlePartnerChange(index, 'type', e.target.value)}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                    >
-                      <option value="">Type</option>
-                      <option value="Government">Government</option>
-                      <option value="Private">Private</option>
-                      <option value="NGO">NGO</option>
-                      <option value="Academic">Academic</option>
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="Nature"
-                      value={partner.nature}
-                      onChange={(e) => handlePartnerChange(index, 'nature', e.target.value)}
-                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
-                    />
-                    {formData.partners.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removePartner(index)}
-                        className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Budget */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Budget Amount
-                </label>
-                <input
-                  type="number"
-                  value={formData.budgetAmount}
-                  onChange={(e) => handleInputChange('budgetAmount', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                  placeholder="₱0.00"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-[#040195] mb-2">
-                  Budget Type
-                </label>
-                <select
-                  value={formData.budgetType}
-                  onChange={(e) => handleInputChange('budgetType', e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                >
-                  <option value="external">External Fund</option>
-                  <option value="internal">Internal Fund</option>
-                </select>
               </div>
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-4">
-            {/* Thumbnail Upload */}
-            <div>
-              <label className="block text-sm font-bold text-[#040195] mb-2">
-                Thumbnail
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                {formData.thumbnail ? (
-                  <div className="space-y-2">
-                    <div className="text-sm text-gray-600">{formData.thumbnail.name}</div>
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange('thumbnail', null)}
-                      className="text-sm text-red-500 hover:text-red-600"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <label className="cursor-pointer text-sm font-semibold hover:opacity-80" style={{ color: officeColor }}>
-                      Upload Image
+          {/* Rows 4-6: Venue/City/Partners/Budget/Reports (left 2 cols) + SDG (right col, spans multiple rows) */}
+          <div className="grid grid-cols-3 gap-4">
+            {/* Left side: 2 columns for venue and partners */}
+            <div className="col-span-2 space-y-4">
+              {/* Venue row 1 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-[#040195] mb-2">
+                    Venue
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.venue.building}
+                    onChange={(e) => handleVenueChange('building', e.target.value)}
+                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
+                    placeholder="Street / Room / Building"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[#040195] mb-2">
+                    Town / Barangay
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.venue.barangay}
+                    onChange={(e) => handleVenueChange('barangay', e.target.value)}
+                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
+                    placeholder="Zone III"
+                  />
+                </div>
+              </div>
+
+              {/* Venue row 2 + Sex count */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <input
+                    type="text"
+                    value={formData.venue.city}
+                    onChange={(e) => handleVenueChange('city', e.target.value)}
+                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
+                    placeholder="Municipality / City"
+                  />
+                </div>
+
+                <div>
+                  <input
+                    type="text"
+                    value={formData.venue.province}
+                    onChange={(e) => handleVenueChange('province', e.target.value)}
+                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
+                    placeholder="Province"
+                  />
+                </div>
+              </div>
+
+              {/* Sex count row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-[#040195] mb-2">
+                    Male
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.male_participants}
+                    onChange={(e) => handleInputChange('male_participants', e.target.value)}
+                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-center text-sm"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#040195] mb-2">
+                    Female
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.female_participants}
+                    onChange={(e) => handleInputChange('female_participants', e.target.value)}
+                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-center text-sm"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              {/* Partners section */}
+              <div>
+                <label className="block text-sm font-bold text-[#040195] mb-2">
+                  Partners
+                </label>
+                <div className="space-y-2">
+                  {formData.partners.map((partner, index) => (
+                    <div key={index} className="grid grid-cols-[2fr_1.5fr_1.5fr_auto] gap-2 items-start">
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
+                        type="text"
+                        placeholder="Name"
+                        value={partner.name}
+                        onChange={(e) => handlePartnerChange(index, 'name', e.target.value)}
+                        className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
                       />
-                    </label>
+                      <select
+                        value={partner.type}
+                        onChange={(e) => handlePartnerChange(index, 'type', e.target.value)}
+                        className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm bg-white"
+                      >
+                        <option value="">Type</option>
+                        <option value="Government">Government</option>
+                        <option value="Non-Government">Non-Government</option>
+                        <option value="Institutional">Institutional</option>
+                      </select>
+                      <input
+                        type="text"
+                        placeholder="Nature"
+                        value={partner.nature}
+                        onChange={(e) => handlePartnerChange(index, 'nature', e.target.value)}
+                        className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
+                      />
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => addPartner()}
+                          className="p-2 rounded-full bg-[#4D49FC] text-white hover:opacity-90"
+                          title="Add"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </button>
+                        {formData.partners.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removePartner(index)}
+                            className="p-2 rounded-full bg-red-500 text-white hover:opacity-90"
+                            title="Remove"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Budget Overview */}
+              <div>
+                <label className="block text-sm font-bold text-[#040195] mb-2">
+                  Budget Overview
+                </label>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-[2fr_1.5fr_auto] gap-2">
+                    <input
+                      type="number"
+                      value={formData.budgetAmount}
+                      onChange={(e) => handleInputChange('budgetAmount', e.target.value)}
+                      className="px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm"
+                      placeholder="Amount"
+                      min="0"
+                      step="0.01"
+                    />
+                    <select
+                      value={formData.budgetType}
+                      onChange={(e) => handleInputChange('budgetType', e.target.value)}
+                      className="px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none text-sm bg-white"
+                    >
+                      <option value="external">External</option>
+                      <option value="internal">Internal</option>
+                    </select>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        className="p-2.5 rounded-full bg-[#4D49FC] text-white hover:opacity-90"
+                        title="Add Budget"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className="p-2.5 rounded-full bg-red-500 text-white hover:opacity-90"
+                        title="Remove Budget"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                )}
+                </div>
+              </div>
+
+              {/* Reports Section */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-[#040195] mb-2">
+                    FULL REPORT
+                  </label>
+                  <div className="text-xs text-gray-500 mb-1">3 MB (max)</div>
+                  <button
+                    type="button"
+                    className="w-full px-4 py-2.5 rounded-lg bg-[#4D49FC] text-white font-semibold hover:opacity-90 transition-opacity"
+                  >
+                    Change
+                  </button>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#040195] mb-2">
+                    Thumbnail
+                  </label>
+                  <div className="text-xs text-gray-500 mb-1">3 MB (max)</div>
+                  <label className="block w-full px-4 py-2.5 rounded-lg bg-[#4D49FC] text-white font-semibold hover:opacity-90 transition-opacity text-center cursor-pointer">
+                    Change
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
 
-            {/* SDG Selection */}
+            {/* Right side: SDG column (spans all rows) */}
             <div>
               <label className="block text-sm font-bold text-[#040195] mb-2">
-                Sustainable Development Goals
+                SDG Goals
               </label>
-              <div className="space-y-2 max-h-96 overflow-y-auto border-2 border-gray-300 rounded-lg p-3">
-                {sdgOptions.map((sdg) => (
-                  <label key={sdg.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                    <input
-                      type="checkbox"
-                      checked={formData.sdgs.includes(sdg.id)}
-                      onChange={() => handleSDGToggle(sdg.id)}
-                      className="w-4 h-4 rounded"
-                      style={{ accentColor: officeColor }}
+              <div className="grid grid-cols-3 gap-2 max-h-[600px] overflow-y-auto p-2 border-2 border-gray-300 rounded-lg">
+                {SDG_GOALS.map((sdg) => (
+                  <div
+                    key={sdg.id}
+                    onClick={() => handleSDGToggle(sdg.id)}
+                    className={`relative cursor-pointer rounded-lg transition-all ${
+                      formData.sdg?.includes(sdg.id)
+                        ? 'ring-2 ring-[#4D49FC]'
+                        : 'hover:ring-2 hover:ring-gray-300'
+                    }`}
+                  >
+                    <img
+                      src={getSDGIcon(sdg.id)}
+                      alt={sdg.label}
+                      className="w-full h-auto rounded-lg"
                     />
-                    <span className="text-sm">{sdg.label}</span>
-                  </label>
+                    {formData.sdg?.includes(sdg.id) && (
+                      <div className="absolute top-1 right-1 bg-[#4D49FC] rounded-full p-0.5">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

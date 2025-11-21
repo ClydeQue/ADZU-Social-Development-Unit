@@ -384,7 +384,8 @@ router.post("/activities", authenticateToken, async (req, res) => {
       budget_amount: activityData.budget_amount ? parseFloat(activityData.budget_amount) : null,
       budget_type: activityData.budget_type || null,
       sdg_number: activityData.sdg_number ? parseInt(activityData.sdg_number) : null,
-      status: activityData.status || 'pending',
+      phase: activityData.phase || null,
+      status: 'pending', // Status is always pending on creation, controlled by Unit Director
       notes: activityData.notes || null,
       created_by: userId,
     };
@@ -674,11 +675,13 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     }
 
     // Prepare update data with only valid fields
+    // Note: 'status' is excluded - only Unit Director can update status
+    // Offices can update 'phase' which represents the activity phase they control
     const allowedFields = [
       'activity_name', 'program_id', 'start_date', 'end_date',
       'participants_count', 'male_participants', 'female_participants',
       'venue', 'objectives', 'implementing_partners',
-      'budget', 'sdg_number', 'status', 'notes', 'allocated_budget',
+      'budget', 'sdg_number', 'phase', 'notes', 'allocated_budget',
       'liquidated_budget', 'budget_amount', 'budget_type',
       'partner_name', 'partner_type', 'partner_nature',
       'venue_street', 'venue_barangay', 'venue_city', 'venue_province'

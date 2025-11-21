@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { getOfficeLogo } from '@/utils/officeLogos';
+import { getSDGIcons } from '@/utils/sdgData';
 
 
 /**
@@ -9,7 +10,7 @@ import { getOfficeLogo } from '@/utils/officeLogos';
  * Displays detailed information about an activity in a centered floating modal
  * Design based on the provided mockup with blue header and clean layout
  */
-export default function ActivityDetailModal({ activity, onClose, officeColor = '#4D49FC', basePath }) {
+export default function ActivityDetailModal({ activity, onClose, onDelete, basePath }) {
   const navigate = useNavigate();
 
   // Listen for escape key
@@ -28,6 +29,15 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
 
   const handleEdit = () => {
     navigate(`${basePath}/edit-activity/${activity.id}`);
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete "${activity.activity_name}"?`)) {
+      if (onDelete) {
+        await onDelete(activity.id);
+        onClose();
+      }
+    }
   };
 
   // Get status badge colors
@@ -64,17 +74,6 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
     return `₱ ${parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Get SDG icons
-  const getSDGIcons = (sdgNumber) => {
-    if (!sdgNumber) return [];
-    // Handle both single number and array
-    const sdgNumbers = Array.isArray(sdgNumber) ? sdgNumber : [sdgNumber];
-    return sdgNumbers.map(num => ({
-      number: num,
-      icon: `/icons/sdg-${num}.svg` // You can add SDG icons to your public/icons folder
-    }));
-  };
-
   const sdgs = getSDGIcons(activity.sdg_number);
 
   return (
@@ -87,13 +86,50 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
     >
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5  shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
+        {/* Action Buttons at Top */}
+        <div className="flex  items-center justify-end gap-2  ">
+          {/* Delete Button */}
+          <button
+            onClick={handleDelete}
+            className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl
+             hover:bg-[#bc3d2c] active:bg-[#9b2c1a] hover:cursor-pointer transition-colors bg-[#4D49FC]"
+
+            title="Delete Activity"
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+          
+          {/* Edit Button */}
+          <button
+            onClick={handleEdit}
+            className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
+            bg-[#4D49FC]  text-white text-sm font-bold"
+            title="Edit Activity"
+          >
+            EDIT
+          </button>
+          
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-gray-200 hover:cursor-pointer hover:bg-gray-300 transition-colors"
+            title="Close"
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
         {/* Header Section with Program Logo/Image */}
         <div 
-          className="relative p-3 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between"
+          className="relative sm:p-2 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between"
         >
           <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
             {/* Logo/Icon Container */}
@@ -135,8 +171,8 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div className="sm:absolute sm:top-6 sm:right-6 w-full sm:w-auto mt-3 sm:mt-0">
+          {/* Status Badge and Dates */}
+          <div className="w-full sm:w-auto mt-3 sm:mt-0">
             <div className={`px-3 sm:px-4 py-1.5 sm:py-0 rounded-full text-center mb-2 ${getStatusStyle(activity.status).bg}`}>
               <span className={`text-xs font-bold uppercase tracking-wider ${getStatusStyle(activity.status).text}`}>
                 {activity.status || 'NO STATUS'}
@@ -177,15 +213,14 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
             {sdgs.length > 0 && (
               <div className="sm:border-l-2 border-t-2 sm:border-t-0 border-[#040195] pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
                 <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-3 uppercase">SDG Goals</h3>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap">
                   {sdgs.map((sdg) => (
                     <div 
-                      key={sdg.number}
-                      className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                      style={{ backgroundColor: officeColor }}
-                      title={`SDG ${sdg.number}`}
+                      key={sdg.id}
+                      className="w-12 h-12 rounded-lg overflow-hidden shadow-lg"
+                      title={sdg.label}
                     >
-                      {sdg.number}
+                      <img src={sdg.icon} alt={sdg.label} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
@@ -329,18 +364,6 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
             </>
           )}
         </div>
-
-        {/* Footer Actions */}
-        <div className="border-[#040195] p-2 flex justify-end">
-          <button
-            onClick={handleEdit}
-            className="px-4 sm:px-5 py-2 text-white text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity 
-            rounded-xl shadow-xl flex items-center gap-2 w-full sm:w-auto justify-center"
-            style={{ backgroundColor: "#4D49FC" }}
-          >
-            VIEW FULL REPORT
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -349,6 +372,7 @@ export default function ActivityDetailModal({ activity, onClose, officeColor = '
 ActivityDetailModal.propTypes = {
   activity: PropTypes.object,
   onClose: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
   officeColor: PropTypes.string,
   basePath: PropTypes.string.isRequired,
 };

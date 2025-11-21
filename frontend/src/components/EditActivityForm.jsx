@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import OfficeService from '@/services/officeService';
 import PropTypes from 'prop-types';
+import { SDG_GOALS, getSDGIcon } from '@/utils/sdgData';
 
 /**
  * Edit Activity Form Component
@@ -41,7 +42,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
     implementing_partners: '',
     budget: '',
     sdg_number: '',
-    status: '',
+    phase: '',
     notes: '',
     allocated_budget: '',
     liquidated_budget: '',
@@ -72,7 +73,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
         implementing_partners: activity.implementing_partners || '',
         budget: activity.budget || '',
         sdg_number: activity.sdg_number || '',
-        status: activity.status || 'pending',
+        phase: activity.phase || '',
         notes: activity.notes || '',
         allocated_budget: activity.allocated_budget || '',
         liquidated_budget: activity.liquidated_budget || '',
@@ -319,20 +320,22 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
 
           {/* Right Column - Additional Info */}
           <div className="space-y-4">
-            {/* Status */}
+            {/* Phase */}
             <div>
               <label className="block text-sm font-bold text-[#040195] mb-2">
-                Status
+                Phase
               </label>
               <select
-                value={formData.status}
-                onChange={(e) => handleInputChange('status', e.target.value)}
+                value={formData.phase}
+                onChange={(e) => handleInputChange('phase', e.target.value)}
                 className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
               >
-                <option value="pending">Pending</option>
-                <option value="in progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="">Select phase</option>
+                <option value="Planning">Planning</option>
+                <option value="Implementation">Implementation</option>
+                <option value="Evaluation">Evaluation</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
             </div>
 
@@ -352,20 +355,42 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
               />
             </div>
 
-            {/* SDG Number */}
+            {/* SDG Selection */}
             <div>
               <label className="block text-sm font-bold text-[#040195] mb-2">
-                SDG Number
+                Sustainable Development Goal
               </label>
-              <input
-                type="number"
-                value={formData.sdg_number}
-                onChange={(e) => handleInputChange('sdg_number', e.target.value)}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                placeholder="Enter SDG number (1-17)"
-                min="1"
-                max="17"
-              />
+              <div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto border-2 border-gray-300 rounded-lg p-2">
+                {SDG_GOALS.map((sdg) => (
+                  <div
+                    key={sdg.id}
+                    onClick={() => handleInputChange('sdg_number', sdg.id)}
+                    className={`relative cursor-pointer rounded-lg overflow-hidden transition-all ${
+                      formData.sdg_number == sdg.id
+                        ? 'ring-2 ring-[#4D49FC] scale-105'
+                        : 'opacity-60 hover:opacity-100'
+                    }`}
+                    title={sdg.fullLabel}
+                  >
+                    <img
+                      src={getSDGIcon(sdg.id)}
+                      alt={sdg.fullLabel}
+                      className="w-full h-auto"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/icons/sdg-default.svg';
+                      }}
+                    />
+                    {formData.sdg_number == sdg.id && (
+                      <div className="absolute top-1 right-1 bg-[#4D49FC] rounded-full p-1">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Implementing Partners */}
