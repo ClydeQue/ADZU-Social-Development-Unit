@@ -311,7 +311,7 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
                   <div>
                     {activity.partner_name}
                     {activity.partner_type && (
-                      <span className="italic ml-2">({activity.partner_type})</span>
+                      <span className="italic ml-2">{activity.partner_type}</span>
                     )}
                     {activity.partner_nature && (
                       <span className="ml-2"> {activity.partner_nature}</span>
@@ -334,8 +334,8 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
             {activity.budget_amount ? (
               <div className="text-[#040195] text-xs leading-relaxed flex items-center">
                 <span className="flex-1 text-left">{formatBudget(activity.budget_amount)}</span>
-                <span className="italic flex-1 text-left">
-                  ({activity.budget_type === 'external' ? 'External Fund' : 'Internal Fund'})
+                <span className="italic flex-5 text-left">
+                  {activity.budget_type === 'external' ? 'External Fund' : 'Internal Fund'}
                 </span>
               </div>
             ) : (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/services/api';
+import UnitDirectorService from '@/services/unitDirectorService';
 import { getOfficeLogo } from '@/utils/officeLogos';
 import { getSDGIcons } from '@/utils/sdgData';
 
@@ -26,12 +26,7 @@ export default function ReportDetailModal({ report, activity, onClose }) {
 
   // Update status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async (newStatus) => {
-      const response = await api.put(`unit-director/activities/${activity.id}/status`, {
-        status: newStatus
-      });
-      return response.data;
-    },
+    mutationFn: (newStatus) => UnitDirectorService.updateActivityStatus(activity.id, newStatus),
     onSuccess: () => {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries(['activity', activity.id]);

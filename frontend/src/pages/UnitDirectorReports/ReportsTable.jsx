@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/services/api';
+import UnitDirectorService from '@/services/unitDirectorService';
 import ReportDetailModal from './ReportDetailModal';
  
 const ReportsTable = ({ reports }) => {
@@ -20,7 +20,7 @@ const ReportsTable = ({ reports }) => {
     queryFn: async () => {
       if (!selectedReport) return null;
       console.log('Fetching activity:', selectedReport);
-      const response = await api.get(`unit-director/activities/${selectedReport}`);
+      const response = await UnitDirectorService.getActivityById(selectedReport);
       console.log('Activity response:', response);
       // Backend returns { activity: {...} }
       return response.activity || response;

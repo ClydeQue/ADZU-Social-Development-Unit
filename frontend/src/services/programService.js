@@ -30,7 +30,7 @@ class ProgramService {
    * Useful for viewing specific office's programs
    */
   async getProgramsByOffice(officeId) {
-    const response = await api.get(`office/${officeId}/programs`);
+    const response = await api.get(`api/office/${officeId}/programs`);
     return response.programs;
   }
 

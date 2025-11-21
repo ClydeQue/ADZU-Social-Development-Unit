@@ -4,7 +4,7 @@ import WhiteContainer from '@/components/WhiteContainer';
 import Sidebar from '@/components/Sidebar';
 import ReportsTable from './ReportsTable';
 import ReportsNavbar from './ReportsNavbar';
-import api from '@/services/api';
+import UnitDirectorService from '@/services/unitDirectorService';
 
 export default function UnitDirectorReports() {
   const [sortBy, setSortBy] = useState('');
@@ -13,10 +13,7 @@ export default function UnitDirectorReports() {
   // Fetch reports data
   const { data: reportsData, isLoading, error } = useQuery({
     queryKey: ['unit-director-reports'],
-    queryFn: async () => {
-      const response = await api.get('unit-director/reports');
-      return response;
-    },
+    queryFn: () => UnitDirectorService.getReports(),
     staleTime: 2 * 60 * 1000, // 2 minutes cache:D
   });
 

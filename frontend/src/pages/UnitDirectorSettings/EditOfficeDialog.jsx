@@ -2,7 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import unitDirectorSettings from "@/services/unitDirectorSettings";
-import api from "@/services/api";
+import UnitDirectorService from "@/services/unitDirectorService";
 
 export default function EditOfficeDialog({ office, onClose }) {
   const [activeSection, setActiveSection] = useState("program"); // 'program' or 'password'
@@ -37,7 +37,7 @@ export default function EditOfficeDialog({ office, onClose }) {
   } = useQuery({
     queryKey: ["office-programs", office?.id],
     queryFn: async () => {
-      const response = await api.get(`office/${office.id}/programs`);
+      const response = await UnitDirectorService.getOfficePrograms(office.id);
       return response.programs || [];
     },
     enabled: !!office?.id,
