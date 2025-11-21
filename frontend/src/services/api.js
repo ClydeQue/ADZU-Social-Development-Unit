@@ -14,7 +14,7 @@ const getAPIBaseURL = () => {
   
   // In production (Vercel), use the production backend URL
   if (import.meta.env.PROD) {
-    return "https://adzu-sdu-backend.vercel.app";
+    return "https://adzu-sdu-backend-delta.vercel.app";
   }
   
   // Local development fallback

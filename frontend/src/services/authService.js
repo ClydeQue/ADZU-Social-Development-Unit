@@ -12,7 +12,7 @@ const getAPIBaseURL = () => {
   }
   
   if (import.meta.env.PROD) {
-    return "https://adzu-sdu-backend.vercel.app";
+    return "https://adzu-sdu-backend-delta.vercel.app";
   }
   
   return "http://localhost:5001";
