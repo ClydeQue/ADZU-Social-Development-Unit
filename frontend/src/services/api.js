@@ -5,7 +5,23 @@
 
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
+// Determine API base URL based on environment
+const getAPIBaseURL = () => {
+  // If VITE_API_URL is explicitly set, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // In production (Vercel), use the production backend URL
+  if (import.meta.env.PROD) {
+    return "https://adzu-sdu-backend.vercel.app";
+  }
+  
+  // Local development fallback
+  return "http://localhost:5001";
+};
+
+const API_BASE = getAPIBaseURL();
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -15,6 +31,11 @@ const axiosInstance = axios.create({
   },
   withCredentials: true, // Send cookies with requests
 });
+
+// Log API configuration in development
+if (import.meta.env.DEV) {
+  console.log("[API Config] Base URL:", `${API_BASE}/api`);
+}
 
 // Flag to prevent multiple simultaneous refresh attempts
 let isRefreshing = false;
@@ -109,6 +130,17 @@ axiosInstance.interceptors.response.use(
     // Extract error message
     const message =
       error.response?.data?.message || error.message || "Request failed";
+    
+    // Log 404 errors for debugging
+    if (error.response?.status === 404) {
+      console.error("[API 404 Error]", {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        fullURL: error.config?.baseURL + '/' + error.config?.url,
+        method: error.config?.method,
+      });
+    }
+    
     return Promise.reject(new Error(message));
   }
 );
