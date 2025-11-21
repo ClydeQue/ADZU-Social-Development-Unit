@@ -27,6 +27,16 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
 
   if (!activity) return null;
 
+  // Parse venue from JSON string
+  let venueData = { street: '', barangay: '', city: '', province: '' };
+  if (activity.venue) {
+    try {
+      venueData = typeof activity.venue === 'string' ? JSON.parse(activity.venue) : activity.venue;
+    } catch (e) {
+      console.error('Error parsing venue:', e);
+    }
+  }
+
   const handleEdit = () => {
     navigate(`${basePath}/edit-activity/${activity.id}`);
   };
@@ -79,14 +89,14 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', overflow: 'hidden' }}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)', overflow: 'hidden' }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
     >
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5  shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+        className="bg-[#fafafa] rounded-xl sm:rounded-2xl p-3 sm:p-5  shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
@@ -166,7 +176,7 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
                 {activity.programs?.title || 'Program Title'}
               </div>
               <p className="text-[#040195] text-xs leading-relaxed line-clamp-2 sm:line-clamp-none">
-                {activity.objectives || 'Activity description'}
+                {activity.description || 'Activity description'}
               </p>
             </div>
           </div>
@@ -236,11 +246,11 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
             <div>
               <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">VENUE</h3>
               <div className="text-[#040195] text-xs leading-relaxed">
-                {activity.venue_street && <div>{activity.venue_street}</div>}
-                {activity.venue_barangay && <div>Zone {activity.venue_barangay}</div>}
-                {activity.venue_city && <div>{activity.venue_city}</div>}
-                {activity.venue_province && <div>{activity.venue_province}</div>}
-                {!activity.venue_street && !activity.venue_barangay && !activity.venue_city && !activity.venue_province && (
+                {venueData.street && <div>{venueData.street}</div>}
+                {venueData.barangay && <div>Zone {venueData.barangay}</div>}
+                {venueData.city && <div>{venueData.city}</div>}
+                {venueData.province && <div>{venueData.province}</div>}
+                {!venueData.street && !venueData.barangay && !venueData.city && !venueData.province && (
                   <div className="text-gray-400">No venue information</div>
                 )}
               </div>

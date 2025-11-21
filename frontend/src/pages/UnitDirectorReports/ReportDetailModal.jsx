@@ -14,6 +14,16 @@ export default function ReportDetailModal({ report, activity, onClose }) {
   const queryClient = useQueryClient();
   const [selectedStatus, setSelectedStatus] = useState(activity?.status || 'pending');
 
+  // Parse venue from JSON string
+  let venueData = { street: '', barangay: '', city: '', province: '' };
+  if (activity?.venue) {
+    try {
+      venueData = typeof activity.venue === 'string' ? JSON.parse(activity.venue) : activity.venue;
+    } catch (e) {
+      console.error('Error parsing venue:', e);
+    }
+  }
+
   // Update status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus) => {
@@ -137,7 +147,7 @@ export default function ReportDetailModal({ report, activity, onClose }) {
                 {report.program}
               </div>
               <p className="text-[#040195] text-xs leading-relaxed line-clamp-2 sm:line-clamp-none">
-                {activity.objectives || 'Activity description'}
+                {activity.description || 'Activity description'}
               </p>
             </div>
           </div>
@@ -207,11 +217,11 @@ export default function ReportDetailModal({ report, activity, onClose }) {
             <div>
               <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">VENUE</h3>
               <div className="text-[#040195] text-xs leading-relaxed">
-                {activity.venue_street && <div>{activity.venue_street}</div>}
-                {activity.venue_barangay && <div>Zone {activity.venue_barangay}</div>}
-                {activity.venue_city && <div>{activity.venue_city}</div>}
-                {activity.venue_province && <div>{activity.venue_province}</div>}
-                {!activity.venue_street && !activity.venue_barangay && !activity.venue_city && !activity.venue_province && (
+                {venueData.street && <div>{venueData.street}</div>}
+                {venueData.barangay && <div>Zone {venueData.barangay}</div>}
+                {venueData.city && <div>{venueData.city}</div>}
+                {venueData.province && <div>{venueData.province}</div>}
+                {!venueData.street && !venueData.barangay && !venueData.city && !venueData.province && (
                   <div className="text-gray-400">No venue information</div>
                 )}
               </div>
