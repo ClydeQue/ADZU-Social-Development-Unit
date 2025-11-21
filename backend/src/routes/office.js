@@ -368,12 +368,15 @@ router.post("/activities", authenticateToken, async (req, res) => {
       participants_count: activityData.participants_count ? parseInt(activityData.participants_count) : 0,
       male_participants: activityData.male_participants ? parseInt(activityData.male_participants) : 0,
       female_participants: activityData.female_participants ? parseInt(activityData.female_participants) : 0,
-      venue: activityData.venue || null,
-      venue_street: activityData.venue_street || null,
-      venue_barangay: activityData.venue_barangay || null,
-      venue_city: activityData.venue_city || null,
-      venue_province: activityData.venue_province || null,
+      venue: activityData.venue || JSON.stringify({
+        street: '',
+        barangay: '',
+        city: '',
+        province: ''
+      }),
+      description: activityData.description || null,
       objectives: activityData.objectives || null,
+      classification: activityData.classification || null,
       implementing_partners: activityData.implementing_partners || null,
       partner_name: activityData.partner_name || null,
       partner_type: activityData.partner_type || null,
@@ -384,7 +387,9 @@ router.post("/activities", authenticateToken, async (req, res) => {
       budget_amount: activityData.budget_amount ? parseFloat(activityData.budget_amount) : null,
       budget_type: activityData.budget_type || null,
       sdg_number: activityData.sdg_number ? parseInt(activityData.sdg_number) : null,
-      status: activityData.status || 'pending',
+      phase: activityData.phase || null,
+      status: 'pending', // Status is always pending on creation, controlled by Unit Director
+      report_url: activityData.report_url || null, // URL link to report
       notes: activityData.notes || null,
       created_by: userId,
     };
@@ -650,7 +655,15 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     const { activityId } = req.params;
     const updateData = req.body;
 
-    console.log("Update activity request:", { activityId, updateData });
+    console.log("\n=== UPDATE ACTIVITY REQUEST ===");
+    console.log("Activity ID:", activityId);
+    console.log("Request body keys:", Object.keys(updateData));
+    console.log("Description received:", updateData.description);
+    console.log("Description type:", typeof updateData.description);
+    console.log("Description is undefined?", updateData.description === undefined);
+    console.log("Description is null?", updateData.description === null);
+    console.log("Description is empty string?", updateData.description === '');
+    console.log("================================\n");
 
     // First, get the activity to check permissions
     const { data: existingActivity, error: fetchError } = await supabase
@@ -673,42 +686,87 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
       return res.status(403).json({ error: "Access denied" });
     }
 
-    // Prepare update data with only valid fields
-    const allowedFields = [
-      'activity_name', 'program_id', 'start_date', 'end_date',
-      'participants_count', 'male_participants', 'female_participants',
-      'venue', 'objectives', 'implementing_partners',
-      'budget', 'sdg_number', 'status', 'notes', 'allocated_budget',
-      'liquidated_budget', 'budget_amount', 'budget_type',
-      'partner_name', 'partner_type', 'partner_nature',
-      'venue_street', 'venue_barangay', 'venue_city', 'venue_province'
-    ];
-
+    // Prepare update data - simplified sanitization
     const sanitizedData = {};
-    allowedFields.forEach(field => {
-      if (updateData[field] !== undefined && updateData[field] !== '') {
-        // Handle numeric fields
-        if (['participants_count', 'male_participants', 'female_participants', 'budget', 'sdg_number', 'allocated_budget', 'liquidated_budget', 'budget_amount'].includes(field)) {
-          const numValue = updateData[field] === null ? null : Number(updateData[field]);
-          sanitizedData[field] = isNaN(numValue) ? null : numValue;
-        } else {
-          sanitizedData[field] = updateData[field];
-        }
-      }
-    });
+    
+    // Simple mapping - just pass through the allowed fields
+    if (updateData.activity_name !== undefined) sanitizedData.activity_name = updateData.activity_name;
+    if (updateData.program_id !== undefined) sanitizedData.program_id = updateData.program_id;
+    if (updateData.start_date !== undefined) sanitizedData.start_date = updateData.start_date;
+    if (updateData.end_date !== undefined) sanitizedData.end_date = updateData.end_date;
+    
+    // Numeric fields
+    if (updateData.participants_count !== undefined) {
+      sanitizedData.participants_count = updateData.participants_count ? parseInt(updateData.participants_count) : null;
+    }
+    if (updateData.male_participants !== undefined) {
+      sanitizedData.male_participants = updateData.male_participants ? parseInt(updateData.male_participants) : null;
+    }
+    if (updateData.female_participants !== undefined) {
+      sanitizedData.female_participants = updateData.female_participants ? parseInt(updateData.female_participants) : null;
+    }
+    
+    // Venue as JSON string
+    if (updateData.venue !== undefined) {
+      sanitizedData.venue = typeof updateData.venue === 'string' ? updateData.venue : JSON.stringify(updateData.venue);
+    }
+    
+    // Text fields - THE KEY FIX: Just pass them through as-is
+    if (updateData.description !== undefined) sanitizedData.description = updateData.description;
+    if (updateData.objectives !== undefined) sanitizedData.objectives = updateData.objectives;
+    if (updateData.classification !== undefined) sanitizedData.classification = updateData.classification;
+    if (updateData.phase !== undefined) sanitizedData.phase = updateData.phase;
+    if (updateData.notes !== undefined) sanitizedData.notes = updateData.notes;
+    
+    // Partners
+    if (updateData.partner_name !== undefined) sanitizedData.partner_name = updateData.partner_name;
+    if (updateData.partner_type !== undefined) sanitizedData.partner_type = updateData.partner_type;
+    if (updateData.partner_nature !== undefined) sanitizedData.partner_nature = updateData.partner_nature;
+    
+    // Budget
+    if (updateData.budget_amount !== undefined) {
+      sanitizedData.budget_amount = updateData.budget_amount ? parseFloat(updateData.budget_amount) : null;
+    }
+    if (updateData.budget_type !== undefined) sanitizedData.budget_type = updateData.budget_type;
+    
+    // Other fields
+    if (updateData.report_url !== undefined) sanitizedData.report_url = updateData.report_url;
+    if (updateData.implementing_partners !== undefined) sanitizedData.implementing_partners = updateData.implementing_partners;
+    
+    console.log("\n=== SANITIZED DATA ===");
+    console.log("Description:", sanitizedData.description);
+    console.log("All fields:", Object.keys(sanitizedData));
+    console.log("======================\n");
 
-    console.log("Sanitized data:", sanitizedData);
+    console.log("Description in sanitizedData:", sanitizedData.description);
+    console.log("======================\n");
 
     // Update the activity
+    console.log("\n=== UPDATING DATABASE ===");
+    console.log("Fields being updated:", Object.keys(sanitizedData));
+    console.log("Description field included?", 'description' in sanitizedData);
+    console.log("Description value:", sanitizedData.description);
+    console.log("Full sanitizedData:", JSON.stringify(sanitizedData, null, 2));
+    
+    const updatePayload = {
+      ...sanitizedData,
+      updated_at: new Date().toISOString(),
+    };
+    
+    console.log("Full update payload:", JSON.stringify(updatePayload, null, 2));
+    
     const { data: updatedActivity, error: updateError } = await supabase
       .from("activities")
-      .update({
-        ...sanitizedData,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", activityId)
       .select()
       .single();
+
+    console.log("Update complete.");
+    console.log("Update error?", updateError);
+    console.log("Updated activity description:", updatedActivity?.description);
+    console.log("Full updated activity:", JSON.stringify(updatedActivity, null, 2));
+    console.log("=========================\n");
 
     if (updateError) {
       console.error("Update error:", updateError);

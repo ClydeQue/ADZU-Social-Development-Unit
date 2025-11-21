@@ -77,6 +77,24 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
     }
   };
 
+  // Handle delete single activity from modal
+  const handleDeleteSingle = async (activityId) => {
+    try {
+      // Call API to delete single activity
+      await OfficeService.deleteActivities([activityId]);
+      
+      // Invalidate and refetch the projects data
+      queryClient.invalidateQueries(['office-projects', officeId]);
+      
+      // Show success message
+      alert('Successfully deleted activity!');
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      alert('Failed to delete activity. Please try again.');
+      throw error; // Re-throw to let modal handle it
+    }
+  };
+
   // Transform data into projects format
   const projects = projectsData?.recent_activities?.map((activity) => {
     const program = activity.programs;
@@ -126,6 +144,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
         <ActivityDetailModal
           activity={selectedActivity}
           onClose={closeModal}
+          onDelete={handleDeleteSingle}
           officeColor={officeColor}
           basePath={basePath}
         />

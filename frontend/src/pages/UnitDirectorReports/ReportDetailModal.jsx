@@ -1,13 +1,60 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '@/services/api';
 import { getOfficeLogo } from '@/utils/officeLogos';
+import { getSDGIcons } from '@/utils/sdgData';
 
 /**
  * Report Detail Modal Component
  * Displays detailed information about a submitted report in a centered floating modal
  * Uses the same design as ActivityDetailModal but with report-specific data
  */
-export default function ReportDetailModal({ report, activity, onClose, officeColor = '#4D49FC' }) {
+export default function ReportDetailModal({ report, activity, onClose }) {
+  const queryClient = useQueryClient();
+  const [selectedStatus, setSelectedStatus] = useState(activity?.status || 'pending');
+
+  // Parse venue from JSON string
+  let venueData = { street: '', barangay: '', city: '', province: '' };
+  if (activity?.venue) {
+    try {
+      venueData = typeof activity.venue === 'string' ? JSON.parse(activity.venue) : activity.venue;
+    } catch (e) {
+      console.error('Error parsing venue:', e);
+    }
+  }
+
+  // Update status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus) => {
+      const response = await api.put(`unit-director/activities/${activity.id}/status`, {
+        status: newStatus
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries(['activity', activity.id]);
+      queryClient.invalidateQueries(['unit-director-activities']);
+      alert('Status updated successfully!');
+    },
+    onError: (error) => {
+      console.error('Update status error:', error);
+      alert(`Failed to update status: ${error.response?.data?.error || error.message}`);
+      // Reset to original status on error
+      setSelectedStatus(activity?.status || 'pending');
+    },
+  });
+
+  const handleStatusChange = (newStatus) => {
+    if (newStatus === selectedStatus) return;
+    
+    if (confirm(`Change activity status to "${newStatus}"?`)) {
+      setSelectedStatus(newStatus);
+      updateStatusMutation.mutate(newStatus);
+    }
+  };
+
   // Listen for escape key
   useEffect(() => {
     const handleEscape = (e) => {
@@ -43,16 +90,6 @@ export default function ReportDetailModal({ report, activity, onClose, officeCol
   const formatBudget = (amount) => {
     if (!amount && amount !== 0) return '₱ 0.00';
     return `₱ ${parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
-  // Get SDG icons
-  const getSDGIcons = (sdgNumber) => {
-    if (!sdgNumber) return [];
-    const sdgNumbers = Array.isArray(sdgNumber) ? sdgNumber : [sdgNumber];
-    return sdgNumbers.map(num => ({
-      number: num,
-      icon: `/icons/sdg-${num}.svg`
-    }));
   };
 
   const sdgs = getSDGIcons(activity.sdg_number);
@@ -110,7 +147,7 @@ export default function ReportDetailModal({ report, activity, onClose, officeCol
                 {report.program}
               </div>
               <p className="text-[#040195] text-xs leading-relaxed line-clamp-2 sm:line-clamp-none">
-                {activity.objectives || 'Activity description'}
+                {activity.description || 'Activity description'}
               </p>
             </div>
           </div>
@@ -157,15 +194,14 @@ export default function ReportDetailModal({ report, activity, onClose, officeCol
             {sdgs.length > 0 && (
               <div className="sm:border-l-2 border-t-2 sm:border-t-0 border-[#040195] pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
                 <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-3 uppercase">SDG Goals</h3>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap">
                   {sdgs.map((sdg) => (
                     <div 
-                      key={sdg.number}
-                      className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                      style={{ backgroundColor: officeColor }}
-                      title={`SDG ${sdg.number}`}
+                      key={sdg.id}
+                      className="w-12 h-12 rounded-lg overflow-hidden shadow-lg"
+                      title={sdg.label}
                     >
-                      {sdg.number}
+                      <img src={sdg.icon} alt={sdg.label} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
@@ -181,11 +217,11 @@ export default function ReportDetailModal({ report, activity, onClose, officeCol
             <div>
               <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">VENUE</h3>
               <div className="text-[#040195] text-xs leading-relaxed">
-                {activity.venue_street && <div>{activity.venue_street}</div>}
-                {activity.venue_barangay && <div>Zone {activity.venue_barangay}</div>}
-                {activity.venue_city && <div>{activity.venue_city}</div>}
-                {activity.venue_province && <div>{activity.venue_province}</div>}
-                {!activity.venue_street && !activity.venue_barangay && !activity.venue_city && !activity.venue_province && (
+                {venueData.street && <div>{venueData.street}</div>}
+                {venueData.barangay && <div>Zone {venueData.barangay}</div>}
+                {venueData.city && <div>{venueData.city}</div>}
+                {venueData.province && <div>{venueData.province}</div>}
+                {!venueData.street && !venueData.barangay && !venueData.city && !venueData.province && (
                   <div className="text-gray-400">No venue information</div>
                 )}
               </div>
@@ -317,22 +353,47 @@ export default function ReportDetailModal({ report, activity, onClose, officeCol
         </div>
 
         {/* Footer Actions */}
-        <div className="border-[#040195] p-2 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 sm:px-5 py-2 bg-gray-200 text-[#040195] text-xs sm:text-sm font-bold hover:bg-gray-300 transition-colors 
-            rounded-xl shadow-md flex items-center gap-2"
-          >
-            CLOSE
-          </button>
-          <button
-            onClick={() => window.print()}
-            className="px-4 sm:px-5 py-2 text-white text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity 
-            rounded-xl shadow-xl flex items-center gap-2"
-            style={{ backgroundColor: "#4D49FC" }}
-          >
-            PRINT REPORT
-          </button>
+        <div className="border-[#040195] p-2 flex justify-between items-center gap-3">
+          {/* Status Dropdown */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-bold text-[#040195]">
+              Mark Status:
+            </label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              disabled={updateStatusMutation.isPending}
+              className="px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold text-[#040195] 
+              focus:border-[#4D49FC] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            {updateStatusMutation.isPending && (
+              <span className="text-xs text-gray-500">Updating...</span>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 sm:px-5 py-2 bg-gray-200 text-[#040195] text-xs sm:text-sm font-bold hover:bg-gray-300 transition-colors 
+              rounded-xl shadow-md flex items-center gap-2"
+            >
+              CLOSE
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="px-4 sm:px-5 py-2 text-white text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity 
+              rounded-xl shadow-xl flex items-center gap-2"
+              style={{ backgroundColor: "#4D49FC" }}
+            >
+              PRINT REPORT
+            </button>
+          </div>
         </div>
       </div>
     </div>

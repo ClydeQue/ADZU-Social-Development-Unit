@@ -361,4 +361,61 @@ router.get(
   }
 );
 
+// Update activity status (Unit Director only)
+router.put(
+  "/activities/:activityId/status",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { activityId } = req.params;
+      const { status } = req.body;
+
+      // Validate status value
+      const validStatuses = ['pending', 'in-progress', 'completed', 'cancelled'];
+      if (!status || !validStatuses.includes(status.toLowerCase())) {
+        return res.status(400).json({ 
+          error: "Invalid status. Must be one of: pending, in-progress, completed, cancelled" 
+        });
+      }
+
+      // Update the activity status
+      const { data: updatedActivity, error } = await supabase
+        .from("activities")
+        .update({ 
+          status: status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", activityId)
+        .select(`
+          *,
+          programs(
+            id, 
+            title, 
+            office_id,
+            offices(id, name, acronym)
+          )
+        `)
+        .single();
+
+      if (error) {
+        console.error("Update status error:", error);
+        throw error;
+      }
+
+      if (!updatedActivity) {
+        return res.status(404).json({ error: "Activity not found" });
+      }
+
+      res.json({ 
+        message: "Activity status updated successfully",
+        activity: updatedActivity 
+      });
+    } catch (error) {
+      console.error("Unit director update status error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 module.exports = router;
