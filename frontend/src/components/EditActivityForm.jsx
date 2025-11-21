@@ -323,7 +323,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
           <div className="flex gap-3">
             <button
               type="button"
-              className="p-2 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] transition-colors group"
+              className="p-2 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] hover:cursor-pointer transition-colors group"
               title="Refresh"
               onClick={() => window.location.reload()}
             >
@@ -334,14 +334,14 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
             <button
               type="button"
               onClick={() => navigate(`${basePath}/projects`)}
-              className="px-4 py-1.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] text-sm font-semibold hover:bg-gray-50 transition-colors"
+              className="px-4 py-1.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] text-sm font-semibold hover:bg-gray-100 hover:cursor-pointer transition-colors"
             >
               CANCEL
             </button>
             <button
               type="submit"
               disabled={updateMutation.isLoading}
-              className="px-4 py-1.5 rounded-lg bg-[#4D49FC] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="px-4 py-1.5 rounded-lg bg-[#4D49FC] text-white text-sm font-semibold hover:opacity-80 hover:cursor-pointer transition-opacity disabled:opacity-50"
             >
               {updateMutation.isLoading ? 'UPDATING...' : 'UPDATE'}
             </button>
@@ -385,7 +385,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
                       <span className={formData.programId ? '' : 'text-gray-400'}>
                         {formData.programId ? programs.find(p => p.id === formData.programId)?.title : 'Select program'}
                       </span>
-                      <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
+                      <div className="w-5 h-5  hover:cursor-pointer active:opacity-85  focus:ring-1 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
                         <svg width="10" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
                         </svg>
@@ -397,9 +397,15 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
                           <button
                             key={program.id}
                             type="button"
-                            onClick={() => {
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               handleInputChange('programId', program.id);
-                              closeDropdown('program');
+                              setTimeout(() => closeDropdown('program'), 0);
                             }}
                             className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                           >
@@ -417,7 +423,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
               <label className="block text-xs font-bold text-[#040195] mb-1">
                 Status
               </label>
-              <div className="px-2 py-2 bg-gray-100 border border-[#8180C9] rounded-[11px] text-center text-xs font-bold text-[#040195] uppercase">
+              <div className="px-2 py-1 bg-gray-200 border-2 border-[#040195] rounded-[11px] text-center lg:text-sm font-black font-inter text-[#040195] uppercase">
                 {formData.status || 'PENDING'}
               </div>
             </div>
@@ -457,7 +463,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
                   <span className={formData.phase ? '' : 'text-gray-400'}>
                     {formData.phase || 'Select phase'}
                   </span>
-                  <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
+                  <div className="w-5 h-5  hover:cursor-pointer active:opacity-85  focus:ring-1 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
                     <svg width="10" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
                     </svg>
@@ -465,13 +471,19 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
                 </button>
                 {dropdownOpen.phase && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
-                    {['Planning', 'Implementation', 'Evaluation', 'Completed', 'Cancelled'].map((phase) => (
+                    {['Planning', 'Implementation', 'In Progress', 'Completed', 'Cancelled'].map((phase) => (
                       <button
                         key={phase}
                         type="button"
-                        onClick={() => {
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           handleInputChange('phase', phase);
-                          closeDropdown('phase');
+                          setTimeout(() => closeDropdown('phase'), 0);
                         }}
                         className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                       >
@@ -654,7 +666,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
                             <span className={partner.type ? '' : 'text-gray-400'}>
                               {partner.type || 'Select'}
                             </span>
-                            <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
+                            <div className="w-5 h-5  hover:cursor-pointer active:opacity-85  focus:ring-1 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
                               <svg width="10" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
                               </svg>
@@ -754,7 +766,7 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
                             <span className={budget.type ? '' : 'text-gray-400'}>
                               {budget.type === 'external' ? 'External' : budget.type === 'internal' ? 'Internal' : 'Select'}
                             </span>
-                            <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
+                            <div className="w-5 h-5  hover:cursor-pointer active:opacity-85  focus:ring-1 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
                               <svg width="10" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
                               </svg>
@@ -766,9 +778,15 @@ export default function EditActivityForm({ officeId, basePath, officeColor = '#4
                                 <button
                                   key={type.value}
                                   type="button"
-                                  onClick={() => {
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                  }}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     handleBudgetChange(index, 'type', type.value);
-                                    closeDropdown(`budget-type-${index}`);
+                                    setTimeout(() => closeDropdown(`budget-type-${index}`), 0);
                                   }}
                                   className="w-full px-3 py-2 text-sm text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                                 >

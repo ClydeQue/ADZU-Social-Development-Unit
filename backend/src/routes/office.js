@@ -410,6 +410,23 @@ router.post("/activities", authenticateToken, async (req, res) => {
 
     console.log("Activity created successfully:", createdActivity);
 
+    // Create notification for unit director about new activity
+    try {
+      await supabase
+        .from("notifications")
+        .insert({
+          activity_id: createdActivity.id,
+          office_id: program.office_id,
+          type: "Report",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      console.log("Notification created for new activity");
+    } catch (notifError) {
+      console.error("Failed to create notification:", notifError);
+      // Don't fail the request if notification fails
+    }
+
     res.status(201).json({ 
       message: "Activity created successfully",
       activity: createdActivity 
@@ -774,6 +791,23 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     }
 
     console.log("Activity updated successfully:", updatedActivity);
+
+    // Create notification for unit director about activity update
+    try {
+      await supabase
+        .from("notifications")
+        .insert({
+          activity_id: updatedActivity.id,
+          office_id: existingActivity.programs.office_id,
+          type: "Updated",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      console.log("Notification created for updated activity");
+    } catch (notifError) {
+      console.error("Failed to create notification:", notifError);
+      // Don't fail the request if notification fails
+    }
 
     res.json({ 
       message: "Activity updated successfully",

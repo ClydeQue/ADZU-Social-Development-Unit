@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import OfficeService from '@/services/officeService';
 import PropTypes from 'prop-types';
 import { SDG_GOALS, getSDGIcon } from '@/utils/sdgData';
@@ -11,6 +11,7 @@ import { SDG_GOALS, getSDGIcon } from '@/utils/sdgData';
  */
 export default function AddActivityForm({ officeId, basePath, officeColor = '#4D49FC' }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const dropdownRef = useRef(null);
 
   // Fetch programs for this office
@@ -135,6 +136,23 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
     }
   };
 
+  // Create mutation for adding activity
+  const createMutation = useMutation({
+    mutationFn: async (data) => {
+      return await OfficeService.createActivity(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['office-projects', officeId]);
+      queryClient.invalidateQueries(['office-activities', officeId]);
+      alert('Activity created successfully!');
+      navigate(`${basePath}/projects`);
+    },
+    onError: (error) => {
+      console.error('Create error:', error);
+      alert(`Error: ${error.message || 'Failed to create activity'}`);
+    },
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -171,34 +189,15 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
       };
 
       console.log('Submitting activity data:', activityData);
-
-      // Call API to create activity
-      const response = await fetch('/api/office/activities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(activityData)
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create activity');
-      }
-
-      const result = await response.json();
-      console.log('Activity created:', result);
-      
-      // Show success message (you can add a toast notification here)
-      alert('Activity created successfully!');
-      
-      // Navigate back to projects page after successful submission
-      navigate(`${basePath}/projects`);
+      createMutation.mutate(activityData);
     } catch (error) {
-      console.error('Error creating activity:', error);
+      console.error('Error preparing submission:', error);
       alert(`Error: ${error.message}`);
     }
+  };
+
+  const handleCancel = () => {
+    navigate(`${basePath}/projects`);
   };
 
   return (
@@ -236,34 +235,17 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
           <div className="flex gap-3">
             <button
               type="button"
-              className="p-2 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] transition-colors group"
-              title="Refresh"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" clipRule="evenodd" d="M16.6667 4.16668V5.83332L13.9844 5.8332C15.3936 7.06988 16.2573 8.87973 16.2557 10.8517C16.2531 13.9056 14.1759 16.5673 11.2142 17.3117C8.25249 18.0562 5.16358 16.693 3.71733 14.0033C2.27112 11.3137 2.83737 7.98516 5.09166 5.925C5.41015 6.43174 5.8592 6.84337 6.39166 7.11668C5.8262 7.57351 5.37026 8.15121 5.05733 8.80734C4.74439 9.46348 4.58242 10.1814 4.58331 10.9083C4.62432 13.6404 6.85092 15.8336 9.58331 15.8333C12.0861 15.8746 14.2204 14.0288 14.5406 11.5463C14.7798 9.69145 13.9494 7.92359 12.5001 6.89988L12.5 10H10.8333V4.16668H16.6667ZM7.91667 2.5C8.83713 2.5 9.58331 3.24621 9.58331 4.16668C9.58331 5.08715 8.83713 5.83332 7.91667 5.83332C6.9962 5.83332 6.24998 5.08715 6.24998 4.16668C6.24998 3.24621 6.9962 2.5 7.91667 2.5Z" fill="white" className="group-hover:fill-gray-200 transition-colors"/>
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="p-2 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] transition-colors group"
-              title="Save"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4.5 5.25H3.75V15C3.75 15.3978 3.90804 15.7794 4.18934 16.0607C4.47064 16.342 4.85218 16.5 5.25 16.5H12.75C13.1478 16.5 13.5294 16.342 13.8107 16.0607C14.092 15.7794 14.25 15.3978 14.25 15V5.25H4.5ZM7.5 14.25H6V7.5H7.5V14.25ZM12 14.25H10.5V7.5H12V14.25ZM12.4635 3L11.25 1.5H6.75L5.5365 3H2.25V4.5H15.75V3H12.4635Z" fill="white" className="group-hover:fill-gray-200 transition-colors"/>
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate(basePath)}
-              className="px-4 py-1.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] text-sm font-semibold hover:bg-gray-50 transition-colors"
+              onClick={handleCancel}
+              className="px-4 py-2 rounded-xl bg-white ring-[#4D49FC] ring-[3px]  hover:bg-gray-400 hover:cursor-pointer transition-colors text-[#4D49FC] font-black font-inter text-sm"
             >
               CANCEL
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded-lg bg-[#4D49FC] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+              disabled={createMutation.isPending}
+              className="px-4 py-2 rounded-xl bg-[#4D49FC] hover:bg-[#3d39cc] hover:cursor-pointer transition-colors text-white font-black font-inter text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              UPDATE
+              {createMutation.isPending ? 'SUBMITTING...' : 'SUBMIT'}
             </button>
           </div>
         </div>
@@ -312,16 +294,22 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                       </div>
                     </button>
                     {dropdownOpen.program && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-[#8180C9] rounded-[11px] shadow-lg max-h-60 overflow-y-auto">
+                      <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg max-h-60 overflow-y-auto">
                         {programs.map((program) => (
                           <button
                             key={program.id}
                             type="button"
-                            onClick={() => {
-                              handleInputChange('programId', program.id);
-                              closeDropdown('program');
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                             }}
-                            className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleInputChange('programId', program.id);
+                              setTimeout(() => closeDropdown('program'), 0);
+                            }}
+                            className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                           >
                             {program.title}
                           </button>
@@ -379,16 +367,22 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                   </div>
                 </button>
                 {dropdownOpen.phase && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
-                    {['Planning', 'In Progress', 'Completed', 'Cancelled'].map((phase) => (
+                  <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
+                    {['Planning', 'Implementation', 'In Progress', 'Completed', 'Cancelled'].map((phase) => (
                       <button
                         key={phase}
                         type="button"
-                        onClick={() => {
-                          handleInputChange('phase', phase);
-                          closeDropdown('phase');
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                         }}
-                        className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleInputChange('phase', phase);
+                          setTimeout(() => closeDropdown('phase'), 0);
+                        }}
+                        className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                       >
                         {phase}
                       </button>
@@ -581,7 +575,7 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                             </div>
                           </button>
                           {dropdownOpen[`partner-type-${index}`] && (
-                            <div className="absolute z-50 w-full mt-1 bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
+                            <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
                               {['Government', 'Non-Government', 'Institutional'].map((type) => (
                                 <button
                                   key={type}
@@ -590,7 +584,7 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                                     handlePartnerChange(index, 'type', type);
                                     closeDropdown(`partner-type-${index}`);
                                   }}
-                                  className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                                  className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                                 >
                                   {type}
                                 </button>
@@ -675,16 +669,22 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                             </div>
                           </button>
                           {dropdownOpen[`budget-type-${index}`] && (
-                            <div className="absolute z-50 w-full mt-1 bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
+                            <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
                               {[{value: 'external', label: 'External'}, {value: 'internal', label: 'Internal'}].map((type) => (
                                 <button
                                   key={type.value}
                                   type="button"
-                                  onClick={() => {
-                                    handleBudgetChange(index, 'type', type.value);
-                                    closeDropdown(`budget-type-${index}`);
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                   }}
-                                  className="w-full px-3 py-2 text-sm text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleBudgetChange(index, 'type', type.value);
+                                    setTimeout(() => closeDropdown(`budget-type-${index}`), 0);
+                                  }}
+                                  className="w-full px-3 py-2 text-sm text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                                 >
                                   {type.label}
                                 </button>

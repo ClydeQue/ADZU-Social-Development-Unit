@@ -28,8 +28,10 @@ function InboxDropdown({ onMessageClick }) {
     queryKey: ["messages"],
     queryFn: MessageService.getMessages,
     select: (data) => data || { messages: [], unread: 0 },
-    staleTime: 2 * 60 * 1000,
-    refetchOnWindowFocus: true,
+    staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes
+    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false, // Don't refetch on component mount if data exists
     retry: false, // Don't retry on error to avoid blocking login
   });
 

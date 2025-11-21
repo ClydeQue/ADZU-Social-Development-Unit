@@ -350,6 +350,23 @@ export default function ReportDetailModal({ report, activity, onClose }) {
               </div>
             </>
           )}
+
+          {/* View Full Report Button */}
+          {activity.report_url && (
+            <div className="flex justify-end mt-4">
+              <a
+                href={activity.report_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                VIEW FULL REPORT
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Footer Actions */}

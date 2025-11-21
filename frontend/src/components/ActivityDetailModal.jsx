@@ -128,11 +128,12 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-gray-200 hover:cursor-pointer hover:bg-gray-300 transition-colors"
+            className="w-10 h-10 sm:w-8 sm:h-8 flex ml-2 items-center justify-center rounded-full 
+            bg-white ring-3 ring-[#4D49FC] hover:cursor-pointer hover:bg-gray-300 transition-colors"
             title="Close"
           >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#4D49FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
@@ -372,6 +373,23 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
                 </p>
               </div>
             </>
+          )}
+
+          {/* View Full Report Button */}
+          {activity.report_url && (
+            <div className="flex justify-end mt-4">
+              <a
+                href={activity.report_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                VIEW FULL REPORT
+              </a>
+            </div>
           )}
         </div>
       </div>
