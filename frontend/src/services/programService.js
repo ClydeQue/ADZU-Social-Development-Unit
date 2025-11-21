@@ -63,14 +63,14 @@ class ProgramService {
    * Delete program
    */
   async deleteProgram(programId) {
-    return await api.delete(`program/${programId}`);
+    return await api.delete(`api/programs/${programId}`);
   }
 
   /**
    * Get program statistics
    */
   async getProgramStats(programId) {
-    const response = await api.get(`program/${programId}/stats`);
+    const response = await api.get(`api/programs/${programId}/stats`);
     return response.data;
   }
 }
