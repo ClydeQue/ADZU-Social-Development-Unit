@@ -25,7 +25,7 @@ const API_BASE = getAPIBaseURL();
 
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: `${API_BASE}/api`,
+  baseURL: API_BASE,  // Remove /api since Express routes already include it
   headers: {
     "Content-Type": "application/json",
   },
@@ -34,7 +34,7 @@ const axiosInstance = axios.create({
 
 // Log API configuration in development
 if (import.meta.env.DEV) {
-  console.log("[API Config] Base URL:", `${API_BASE}/api`);
+  console.log("[API Config] Base URL:", API_BASE);
 }
 
 // Flag to prevent multiple simultaneous refresh attempts

@@ -5,7 +5,20 @@
 
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
+// Determine API base URL based on environment (same logic as api.js)
+const getAPIBaseURL = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  if (import.meta.env.PROD) {
+    return "https://adzu-sdu-backend.vercel.app";
+  }
+  
+  return "http://localhost:5001";
+};
+
+const API_BASE = getAPIBaseURL();
 const ACCESS_TOKEN_KEY = "sdu_access_token";
 
 // Create a separate axios instance for auth (no interceptors)

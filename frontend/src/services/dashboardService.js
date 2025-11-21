@@ -10,14 +10,14 @@ class DashboardService {
    * Get dashboard statistics (completed, in progress, pending)
    */
   async getDashboardStats() {
-    return api.get('unit-director/dashboard');
+    return api.get('/api/unit-director/dashboard');
   }
 
   /**
    * Get upcoming activities (next 3 closest to current date)
    */
   async getUpcomingActivities() {
-    return api.get('unit-director/upcoming-activities');
+    return api.get('/api/unit-director/upcoming-activities');
   }
 }
 

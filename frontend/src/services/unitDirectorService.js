@@ -10,7 +10,7 @@ class UnitDirectorService {
    * Get unit director dashboard data
    */
   async getDashboard() {
-    return await api.get("unit-director/dashboard");
+    return await api.get("/api/unit-director/dashboard");
   }
 
   /**
