@@ -67,7 +67,7 @@ export default function UsersManagement() {
             <div className="mb-6">
               <button
                 onClick={() => navigate('/unit-director/settings/main')}
-                className="flex items-center gap-2 text-[#4D49FC] hover:underline mb-4"
+                className="flex items-center  gap-2 text-[#4D49FC] hover:underline mb-4"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ export default function UsersManagement() {
             </div>
 
             {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-md p-2 mb-6">
+            <div className="bg-white rounded-xl cursor-pointer shadow-md p-2 mb-6">
               <div className="flex gap-2">
                 <button
                   onClick={() => setActiveTab('users')}
@@ -93,7 +93,7 @@ export default function UsersManagement() {
                   }`}
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center cursor-pointer gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -109,7 +109,7 @@ export default function UsersManagement() {
                   }`}
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center cursor-pointer gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -197,7 +197,7 @@ export default function UsersManagement() {
                           </div>
                           <div className="flex items-center justify-end">
                             <button
-                              className="px-4 py-1.5 bg-[#4D49FC] text-white font-semibold rounded-md hover:bg-[#201f65] transition-colors text-xs"
+                              className="px-4 py-1.5 bg-[#4D49FC] text-white cursor-pointer font-semibold rounded-md hover:bg-[#201f65] transition-colors text-xs"
                               style={{ fontFamily: 'Inter, sans-serif' }}
                             >
                               Approve Change
@@ -213,7 +213,7 @@ export default function UsersManagement() {
 
             {/* Reset Requests List */}
             {activeTab === 'reset-requests' && (
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 {mockResetRequests.filter(r => r.status === 'pending').length === 0 ? (
                   <div className="bg-white rounded-xl shadow-md p-12 text-center">
                     <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

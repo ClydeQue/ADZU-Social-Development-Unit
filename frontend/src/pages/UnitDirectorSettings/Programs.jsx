@@ -56,7 +56,7 @@ export default function ProgramsManagement() {
             <div className="mb-6">
               <button
                 onClick={() => navigate('/unit-director/settings/main')}
-                className="flex items-center gap-2 text-[#4D49FC] hover:underline mb-4"
+                className="flex items-center  cursor-pointer gap-2 text-[#4D49FC] hover:underline mb-4"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,13 +96,13 @@ export default function ProgramsManagement() {
                   <div className="relative">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="w-full px-4 py-3 border-2 border-[#4D49FC] rounded-full focus:border-[#4D49FC] focus:outline-none text-left flex items-center justify-between bg-white hover:bg-[#F8F8FF] transition-colors"
+                      className="w-full px-4 py-3 border-2 border-[#4D49FC] cursor-pointer rounded-full focus:border-[#4D49FC] focus:outline-none text-left flex items-center justify-between bg-white hover:bg-[#F8F8FF] transition-colors"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
-                      <span className={selectedOfficeId ? 'text-[#4D49FC] font-semibold' : 'text-gray-400'}>
+                      <span className={selectedOfficeId ? 'text-[#4D49FC] font-semibold ' : 'text-gray-400'}>
                         {selectedOffice ? selectedOffice.acronym : 'SELECT AN OFFICE'}
                       </span>
-                      <div className="flex items-center justify-center w-8 h-8 bg-[#4D49FC] rounded-full">
+                      <div className="flex items-center justify-center w-8 h-8 bg-[#4D49FC]  rounded-full">
                         <svg 
                           className={`w-4 h-4 text-white transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
                           fill="none" 
@@ -135,7 +135,7 @@ export default function ProgramsManagement() {
                                   setSelectedOfficeId(office.id);
                                   setIsDropdownOpen(false);
                                 }}
-                                className="w-full px-4 py-3 hover:bg-[#F0F0FF] rounded-xl flex items-center gap-3 transition-colors text-left mb-1"
+                                className="w-full px-4 py-3 cursor-pointer hover:bg-[#F0F0FF] rounded-xl flex items-center gap-3 transition-colors text-left mb-1"
                               >
                                 {getOfficeLogo(office.acronym) && (
                                   <img 
@@ -173,7 +173,7 @@ export default function ProgramsManagement() {
                     }
                   }}
                   disabled={!newProgramName.trim() || !selectedOfficeId}
-                  className="px-8 py-2.5 bg-[#4D49FC] text-white font-bold rounded-lg hover:bg-[#3D39EC] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors uppercase text-sm"
+                  className="px-8 py-2.5 bg-[#4D49FC] text-white font-bold rounded-lg cursor-pointer hover:bg-[#3D39EC] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors uppercase text-sm"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Add

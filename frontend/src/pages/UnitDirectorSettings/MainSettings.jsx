@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WhiteContainer from '@/components/WhiteContainer';
 import Sidebar from '@/components/Sidebar';
+import { Eye, EyeOff, RefreshCw } from 'lucide-react';
 
 /**
  * Main Settings Page for Unit Director
@@ -22,6 +23,14 @@ export default function MainSettings() {
   const [usernameForm, setUsernameForm] = useState({
     newUsername: '',
     currentPassword: ''
+  });
+
+  // Password visibility states
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+    usernameConfirm: false
   });
 
   // Handle password change (TODO: integrate with API)
@@ -96,7 +105,7 @@ export default function MainSettings() {
                       {/* Change Password Option */}
                       <button
                         onClick={() => setActiveForm('password')}
-                        className="w-full group hover:bg-[#F8F9FF] border-2 border-[#7E7DC5] hover:border-[#040195] rounded-xl p-5 transition-all text-left"
+                        className="w-full group hover:bg-[#F8F9FF] border-2 border-[#7E7DC5] cursor-pointer hover:border-[#040195] rounded-xl p-5 transition-all text-left"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -123,7 +132,7 @@ export default function MainSettings() {
                       {/* Change Username Option */}
                       <button
                         onClick={() => setActiveForm('username')}
-                        className="w-full group hover:bg-[#F8F9FF] border-2 border-[#7E7DC5] hover:border-[#040195] rounded-xl p-5 transition-all text-left"
+                        className="w-full group hover:bg-[#F8F9FF] border-2 border-[#7E7DC5] cursor-pointer hover:border-[#040195] rounded-xl p-5 transition-all text-left"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -167,7 +176,7 @@ export default function MainSettings() {
                       {/* Programs Management */}
                       <button
                         onClick={() => navigate('/unit-director/settings/programs')}
-                        className="w-full bg-[#040195] hover:bg-[#3d39cc] text-white rounded-xl p-4 transition-all shadow-md hover:shadow-lg group"
+                        className="w-full bg-[#040195] hover:bg-[#3d39cc] cursor-pointer text-white rounded-xl p-4 transition-all shadow-md hover:shadow-lg group"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -194,7 +203,7 @@ export default function MainSettings() {
                       {/* Users Management */}
                       <button
                         onClick={() => navigate('/unit-director/settings/users')}
-                        className="w-full bg-[#040195] hover:bg-[#3d39cc] text-white rounded-xl p-4 transition-all shadow-md hover:shadow-lg group"
+                        className="w-full bg-[#040195] hover:bg-[#3d39cc] cursor-pointer text-white rounded-xl p-4 transition-all shadow-md hover:shadow-lg group"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -244,214 +253,259 @@ export default function MainSettings() {
 
             {/* Password Change Form */}
             {activeForm === 'password' && (
-              <div className="max-w-3xl mx-auto">
+              <div className="max-w-4xl mx-auto">
                 {/* Back Button */}
                 <button
                   onClick={() => setActiveForm(null)}
-                  className="flex items-center gap-2 text-[#040195] hover:text-[#040195] mb-6 font-semibold transition-colors"
+                  className="flex items-center gap-2 text-white bg-[#040195] hover:bg-[#3d39cc] px-4 py-2 rounded-full mb-4 font-semibold transition-all text-xs cursor-pointer shadow-sm hover:shadow-md"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                   Back to Settings
                 </button>
 
-                <div className="bg-white rounded-2xl shadow-sm border-2 border-[#7E7DC5] overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-[#040195] px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Change Password
-                        </h2>
-                        <p className="text-white/80 text-sm mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Enter your current password and choose a new secure password
-                        </p>
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Username (read-only display) */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value="Social Development Unit"
+                        readOnly
+                        className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+
+                    {/* Current Password */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Current Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPasswords.current ? "text" : "password"}
+                          value={passwordForm.currentPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                          className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full focus:border-[#4D49FC] focus:ring-4 focus:ring-[#4D49FC]/20 outline-none transition-all text-gray-600 text-sm"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                          placeholder="**************"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#040195] transition-colors"
+                        >
+                          {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Form Content */}
-                  <div className="p-8">
-                    <form onSubmit={handlePasswordChange} className="space-y-6">
-                      {/* Current Password */}
-                      <div>
-                        <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Current Password <span className="text-red-500">*</span>
-                        </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* New Password */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        New Password
+                      </label>
+                      <div className="relative">
                         <input
-                          type="password"
-                          value={passwordForm.currentPassword}
-                          onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#040195] focus:ring-2 focus:ring-[#040195]/20 outline-none transition-all"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
-                          placeholder="Enter your current password"
-                          required
-                        />
-                      </div>
-
-                      {/* New Password */}
-                      <div>
-                        <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          New Password <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="password"
+                          type={showPasswords.new ? "text" : "password"}
                           value={passwordForm.newPassword}
                           onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#040195] focus:ring-2 focus:ring-[#040195]/20 outline-none transition-all"
+                          className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full focus:border-[#4D49FC] focus:ring-4 focus:ring-[#4D49FC]/20 outline-none transition-all text-gray-600 text-sm"
                           style={{ fontFamily: 'Inter, sans-serif' }}
-                          placeholder="Enter your new password"
+                          placeholder="**************"
                           required
                         />
-                        <p className="mt-2 text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Password must be at least 8 characters long and include uppercase, lowercase, and numbers
-                        </p>
-                      </div>
-
-                      {/* Confirm Password */}
-                      <div>
-                        <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Confirm New Password <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.confirmPassword}
-                          onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#040195] focus:ring-2 focus:ring-[#040195]/20 outline-none transition-all"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
-                          placeholder="Re-enter your new password"
-                          required
-                        />
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-4 pt-4">
-                        <button
-                          type="submit"
-                          className="flex-1 bg-[#040195] hover:bg-[#3d39cc] text-white font-semibold py-3 px-6 rounded-xl hover:shadow-lg transition-all"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
-                        >
-                          Update Password
-                        </button>
                         <button
                           type="button"
-                          onClick={() => setActiveForm(null)}
-                          className="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-all"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
+                          onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#040195] transition-colors"
                         >
-                          Cancel
+                          {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
-                    </form>
+                    </div>
+
+                    {/* Retype Password */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Retype Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPasswords.confirm ? "text" : "password"}
+                          value={passwordForm.confirmPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                          className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full focus:border-[#4D49FC] focus:ring-4 focus:ring-[#4D49FC]/20 outline-none transition-all text-gray-600 text-sm"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                          placeholder="**************"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#040195] transition-colors"
+                        >
+                          {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-end gap-3 pt-4">
+                    <button
+                      type="submit"
+                      className="bg-[#4D49FC] hover:bg-[#3d39cc] text-white font-bold py-2.5 px-6 rounded-full hover:shadow-lg transition-all flex items-center gap-2 text-sm"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                        setShowPasswords({ current: false, new: false, confirm: false, usernameConfirm: false });
+                      }}
+                      className="bg-[#4D49FC] hover:bg-[#3d39cc] text-white font-bold p-2.5 rounded-full hover:shadow-lg transition-all"
+                      title="Reset form"
+                    >
+                      <RefreshCw size={18} />
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
 
             {/* Username Change Form */}
             {activeForm === 'username' && (
-              <div className="max-w-3xl mx-auto">
+              <div className="max-w-4xl mx-auto">
                 {/* Back Button */}
                 <button
                   onClick={() => setActiveForm(null)}
-                  className="flex items-center gap-2 text-[#040195] hover:text-[#040195] mb-6 font-semibold transition-colors"
+                  className="flex items-center gap-2 text-white bg-[#040195] hover:bg-[#3d39cc] px-4 py-2 rounded-full mb-4 font-semibold transition-all text-xs cursor-pointer shadow-sm hover:shadow-md"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                   Back to Settings
                 </button>
 
-                <div className="bg-white rounded-2xl shadow-sm border-2 border-[#7E7DC5] overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-[#040195] px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Change Username
-                        </h2>
-                        <p className="text-white/80 text-sm mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Update your account username (requires password confirmation)
-                        </p>
+                <form onSubmit={handleUsernameChange} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Current Username (read-only) */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value="Social Development Unit"
+                        readOnly
+                        className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+
+                    {/* Current Password for Confirmation */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Current Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPasswords.usernameConfirm ? "text" : "password"}
+                          value={usernameForm.currentPassword}
+                          onChange={(e) => setUsernameForm({ ...usernameForm, currentPassword: e.target.value })}
+                          className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full focus:border-[#4D49FC] focus:ring-4 focus:ring-[#4D49FC]/20 outline-none transition-all text-gray-600 text-sm"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                          placeholder="**************"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords({ ...showPasswords, usernameConfirm: !showPasswords.usernameConfirm })}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#040195] transition-colors"
+                        >
+                          {showPasswords.usernameConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Form Content */}
-                  <div className="p-8">
-                    <form onSubmit={handleUsernameChange} className="space-y-6">
-                      {/* New Username */}
-                      <div>
-                        <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          New Username <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={usernameForm.newUsername}
-                          onChange={(e) => setUsernameForm({ ...usernameForm, newUsername: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#040195] focus:ring-2 focus:ring-[#040195]/20 outline-none transition-all"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
-                          placeholder="Enter your new username"
-                          required
-                        />
-                        <p className="mt-2 text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Username must be unique and contain only letters, numbers, and underscores
-                        </p>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* New Username */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        New Username
+                      </label>
+                      <input
+                        type="text"
+                        value={usernameForm.newUsername}
+                        onChange={(e) => setUsernameForm({ ...usernameForm, newUsername: e.target.value })}
+                        className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full focus:border-[#4D49FC] focus:ring-4 focus:ring-[#4D49FC]/20 outline-none transition-all text-gray-600 text-sm"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                        placeholder="Enter new username"
+                        required
+                      />
+                    </div>
 
-                      {/* Current Password for Confirmation */}
-                      <div>
-                        <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          Current Password <span className="text-red-500">*</span>
-                        </label>
+                    {/* Retype Password */}
+                    <div>
+                      <label className="block text-base font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Retype Password
+                      </label>
+                      <div className="relative">
                         <input
-                          type="password"
+                          type={showPasswords.usernameConfirm ? "text" : "password"}
                           value={usernameForm.currentPassword}
-                          onChange={(e) => setUsernameForm({ ...usernameForm, currentPassword: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#040195] focus:ring-2 focus:ring-[#040195]/20 outline-none transition-all"
+                          readOnly
+                          className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
                           style={{ fontFamily: 'Inter, sans-serif' }}
-                          placeholder="Confirm with your current password"
-                          required
+                          placeholder="**************"
                         />
-                        <p className="mt-2 text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          For security purposes, please enter your current password
-                        </p>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-4 pt-4">
-                        <button
-                          type="submit"
-                          className="flex-1 bg-[#040195] hover:bg-[#3d39cc] text-white font-semibold py-3 px-6 rounded-xl hover:shadow-lg transition-all"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
-                        >
-                          Update Username
-                        </button>
                         <button
                           type="button"
-                          onClick={() => setActiveForm(null)}
-                          className="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-all"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
+                          onClick={() => setShowPasswords({ ...showPasswords, usernameConfirm: !showPasswords.usernameConfirm })}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#040195] transition-colors"
                         >
-                          Cancel
+                          {showPasswords.usernameConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
-                    </form>
+                    </div>
                   </div>
-                </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-end gap-3 pt-4">
+                    <button
+                      type="submit"
+                      className="bg-[#4D49FC] hover:bg-[#3d39cc] text-white font-bold py-2.5 px-6 rounded-full hover:shadow-lg transition-all flex items-center gap-2 text-sm"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUsernameForm({ newUsername: '', currentPassword: '' });
+                        setShowPasswords({ ...showPasswords, usernameConfirm: false });
+                      }}
+                      className="bg-[#4D49FC] hover:bg-[#3d39cc] text-white font-bold p-2.5 rounded-full hover:shadow-lg transition-all"
+                      title="Reset form"
+                    >
+                      <RefreshCw size={18} />
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
             </div>
