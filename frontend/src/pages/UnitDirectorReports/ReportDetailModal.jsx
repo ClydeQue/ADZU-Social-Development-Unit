@@ -77,11 +77,17 @@ export default function ReportDetailModal({ report, activity, onClose }) {
     try {
       const blob = await pdf(<ActivityPDF activity={activity} report={report} />).toBlob();
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${activity?.title || 'Activity'}_Report.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
+      
+      // Open in new window for print preview
+      const printWindow = window.open(url, '_blank');
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+      
+      // Clean up after a delay
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Please try again.');

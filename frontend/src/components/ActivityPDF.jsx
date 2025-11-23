@@ -211,7 +211,7 @@ const ActivityPDF = ({ activity, report }) => {
           {/* Left Logo */}
           <View style={styles.headerLeft}>
             <Image
-              src="/logos/pdflogo/adzu_logo_print.webp"
+              src={`${window.location.origin}/logos/pdflogo/adzu_logo_print.webp`}
               style={styles.logo}
             />
           </View>
@@ -228,7 +228,7 @@ const ActivityPDF = ({ activity, report }) => {
           {/* Right Logo */}
           <View style={styles.headerRight}>
             <Image
-              src="/logos/pdflogo/sdu_logo_pdf.webp"
+              src={`${window.location.origin}/logos/pdflogo/sdu_logo_pdf.webp`}
               style={styles.logo}
             />
           </View>
