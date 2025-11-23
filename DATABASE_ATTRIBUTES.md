@@ -22,10 +22,8 @@
     14.2. partner_type
     14.3. partner_nature
 15. budget (Composite Attribute - Parent)
-    15.1. allocated_budget
-    15.2. liquidated_budget
-    15.3. budget_amount
-    15.4. budget_type
+    15.1. budget_amount
+    15.2. budget_type
 16. sdg_number (Multivalued Attribute)
 17. phase
 18. status

@@ -386,19 +386,27 @@ export default function ReportDetailModal({ report, activity, onClose }) {
           <div className="mb-4 sm:mb-6">
             <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">PARTNERS</h3>
             {(activity.partner_name || activity.implementing_partners) ? (
-              <div className="text-[#040195] text-xs leading-relaxed">
+              <div className="space-y-2">
                 {activity.partner_name ? (
-                  <div>
-                    {activity.partner_name}
-                    {activity.partner_type && (
-                      <span className="italic ml-2">{activity.partner_type}</span>
-                    )}
-                    {activity.partner_nature && (
-                      <span className="ml-2"> {activity.partner_nature}</span>
-                    )}
-                  </div>
+                  (() => {
+                    const names = activity.partner_name.split(',').map(s => s.trim()).filter(Boolean);
+                    const types = activity.partner_type ? activity.partner_type.split(',').map(s => s.trim()).filter(Boolean) : [];
+                    const natures = activity.partner_nature ? activity.partner_nature.split(',').map(s => s.trim()).filter(Boolean) : [];
+                    
+                    return names.map((name, index) => (
+                      <div key={index} className="text-[#040195] text-xs leading-relaxed">
+                        <span className="font-semibold">{name}</span>
+                        {types[index] && (
+                          <span className="italic text-gray-600 ml-2">{types[index]}</span>
+                        )}
+                        {natures[index] && (
+                          <span className="text-gray-600 ml-2">{natures[index]}</span>
+                        )}
+                      </div>
+                    ));
+                  })()
                 ) : (
-                  <div>{activity.implementing_partners}</div>
+                  <div className="text-[#040195] text-xs leading-relaxed">{activity.implementing_partners}</div>
                 )}
               </div>
             ) : (
