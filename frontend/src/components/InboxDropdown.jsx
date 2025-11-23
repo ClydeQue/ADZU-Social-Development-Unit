@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { Email as EmailIcon, Edit as EditIcon } from "@mui/icons-material";
+import { Email as EmailIcon } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import MessageService from "@/services/messageService";
 import ComposeMessageDialog from "./ComposeMessageDialog";
@@ -102,15 +102,28 @@ function InboxDropdown({ onMessageClick }) {
           <div className="px-4 py-3 border-b border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-bold text-[#040195]">Inbox</h3>
+
               <button
                 onClick={() => {
                   setShowCompose(true);
                   setShowInbox(false);
                 }}
-                className="p-1.5 bg-[#4D49FC] text-white rounded-full hover:bg-[#3D39EC] transition-colors"
+                className="p-1.5 bg-[#4D49FC] flex items-center gap-1.5 text-white rounded-lg - 8px px-3 py-1 hover:bg-[#3D39EC] transition-colors"
                 title="Compose message"
               >
-                <EditIcon sx={{ fontSize: 16 }} />
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 000-1.41l-2.34-2.34a.996.996 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span className="text-xs font-semibold">Compose</span>
               </button>
             </div>
             <div className="flex gap-1.5">
