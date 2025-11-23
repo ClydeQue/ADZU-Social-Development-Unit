@@ -29,10 +29,14 @@ export default function ReportDetailModal({ report, activity, onClose }) {
   const updateStatusMutation = useMutation({
     mutationFn: (newStatus) => UnitDirectorService.updateActivityStatus(activity.id, newStatus),
     onSuccess: () => {
-      // Invalidate queries to refresh data
+      // Invalidate queries to refresh data across all views
       queryClient.invalidateQueries(['activity', activity.id]);
+      queryClient.invalidateQueries(['unit-director-reports']);
       queryClient.invalidateQueries(['unit-director-activities']);
+      queryClient.invalidateQueries(['office-activities']);
+      queryClient.invalidateQueries(['office-reports']);
       alert('Status updated successfully!');
+      onClose(); // Close modal after successful update
     },
     onError: (error) => {
       console.error('Update status error:', error);

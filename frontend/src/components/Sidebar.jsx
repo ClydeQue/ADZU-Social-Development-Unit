@@ -113,7 +113,7 @@ export default function Sidebar() {
                 {item.text}
               </span>
               {item.badgeCount > 0 && (
-                <span className="absolute top-1 right-1 bg-[#EF4444] text-white text-[0.6rem] h-4 min-w-[16px] rounded-full flex items-center justify-center px-1">
+                <span className="absolute top-1 right-1 bg-[#EF4444] text-white text-[0.55rem] h-[15px] min-w-[15px] max-w-[28px] rounded-full flex items-center justify-center px-1 font-semibold">
                   {item.badgeCount > 99 ? '99+' : item.badgeCount}
                 </span>
               )}
@@ -174,7 +174,7 @@ export default function Sidebar() {
                       {item.text}
                     </span>
                     {item.badgeCount > 0 && (
-                      <span className="ml-auto bg-[#EF4444] text-white text-[0.65rem] h-[18px] min-w-[18px] rounded-[9px] flex items-center justify-center px-1">
+                      <span className="ml-auto bg-[#EF4444] text-white text-[0.65rem] h-[18px] min-w-[18px] max-w-[32px] rounded-[9px] flex items-center justify-center px-1.5 font-semibold flex-shrink-0">
                         {item.badgeCount > 99 ? '99+' : item.badgeCount}
                       </span>
                     )}

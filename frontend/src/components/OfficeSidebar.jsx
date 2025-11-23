@@ -135,7 +135,7 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
               }`}
             >
               {item.badgeCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-[#4D49FC] text-white text-[0.6rem] font-semibold rounded-full flex items-center justify-center px-1">
+                <span className="absolute -top-0.5 -right-0.5 min-w-[15px] max-w-[28px] h-[15px] bg-[#4D49FC] text-white text-[0.55rem] font-semibold rounded-full flex items-center justify-center px-1">
                   {item.badgeCount > 99 ? '99+' : item.badgeCount}
                 </span>
               )}
@@ -206,7 +206,7 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
                       {item.text}
                     </span>
                     {item.badgeCount > 0 && (
-                      <span className="ml-auto min-w-[20px] h-5 bg-[#4D49FC] text-white text-[0.7rem] font-semibold rounded-full flex items-center justify-center px-1.5">
+                      <span className="ml-auto min-w-[20px] max-w-[32px] h-5 bg-[#4D49FC] text-white text-[0.65rem] font-semibold rounded-full flex items-center justify-center px-1.5 flex-shrink-0">
                         {item.badgeCount > 99 ? '99+' : item.badgeCount}
                       </span>
                     )}

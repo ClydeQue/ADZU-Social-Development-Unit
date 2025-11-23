@@ -82,7 +82,7 @@ function NotificationDropdown({ onNotificationClick }) {
           sx={{ fontSize: { xs: 16, sm: 18, xl: 19 } }}
         />
         {notificationsCount > 0 && (
-          <span className="absolute bottom-0 right-0 z-50 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold text-[9px] xl:text-[10px] shadow-md border-2 border-white pointer-events-none">
+          <span className="absolute bottom-0 right-0 z-50 bg-red-500 text-white rounded-full min-w-[16px] max-w-[22px] h-4 flex items-center justify-center font-semibold text-[9px] xl:text-[10px] shadow-md border-2 border-white pointer-events-none px-0.5">
             {notificationsCount > 9 ? "9+" : notificationsCount}
           </span>
         )}
