@@ -1,30 +1,36 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getOfficeLogo } from '@/utils/officeLogos';
 
 // eslint-disable-next-line react/prop-types
 const BudgetCard = ({ budgetData }) => {
   const [visibleItems, setVisibleItems] = useState([1, 2, 3, 4, 5, 6, 7]);
   const [direction, setDirection] = useState(0);
+  const [hoveredSDG, setHoveredSDG] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  // sdgData is static for now, 
+  // Office list
+  const offices = ['ACCA', 'ACES', 'ACLG', 'ALTEC', 'APC', 'CCES'];
+
+  // sdgData is static for now with office breakdown
   const sdgData = [
-    { id: 1, value: 75 },
-    { id: 2, value: 90 },
-    { id: 3, value: 45 },
-    { id: 4, value: 80 },
-    { id: 5, value: 60 },
-    { id: 6, value: 85 },
-    { id: 7, value: 95 },
-    { id: 8, value: 70 },
-    { id: 9, value: 88 },
-    { id: 10, value: 55 },
-    { id: 11, value: 92 },
-    { id: 12, value: 78 },
-    { id: 13, value: 65 },
-    { id: 14, value: 82 },
-    { id: 15, value: 73 },
-    { id: 16, value: 68 },
-    { id: 17, value: 91 },
+    { id: 1, value: 75, offices: { ACCA: 15, ACES: 20, ACLG: 10, ALTEC: 12, APC: 8, CCES: 10 } },
+    { id: 2, value: 90, offices: { ACCA: 18, ACES: 22, ACLG: 15, ALTEC: 14, APC: 11, CCES: 10 } },
+    { id: 3, value: 45, offices: { ACCA: 8, ACES: 10, ACLG: 7, ALTEC: 6, APC: 7, CCES: 7 } },
+    { id: 4, value: 80, offices: { ACCA: 16, ACES: 18, ACLG: 12, ALTEC: 13, APC: 11, CCES: 10 } },
+    { id: 5, value: 60, offices: { ACCA: 12, ACES: 14, ACLG: 9, ALTEC: 10, APC: 8, CCES: 7 } },
+    { id: 6, value: 85, offices: { ACCA: 17, ACES: 19, ACLG: 13, ALTEC: 14, APC: 12, CCES: 10 } },
+    { id: 7, value: 95, offices: { ACCA: 19, ACES: 21, ACLG: 16, ALTEC: 15, APC: 13, CCES: 11 } },
+    { id: 8, value: 70, offices: { ACCA: 14, ACES: 16, ACLG: 11, ALTEC: 11, APC: 9, CCES: 9 } },
+    { id: 9, value: 88, offices: { ACCA: 18, ACES: 20, ACLG: 14, ALTEC: 14, APC: 12, CCES: 10 } },
+    { id: 10, value: 55, offices: { ACCA: 11, ACES: 13, ACLG: 8, ALTEC: 9, APC: 7, CCES: 7 } },
+    { id: 11, value: 92, offices: { ACCA: 18, ACES: 21, ACLG: 15, ALTEC: 15, APC: 12, CCES: 11 } },
+    { id: 12, value: 78, offices: { ACCA: 15, ACES: 18, ACLG: 12, ALTEC: 13, APC: 10, CCES: 10 } },
+    { id: 13, value: 65, offices: { ACCA: 13, ACES: 15, ACLG: 10, ALTEC: 10, APC: 9, CCES: 8 } },
+    { id: 14, value: 82, offices: { ACCA: 16, ACES: 19, ACLG: 13, ALTEC: 13, APC: 11, CCES: 10 } },
+    { id: 15, value: 73, offices: { ACCA: 14, ACES: 17, ACLG: 11, ALTEC: 12, APC: 10, CCES: 9 } },
+    { id: 16, value: 68, offices: { ACCA: 13, ACES: 16, ACLG: 10, ALTEC: 11, APC: 9, CCES: 9 } },
+    { id: 17, value: 91, offices: { ACCA: 18, ACES: 21, ACLG: 15, ALTEC: 14, APC: 12, CCES: 11 } },
   ];
 // Queue algorithm for carousel effect
   const handlePrev = () => {
@@ -104,7 +110,7 @@ const BudgetCard = ({ budgetData }) => {
               {getCurrentPageData().map((item) => (
                 <motion.div 
                   key={item.id} 
-                  className="flex items-end gap-0.5 sm:gap-1 flex-1"
+                  className="flex items-end gap-0.5 sm:gap-1 flex-1 relative"
                   initial={{ 
                     x: direction > 0 ? 50 : -50,
                     opacity: 0,
@@ -125,11 +131,19 @@ const BudgetCard = ({ budgetData }) => {
                     ease: "easeInOut"
                   }}
                   layout
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top });
+                    setHoveredSDG(item);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredSDG(null);
+                  }}
                 >
                   {/* Bar */}
                   <div className="flex items-end justify-center" style={{ height: '50px' }}>
                     <div
-                      className="bg-[#4D49FC] rounded-full"
+                      className="bg-[#4D49FC] rounded-full cursor-pointer hover:bg-[#3d39cc] transition-colors"
                       style={{
                         width: window.innerWidth < 640 ? '8px' : '10px',
                         height: `${(item.value / maxValue) * 100}%`,
@@ -146,10 +160,70 @@ const BudgetCard = ({ budgetData }) => {
             </AnimatePresence>
           </div>
         </div>
-
-
-        
       </div>
+
+      {/* Tooltip */}
+      {hoveredSDG && (
+        <div
+          className="fixed z-[9999] pointer-events-none"
+          style={{
+            left: `${tooltipPosition.x}px`,
+            top: `${tooltipPosition.y - 10}px`,
+            transform: 'translate(-50%, -100%)',
+          }}
+        >
+          <div className="bg-white rounded-xl shadow-2xl border-2 border-[#4D49FC] p-3 min-w-[200px]">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+              <h4 className="text-[#040195] font-bold text-sm">SDG {hoveredSDG.id}</h4>
+              <span className="text-[#4D49FC] font-bold text-lg">{hoveredSDG.value}</span>
+            </div>
+            
+            {/* Office List */}
+            <div className="space-y-2">
+              {offices.map((office) => {
+                const count = hoveredSDG.offices[office] || 0;
+                const logo = getOfficeLogo(office);
+                
+                return (
+                  <div
+                    key={office}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      {logo && (
+                        <img
+                          src={logo}
+                          alt={office}
+                          className="w-5 h-5 object-contain"
+                        />
+                      )}
+                      <span className="text-[#040195] text-xs font-semibold">
+                        {office}
+                      </span>
+                    </div>
+                    <span className={`text-xs font-bold ${count > 0 ? 'text-[#4D49FC]' : 'text-gray-400'}`}>
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Arrow pointer */}
+            <div
+              className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-full"
+              style={{
+                width: 0,
+                height: 0,
+                borderLeft: '8px solid transparent',
+                borderRight: '8px solid transparent',
+                borderTop: '8px solid #4D49FC',
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
