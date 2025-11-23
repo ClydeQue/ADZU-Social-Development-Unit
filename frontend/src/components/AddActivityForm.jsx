@@ -1,22 +1,26 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import OfficeService from '@/services/officeService';
-import PropTypes from 'prop-types';
-import { SDG_GOALS, getSDGIcon } from '@/utils/sdgData';
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import OfficeService from "@/services/officeService";
+import PropTypes from "prop-types";
+import { SDG_GOALS, getSDGIcon } from "@/utils/sdgData";
 
 /**
  * Reusable Add Activity Form Component
  * Works for all offices based on officeId
  */
-export default function AddActivityForm({ officeId, basePath, officeColor = '#4D49FC' }) {
+export default function AddActivityForm({
+  officeId,
+  basePath,
+  officeColor = "#4D49FC",
+}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const dropdownRef = useRef(null);
 
   // Fetch programs for this office
   const { data: programs = [], isLoading: programsLoading } = useQuery({
-    queryKey: ['office-programs', officeId],
+    queryKey: ["office-programs", officeId],
     queryFn: () => OfficeService.getOfficePrograms(officeId),
     enabled: !!officeId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -24,42 +28,42 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
 
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [formData, setFormData] = useState({
-    projectName: '',
-    programId: '', // Changed to programId to store the selected program
-    programComponent: '',
-    initiation: '',
-    implementation: '',
-    participantsNo: '',
-    male_participants: '',
-    female_participants: '',
-    classification: '',
-    phase: '',
-    status: 'pending', // Default status for new activities
+    projectName: "",
+    programId: "", // Changed to programId to store the selected program
+    programComponent: "",
+    initiation: "",
+    implementation: "",
+    participantsNo: "",
+    male_participants: "",
+    female_participants: "",
+    classification: "",
+    phase: "",
+    status: "pending", // Default status for new activities
     venue: {
-      street: '',
-      barangay: '',
-      city: '',
-      province: ''
+      street: "",
+      barangay: "",
+      city: "",
+      province: "",
     },
-    description: '',
-    objectives: '',
-    partners: [{ name: '', type: '', nature: '' }],
-    budgets: [{ amount: '', type: 'external' }],
+    description: "",
+    objectives: "",
+    partners: [{ name: "", type: "", nature: "" }],
+    budgets: [{ amount: "", type: "external" }],
     thumbnail: null,
-    reportUrl: '',
-    sdgs: []
+    reportUrl: "",
+    sdgs: [],
   });
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const toggleDropdown = (name) => {
-    setDropdownOpen(prev => ({ ...prev, [name]: !prev[name] }));
+    setDropdownOpen((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
   const closeDropdown = (name) => {
-    setDropdownOpen(prev => ({ ...prev, [name]: false }));
+    setDropdownOpen((prev) => ({ ...prev, [name]: false }));
   };
 
   // Close dropdown when clicking outside
@@ -69,70 +73,70 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
         setDropdownOpen({});
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleVenueChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      venue: { ...prev.venue, [field]: value }
+      venue: { ...prev.venue, [field]: value },
     }));
   };
 
   const handlePartnerChange = (index, field, value) => {
     const newPartners = [...formData.partners];
     newPartners[index][field] = value;
-    setFormData(prev => ({ ...prev, partners: newPartners }));
+    setFormData((prev) => ({ ...prev, partners: newPartners }));
   };
 
   const addPartner = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      partners: [...prev.partners, { name: '', type: '', nature: '' }]
+      partners: [...prev.partners, { name: "", type: "", nature: "" }],
     }));
   };
 
   const removePartner = (index) => {
     if (formData.partners.length > 1) {
       const newPartners = formData.partners.filter((_, i) => i !== index);
-      setFormData(prev => ({ ...prev, partners: newPartners }));
+      setFormData((prev) => ({ ...prev, partners: newPartners }));
     }
   };
 
   const handleBudgetChange = (index, field, value) => {
     const newBudgets = [...formData.budgets];
     newBudgets[index][field] = value;
-    setFormData(prev => ({ ...prev, budgets: newBudgets }));
+    setFormData((prev) => ({ ...prev, budgets: newBudgets }));
   };
 
   const addBudget = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      budgets: [...prev.budgets, { amount: '', type: 'external' }]
+      budgets: [...prev.budgets, { amount: "", type: "external" }],
     }));
   };
 
   const removeBudget = (index) => {
     if (formData.budgets.length > 1) {
       const newBudgets = formData.budgets.filter((_, i) => i !== index);
-      setFormData(prev => ({ ...prev, budgets: newBudgets }));
+      setFormData((prev) => ({ ...prev, budgets: newBudgets }));
     }
   };
 
   const handleSDGToggle = (sdgId) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       sdgs: prev.sdgs.includes(sdgId)
-        ? prev.sdgs.filter(id => id !== sdgId)
-        : [...prev.sdgs, sdgId]
+        ? prev.sdgs.filter((id) => id !== sdgId)
+        : [...prev.sdgs, sdgId],
     }));
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, thumbnail: file }));
+      setFormData((prev) => ({ ...prev, thumbnail: file }));
     }
   };
 
@@ -142,20 +146,20 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
       return await OfficeService.createActivity(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['office-projects', officeId]);
-      queryClient.invalidateQueries(['office-activities', officeId]);
-      alert('Activity created successfully!');
+      queryClient.invalidateQueries(["office-projects", officeId]);
+      queryClient.invalidateQueries(["office-activities", officeId]);
+      alert("Activity created successfully!");
       navigate(`${basePath}/projects`);
     },
     onError: (error) => {
-      console.error('Create error:', error);
-      alert(`Error: ${error.message || 'Failed to create activity'}`);
+      console.error("Create error:", error);
+      alert(`Error: ${error.message || "Failed to create activity"}`);
     },
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       // Prepare activity data for backend
       const activityData = {
@@ -167,10 +171,10 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
         male_participants: parseInt(formData.male_participants) || 0,
         female_participants: parseInt(formData.female_participants) || 0,
         venue: JSON.stringify({
-          street: formData.venue.street || '',
-          barangay: formData.venue.barangay || '',
-          city: formData.venue.city || '',
-          province: formData.venue.province || ''
+          street: formData.venue.street || "",
+          barangay: formData.venue.barangay || "",
+          city: formData.venue.city || "",
+          province: formData.venue.province || "",
         }),
         description: formData.description || null,
         objectives: formData.objectives || null,
@@ -187,16 +191,16 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
         budget_amount: formData.budgets[0]?.amount ? parseFloat(formData.budgets[0].amount) : null,
         budget_type: formData.budgets[0]?.type || null,
         // Submit SDG numbers as array of integers
-        sdg_numbers: formData.sdgs.map(id => parseInt(id)),
+        sdg_numbers: formData.sdgs.map((id) => parseInt(id)),
         phase: formData.phase || null,
         report_url: formData.reportUrl || null,
         classification: formData.classification || null,
       };
 
-      console.log('Submitting activity data:', activityData);
+      console.log("Submitting activity data:", activityData);
       createMutation.mutate(activityData);
     } catch (error) {
-      console.error('Error preparing submission:', error);
+      console.error("Error preparing submission:", error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -231,11 +235,17 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
           box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
         }
       `}</style>
-      <form onSubmit={handleSubmit} className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8"
+      >
         {/* Header with Hashtag and Action Buttons */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: officeColor }}>
-            #{formData.projectName || 'dAZurv'}
+          <h1
+            className="text-4xl font-black font-inter"
+            style={{ color: "#4d49fc" }}
+          >
+            {formData.projectName || "Project"}
           </h1>
           <div className="flex gap-3">
             <button
@@ -250,7 +260,7 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               disabled={createMutation.isPending}
               className="px-4 py-2 rounded-xl bg-[#4D49FC] hover:bg-[#3d39cc] hover:cursor-pointer transition-colors text-white font-black font-inter text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {createMutation.isPending ? 'SUBMITTING...' : 'SUBMIT'}
+              {createMutation.isPending ? "SUBMITTING..." : "SUBMIT"}
             </button>
           </div>
         </div>
@@ -266,9 +276,11 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               <input
                 type="text"
                 value={formData.projectName}
-                onChange={(e) => handleInputChange('projectName', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("projectName", e.target.value)
+                }
                 className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
-                placeholder="ndAZurv"
+                placeholder="Project Name"
                 required
               />
             </div>
@@ -286,15 +298,29 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                   <div className="relative flex-1" ref={dropdownRef}>
                     <button
                       type="button"
-                      onClick={() => toggleDropdown('program')}
+                      onClick={() => toggleDropdown("program")}
                       className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
                     >
-                      <span className={formData.programId ? '' : 'text-gray-400'}>
-                        {formData.programId ? programs.find(p => p.id === formData.programId)?.title : 'Select program'}
+                      <span
+                        className={formData.programId ? "" : "text-gray-400"}
+                      >
+                        {formData.programId
+                          ? programs.find((p) => p.id === formData.programId)
+                              ?.title
+                          : "Select program"}
                       </span>
                       <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
-                        <svg width="10" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 9 8"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z"
+                            fill="white"
+                          />
                         </svg>
                       </div>
                     </button>
@@ -311,8 +337,8 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              handleInputChange('programId', program.id);
-                              setTimeout(() => closeDropdown('program'), 0);
+                              handleInputChange("programId", program.id);
+                              setTimeout(() => closeDropdown("program"), 0);
                             }}
                             className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                           >
@@ -331,7 +357,7 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 Status
               </label>
               <div className="px-2 py-2 bg-gray-100 border border-[#8180C9] rounded-[11px] text-center text-xs font-bold text-[#040195] uppercase">
-                {formData.status || 'PENDING'}
+                {formData.status || "PENDING"}
               </div>
             </div>
           </div>
@@ -344,7 +370,9 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 rows={2}
                 className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none resize-none placeholder:text-gray-400"
                 placeholder="It brings you in-depth conversations about candidates shaping Zamboanga's future..."
@@ -359,21 +387,36 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => toggleDropdown('phase')}
+                  onClick={() => toggleDropdown("phase")}
                   className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
                 >
-                  <span className={formData.phase ? '' : 'text-gray-400'}>
-                    {formData.phase || 'Select phase'}
+                  <span className={formData.phase ? "" : "text-gray-400"}>
+                    {formData.phase || "Select phase"}
                   </span>
                   <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
-                    <svg width="10" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 9 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z"
+                        fill="white"
+                      />
                     </svg>
                   </div>
                 </button>
                 {dropdownOpen.phase && (
                   <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
-                    {['Planning', 'Implementation', 'In Progress', 'Completed', 'Cancelled'].map((phase) => (
+                    {[
+                      "Planning",
+                      "Implementation",
+                      "In Progress",
+                      "Completed",
+                      "Cancelled",
+                    ].map((phase) => (
                       <button
                         key={phase}
                         type="button"
@@ -384,8 +427,8 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleInputChange('phase', phase);
-                          setTimeout(() => closeDropdown('phase'), 0);
+                          handleInputChange("phase", phase);
+                          setTimeout(() => closeDropdown("phase"), 0);
                         }}
                         className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                       >
@@ -406,7 +449,9 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               </label>
               <textarea
                 value={formData.objectives}
-                onChange={(e) => handleInputChange('objectives', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("objectives", e.target.value)
+                }
                 rows={2}
                 className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none resize-none placeholder:text-gray-400"
                 placeholder="To provide voters with insightful information..."
@@ -419,21 +464,29 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               </label>
               <div className="grid grid-cols-[70px_1fr] gap-1.5">
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Total Numbers</div>
+                  <div className="text-[9px] text-[#8180C9] mb-0.5">
+                    Total Numbers
+                  </div>
                   <input
                     type="number"
                     value={formData.participantsNo}
-                    onChange={(e) => handleInputChange('participantsNo', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("participantsNo", e.target.value)
+                    }
                     className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] text-center focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="0"
                   />
                 </div>
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Classification</div>
+                  <div className="text-[9px] text-[#8180C9] mb-0.5">
+                    Classification
+                  </div>
                   <input
                     type="text"
                     value={formData.classification}
-                    onChange={(e) => handleInputChange('classification', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("classification", e.target.value)
+                    }
                     className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="Type"
                   />
@@ -449,7 +502,9 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 <input
                   type="date"
                   value={formData.initiation}
-                  onChange={(e) => handleInputChange('initiation', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("initiation", e.target.value)
+                  }
                   className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none"
                 />
               </div>
@@ -460,7 +515,9 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 <input
                   type="date"
                   value={formData.implementation}
-                  onChange={(e) => handleInputChange('implementation', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("implementation", e.target.value)
+                  }
                   className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none"
                 />
               </div>
@@ -474,22 +531,30 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               {/* Venue row 1: Street, Barangay, Male */}
               <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Street / Room / Building</div>
+                  <div className="text-[9px] text-[#8180C9] mb-0.5">
+                    Street / Room / Building
+                  </div>
                   <input
                     type="text"
                     value={formData.venue.street}
-                    onChange={(e) => handleVenueChange('street', e.target.value)}
+                    onChange={(e) =>
+                      handleVenueChange("street", e.target.value)
+                    }
                     className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="Venue"
                   />
                 </div>
 
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Town / Barangay</div>
+                  <div className="text-[9px] text-[#8180C9] mb-0.5">
+                    Town / Barangay
+                  </div>
                   <input
                     type="text"
                     value={formData.venue.barangay}
-                    onChange={(e) => handleVenueChange('barangay', e.target.value)}
+                    onChange={(e) =>
+                      handleVenueChange("barangay", e.target.value)
+                    }
                     className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="Zone"
                   />
@@ -501,7 +566,9 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                     type="number"
                     min="0"
                     value={formData.male_participants}
-                    onChange={(e) => handleInputChange('male_participants', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("male_participants", e.target.value)
+                    }
                     className="w-16 px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] text-center focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="0"
                   />
@@ -511,22 +578,28 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
               {/* Venue row 2: City, Province, Female */}
               <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Municipality / City</div>
+                  <div className="text-[9px] text-[#8180C9] mb-0.5">
+                    Municipality / City
+                  </div>
                   <input
                     type="text"
                     value={formData.venue.city}
-                    onChange={(e) => handleVenueChange('city', e.target.value)}
+                    onChange={(e) => handleVenueChange("city", e.target.value)}
                     className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="City"
                   />
                 </div>
 
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Province</div>
+                  <div className="text-[9px] text-[#8180C9] mb-0.5">
+                    Province
+                  </div>
                   <input
                     type="text"
                     value={formData.venue.province}
-                    onChange={(e) => handleVenueChange('province', e.target.value)}
+                    onChange={(e) =>
+                      handleVenueChange("province", e.target.value)
+                    }
                     className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="Province"
                   />
@@ -538,7 +611,9 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                     type="number"
                     min="0"
                     value={formData.female_participants}
-                    onChange={(e) => handleInputChange('female_participants', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("female_participants", e.target.value)
+                    }
                     className="w-16 px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] text-center focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="0"
                   />
@@ -552,41 +627,67 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 </label>
                 <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
                   {formData.partners.map((partner, index) => (
-                    <div key={index} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-1.5">
+                    <div
+                      key={index}
+                      className="grid grid-cols-[1fr_1fr_1fr_auto] gap-1.5"
+                    >
                       <div>
-                        <div className="text-[9px] text-[#8180C9] mb-0.5">Name</div>
+                        <div className="text-[9px] text-[#8180C9] mb-0.5">
+                          Name
+                        </div>
                         <input
                           type="text"
                           value={partner.name}
-                          onChange={(e) => handlePartnerChange(index, 'name', e.target.value)}
+                          onChange={(e) =>
+                            handlePartnerChange(index, "name", e.target.value)
+                          }
                           className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                         />
                       </div>
                       <div>
-                        <div className="text-[9px] text-[#8180C9] mb-0.5">Type</div>
+                        <div className="text-[9px] text-[#8180C9] mb-0.5">
+                          Type
+                        </div>
                         <div className="relative">
                           <button
                             type="button"
-                            onClick={() => toggleDropdown(`partner-type-${index}`)}
+                            onClick={() =>
+                              toggleDropdown(`partner-type-${index}`)
+                            }
                             className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
                           >
-                            <span className={partner.type ? '' : 'text-gray-400'}>
-                              {partner.type || 'Select'}
+                            <span
+                              className={partner.type ? "" : "text-gray-400"}
+                            >
+                              {partner.type || "Select"}
                             </span>
                             <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
-                              <svg width="9" height="10" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
+                              <svg
+                                width="9"
+                                height="10"
+                                viewBox="0 0 9 8"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z"
+                                  fill="white"
+                                />
                               </svg>
                             </div>
                           </button>
                           {dropdownOpen[`partner-type-${index}`] && (
                             <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
-                              {['Government', 'Non-Government', 'Institutional'].map((type) => (
+                              {[
+                                "Government",
+                                "Non-Government",
+                                "Institutional",
+                              ].map((type) => (
                                 <button
                                   key={type}
                                   type="button"
                                   onClick={() => {
-                                    handlePartnerChange(index, 'type', type);
+                                    handlePartnerChange(index, "type", type);
                                     closeDropdown(`partner-type-${index}`);
                                   }}
                                   className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
@@ -599,11 +700,15 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                         </div>
                       </div>
                       <div>
-                        <div className="text-[9px] text-[#8180C9] mb-0.5">Nature</div>
+                        <div className="text-[9px] text-[#8180C9] mb-0.5">
+                          Nature
+                        </div>
                         <input
                           type="text"
                           value={partner.nature}
-                          onChange={(e) => handlePartnerChange(index, 'nature', e.target.value)}
+                          onChange={(e) =>
+                            handlePartnerChange(index, "nature", e.target.value)
+                          }
                           className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                         />
                       </div>
@@ -615,8 +720,17 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                             className="p-1.5 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] transition-colors group"
                             title="Add Partner"
                           >
-                            <svg className="w-3.5 h-3.5" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M9.41477 25.1818V0.500017H16.2841V25.1818H9.41477ZM0.5 16.2841V9.41479H25.1818V16.2841H0.5Z" fill="white" className="group-hover:fill-gray-200 transition-colors"/>
+                            <svg
+                              className="w-3.5 h-3.5"
+                              viewBox="0 0 26 26"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M9.41477 25.1818V0.500017H16.2841V25.1818H9.41477ZM0.5 16.2841V9.41479H25.1818V16.2841H0.5Z"
+                                fill="white"
+                                className="group-hover:fill-gray-200 transition-colors"
+                              />
                             </svg>
                           </button>
                         ) : (
@@ -626,8 +740,18 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                             className="p-1.5 rounded-full bg-red-500 hover:bg-red-600 transition-colors group"
                             title="Remove Partner"
                           >
-                            <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M14.9997 8.66504C15.736 8.66504 16.3335 9.26182 16.3337 9.99805C16.3337 10.7344 15.7361 11.332 14.9997 11.332H4.99969C4.26347 11.3319 3.66669 10.7343 3.66669 9.99805C3.66686 9.26193 4.26357 8.66522 4.99969 8.66504H14.9997Z" fill="white" stroke="white" className="group-hover:fill-gray-200 group-hover:stroke-gray-200 transition-colors"/>
+                            <svg
+                              className="w-3.5 h-3.5"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M14.9997 8.66504C15.736 8.66504 16.3335 9.26182 16.3337 9.99805C16.3337 10.7344 15.7361 11.332 14.9997 11.332H4.99969C4.26347 11.3319 3.66669 10.7343 3.66669 9.99805C3.66686 9.26193 4.26357 8.66522 4.99969 8.66504H14.9997Z"
+                                fill="white"
+                                stroke="white"
+                                className="group-hover:fill-gray-200 group-hover:stroke-gray-200 transition-colors"
+                              />
                             </svg>
                           </button>
                         )}
@@ -644,38 +768,67 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 </label>
                 <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
                   {formData.budgets.map((budget, index) => (
-                    <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                    <div
+                      key={index}
+                      className="grid grid-cols-[1fr_1fr_auto] gap-2"
+                    >
                       <div>
-                        <div className="text-[9px] text-[#8180C9] mb-0.5">Amount</div>
+                        <div className="text-[9px] text-[#8180C9] mb-0.5">
+                          Amount
+                        </div>
                         <input
                           type="number"
                           value={budget.amount}
-                          onChange={(e) => handleBudgetChange(index, 'amount', e.target.value)}
+                          onChange={(e) =>
+                            handleBudgetChange(index, "amount", e.target.value)
+                          }
                           className="w-full px-3 py-2 border border-[#8180C9] rounded-[11px] text-sm text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                           min="0"
                           step="0.01"
                         />
                       </div>
                       <div>
-                        <div className="text-[9px] text-[#8180C9] mb-0.5">Type</div>
+                        <div className="text-[9px] text-[#8180C9] mb-0.5">
+                          Type
+                        </div>
                         <div className="relative">
                           <button
                             type="button"
-                            onClick={() => toggleDropdown(`budget-type-${index}`)}
+                            onClick={() =>
+                              toggleDropdown(`budget-type-${index}`)
+                            }
                             className="w-full px-3 py-2 border border-[#8180C9] rounded-[11px] text-sm text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
                           >
-                            <span className={budget.type ? '' : 'text-gray-400'}>
-                              {budget.type === 'external' ? 'External' : budget.type === 'internal' ? 'Internal' : 'Select'}
+                            <span
+                              className={budget.type ? "" : "text-gray-400"}
+                            >
+                              {budget.type === "external"
+                                ? "External"
+                                : budget.type === "internal"
+                                ? "Internal"
+                                : "Select"}
                             </span>
                             <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
-                              <svg width="10" height="11" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z" fill="white"/>
+                              <svg
+                                width="10"
+                                height="11"
+                                viewBox="0 0 9 8"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z"
+                                  fill="white"
+                                />
                               </svg>
                             </div>
                           </button>
                           {dropdownOpen[`budget-type-${index}`] && (
                             <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
-                              {[{value: 'external', label: 'External'}, {value: 'internal', label: 'Internal'}].map((type) => (
+                              {[
+                                { value: "external", label: "External" },
+                                { value: "internal", label: "Internal" },
+                              ].map((type) => (
                                 <button
                                   key={type.value}
                                   type="button"
@@ -686,8 +839,16 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    handleBudgetChange(index, 'type', type.value);
-                                    setTimeout(() => closeDropdown(`budget-type-${index}`), 0);
+                                    handleBudgetChange(
+                                      index,
+                                      "type",
+                                      type.value
+                                    );
+                                    setTimeout(
+                                      () =>
+                                        closeDropdown(`budget-type-${index}`),
+                                      0
+                                    );
                                   }}
                                   className="w-full px-3 py-2 text-sm text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                                 >
@@ -706,8 +867,17 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                             className="p-1.5 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] transition-colors group"
                             title="Add Budget"
                           >
-                            <svg className="w-3.5 h-3.5" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M9.41477 25.1818V0.500017H16.2841V25.1818H9.41477ZM0.5 16.2841V9.41479H25.1818V16.2841H0.5Z" fill="white" className="group-hover:fill-gray-200 transition-colors"/>
+                            <svg
+                              className="w-3.5 h-3.5"
+                              viewBox="0 0 26 26"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M9.41477 25.1818V0.500017H16.2841V25.1818H9.41477ZM0.5 16.2841V9.41479H25.1818V16.2841H0.5Z"
+                                fill="white"
+                                className="group-hover:fill-gray-200 transition-colors"
+                              />
                             </svg>
                           </button>
                         ) : (
@@ -717,8 +887,18 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                             className="p-1.5 rounded-full bg-red-500 hover:bg-red-600 transition-colors group"
                             title="Remove Budget"
                           >
-                            <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M14.9997 8.66504C15.736 8.66504 16.3335 9.26182 16.3337 9.99805C16.3337 10.7344 15.7361 11.332 14.9997 11.332H4.99969C4.26347 11.3319 3.66669 10.7343 3.66669 9.99805C3.66686 9.26193 4.26357 8.66522 4.99969 8.66504H14.9997Z" fill="white" stroke="white" className="group-hover:fill-gray-200 group-hover:stroke-gray-200 transition-colors"/>
+                            <svg
+                              className="w-3.5 h-3.5"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M14.9997 8.66504C15.736 8.66504 16.3335 9.26182 16.3337 9.99805C16.3337 10.7344 15.7361 11.332 14.9997 11.332H4.99969C4.26347 11.3319 3.66669 10.7343 3.66669 9.99805C3.66686 9.26193 4.26357 8.66522 4.99969 8.66504H14.9997Z"
+                                fill="white"
+                                stroke="white"
+                                className="group-hover:fill-gray-200 group-hover:stroke-gray-200 transition-colors"
+                              />
                             </svg>
                           </button>
                         )}
@@ -742,8 +922,8 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                       onClick={() => handleSDGToggle(sdg.id)}
                       className={`relative cursor-pointer rounded-lg transition-all ${
                         formData.sdgs?.includes(sdg.id)
-                          ? 'ring-2 ring-[#4D49FC] ring-offset-2'
-                          : 'hover:opacity-80'
+                          ? "ring-2 ring-[#4D49FC] ring-offset-2"
+                          : "hover:opacity-80"
                       }`}
                     >
                       <img
@@ -761,11 +941,15 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   FULL REPORT URL
                 </label>
-                <div className="text-[9px] text-[#8180C9] mb-0.5">Paste report link</div>
+                <div className="text-[9px] text-[#8180C9] mb-0.5">
+                  Paste report link
+                </div>
                 <input
                   type="url"
                   value={formData.reportUrl}
-                  onChange={(e) => handleInputChange('reportUrl', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("reportUrl", e.target.value)
+                  }
                   className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                   placeholder="https://example.com/report.pdf"
                 />
@@ -775,10 +959,23 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   Thumbnail
                 </label>
-                <div className="text-[9px] text-[#8180C9] mb-0.5">3 MB (max)</div>
+                <div className="text-[9px] text-[#8180C9] mb-0.5">
+                  3 MB (max)
+                </div>
                 <label className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-[11px] text-xs bg-[#4D49FC] text-white font-semibold hover:bg-[#3d39cc] transition-colors cursor-pointer group">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M16.6667 4.16668V5.83332L13.9844 5.8332C15.3936 7.06988 16.2573 8.87973 16.2557 10.8517C16.2531 13.9056 14.1759 16.5673 11.2142 17.3117C8.25249 18.0562 5.16358 16.693 3.71733 14.0033C2.27112 11.3137 2.83737 7.98516 5.09166 5.925C5.41015 6.43174 5.8592 6.84337 6.39166 7.11668C5.8262 7.57351 5.37026 8.15121 5.05733 8.80734C4.74439 9.46348 4.58242 10.1814 4.58331 10.9083C4.62432 13.6404 6.85092 15.8336 9.58331 15.8333C12.0861 15.8746 14.2204 14.0288 14.5406 11.5463C14.7798 9.69145 13.9494 7.92359 12.5001 6.89988L12.5 10H10.8333V4.16668H16.6667ZM7.91667 2.5C8.83713 2.5 9.58331 3.24621 9.58331 4.16668C9.58331 5.08715 8.83713 5.83332 7.91667 5.83332C6.9962 5.83332 6.24998 5.08715 6.24998 4.16668C6.24998 3.24621 6.9962 2.5 7.91667 2.5Z" fill="white" className="group-hover:fill-gray-200 transition-colors"/>
+                  <svg
+                    className="w-3.5 h-3.5"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M16.6667 4.16668V5.83332L13.9844 5.8332C15.3936 7.06988 16.2573 8.87973 16.2557 10.8517C16.2531 13.9056 14.1759 16.5673 11.2142 17.3117C8.25249 18.0562 5.16358 16.693 3.71733 14.0033C2.27112 11.3137 2.83737 7.98516 5.09166 5.925C5.41015 6.43174 5.8592 6.84337 6.39166 7.11668C5.8262 7.57351 5.37026 8.15121 5.05733 8.80734C4.74439 9.46348 4.58242 10.1814 4.58331 10.9083C4.62432 13.6404 6.85092 15.8336 9.58331 15.8333C12.0861 15.8746 14.2204 14.0288 14.5406 11.5463C14.7798 9.69145 13.9494 7.92359 12.5001 6.89988L12.5 10H10.8333V4.16668H16.6667ZM7.91667 2.5C8.83713 2.5 9.58331 3.24621 9.58331 4.16668C9.58331 5.08715 8.83713 5.83332 7.91667 5.83332C6.9962 5.83332 6.24998 5.08715 6.24998 4.16668C6.24998 3.24621 6.9962 2.5 7.91667 2.5Z"
+                      fill="white"
+                      className="group-hover:fill-gray-200 transition-colors"
+                    />
                   </svg>
                   Change
                   <input
@@ -798,7 +995,8 @@ export default function AddActivityForm({ officeId, basePath, officeColor = '#4D
 }
 
 AddActivityForm.propTypes = {
-  officeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  officeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
   basePath: PropTypes.string.isRequired,
   officeColor: PropTypes.string,
 };

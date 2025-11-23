@@ -168,13 +168,21 @@ function InboxDropdown({ onMessageClick }) {
                   className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
                 >
                   <div className="flex items-start gap-3">
-                    {/* Avatar or Icon */}
+                    {/* Office Logo */}
                     <div className="flex-shrink-0 mt-0.5">
-                      <div className="w-8 h-8 rounded-full bg-[#E8EAFF] flex items-center justify-center">
-                        <span className="text-xs font-semibold text-[#5B6FED]">
-                          {message.sender?.charAt(0) || "?"}
-                        </span>
-                      </div>
+                      <img
+                        src={
+                          message.officeLogo ||
+                          "/logos/officeLogoTransparent/default.png"
+                        }
+                        alt={message.office || message.sender}
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "/logos/officeLogoTransparent/default.png";
+                        }}
+                      />
                     </div>
 
                     {/* Content */}
@@ -182,9 +190,12 @@ function InboxDropdown({ onMessageClick }) {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <p className="text-xs font-bold text-gray-900 mb-0.5">
-                            {message.sender}
+                            {message.office || message.sender}
                           </p>
-                          <p className="text-[10px] text-gray-400 line-clamp-2">
+                          <p className="text-[10px] text-gray-600 mb-0.5">
+                            {message.subject}
+                          </p>
+                          <p className="text-[10px] text-gray-400 line-clamp-1">
                             {message.preview}
                           </p>
                         </div>

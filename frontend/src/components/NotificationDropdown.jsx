@@ -60,7 +60,7 @@ function NotificationDropdown({ onNotificationClick }) {
     if (onNotificationClick) {
       onNotificationClick(notificationId);
     }
-    
+
     // Mark as read
     try {
       await NotificationService.markAsRead(notificationId);
@@ -162,9 +162,7 @@ function NotificationDropdown({ onNotificationClick }) {
                 } else if (notification.type === "Updated") {
                   dateLabel = "Updated";
                   dateValue =
-                    notification.updatedTime ||
-                    notification.time ||
-                    "Recently";
+                    notification.updatedTime || notification.time || "Recently";
                 }
 
                 return (
@@ -186,6 +184,7 @@ function NotificationDropdown({ onNotificationClick }) {
                           }
                           className="w-8 h-8 object-contain"
                           onError={(e) => {
+                            e.target.onerror = null;
                             e.target.src =
                               "/logos/officeLogoTransparent/default.png";
                           }}
