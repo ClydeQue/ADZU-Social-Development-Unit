@@ -249,10 +249,10 @@ function NotificationDropdown({ onNotificationClick }) {
                                 style={{
                                   backgroundColor: notification.unread
                                     ? "#ef4444"
-                                    : "#8988CD",
+                                    : "#22c55e",
                                   boxShadow: notification.unread
                                     ? "0 0 4px #ef444460"
-                                    : "0 0 4px #8988CD40",
+                                    : "0 0 4px #22c55e40",
                                 }}
                                 className="w-2.5 h-2.5 rounded-full mb-0.5"
                               ></span>
