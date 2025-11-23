@@ -179,25 +179,16 @@ export default function AddActivityForm({
         description: formData.description || null,
         objectives: formData.objectives || null,
         // Map partners array to backend format
-        partner_name:
-          formData.partners
-            .map((p) => p.name)
-            .filter(Boolean)
-            .join(", ") || null,
-        partner_type:
-          formData.partners
-            .map((p) => p.type)
-            .filter(Boolean)
-            .join(", ") || null,
-        partner_nature:
-          formData.partners
-            .map((p) => p.nature)
-            .filter(Boolean)
-            .join(", ") || null,
-        // Map budgets array to backend format
-        budget_amount: formData.budgets[0]?.amount
-          ? parseFloat(formData.budgets[0].amount)
-          : null,
+        partner_name: formData.partners.map(p => p.name).filter(Boolean).join(', ') || null,
+        partner_type: formData.partners.map(p => p.type).filter(Boolean).join(', ') || null,
+        partner_nature: formData.partners.map(p => p.nature).filter(Boolean).join(', ') || null,
+        // Map all budgets array to backend format (send as JSON string or separate amounts)
+        budgets: JSON.stringify(formData.budgets.filter(b => b.amount).map(b => ({
+          amount: parseFloat(b.amount),
+          type: b.type
+        }))),
+        // Also include first budget for backward compatibility if backend expects it
+        budget_amount: formData.budgets[0]?.amount ? parseFloat(formData.budgets[0].amount) : null,
         budget_type: formData.budgets[0]?.type || null,
         // Submit SDG numbers as array of integers
         sdg_numbers: formData.sdgs.map((id) => parseInt(id)),

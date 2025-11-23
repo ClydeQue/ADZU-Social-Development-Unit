@@ -189,7 +189,8 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
           objectives,
           participants_count,
           venue,
-          budget,
+          budget_amount,
+          budget_type,
           sdg_number,
           status,
           notes,
@@ -257,20 +258,43 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
         ? Math.round(totalParticipants / activities.length)
         : 0;
 
-    // Budget statistics
-    const totalBudget = activities.reduce(
-      (sum, a) => sum + (parseFloat(a.budget) || 0),
-      0
-    );
+    // Budget statistics - parse from budget_amount JSON array
+    const totalBudget = activities.reduce((sum, a) => {
+      try {
+        if (a.budget_amount) {
+          const amounts = typeof a.budget_amount === 'string' ? JSON.parse(a.budget_amount) : [a.budget_amount];
+          const activityTotal = amounts.reduce((total, amount) => total + (parseFloat(amount) || 0), 0);
+          return sum + activityTotal;
+        }
+      } catch (e) {
+        // If parsing fails, try single value
+        return sum + (parseFloat(a.budget_amount) || 0);
+      }
+      return sum;
+    }, 0);
     const avgBudget =
       activities.length > 0 ? totalBudget / activities.length : 0;
 
-    // SDG distribution
+    // SDG distribution - parse from sdg_number JSON array
     const sdgDistribution = {};
     activities.forEach((a) => {
       if (a.sdg_number) {
-        sdgDistribution[a.sdg_number] =
-          (sdgDistribution[a.sdg_number] || 0) + 1;
+        try {
+          const sdgNumbers = typeof a.sdg_number === 'string' ? JSON.parse(a.sdg_number) : 
+                            (Array.isArray(a.sdg_number) ? a.sdg_number : [a.sdg_number]);
+          sdgNumbers.forEach(sdgNum => {
+            const sdg = parseInt(sdgNum);
+            if (!isNaN(sdg)) {
+              sdgDistribution[sdg] = (sdgDistribution[sdg] || 0) + 1;
+            }
+          });
+        } catch (e) {
+          // Fallback for single numeric value
+          const sdg = parseInt(a.sdg_number);
+          if (!isNaN(sdg)) {
+            sdgDistribution[sdg] = (sdgDistribution[sdg] || 0) + 1;
+          }
+        }
       }
     });
 
@@ -359,6 +383,26 @@ router.post("/activities", authenticateToken, async (req, res) => {
       return res.status(403).json({ error: "Access denied" });
     }
 
+    // Parse budgets array if provided
+    let budgetsArray = [];
+    if (activityData.budgets) {
+      try {
+        budgetsArray = typeof activityData.budgets === 'string' 
+          ? JSON.parse(activityData.budgets) 
+          : activityData.budgets;
+      } catch (e) {
+        console.error('Error parsing budgets:', e);
+      }
+    }
+
+    // Parse SDG numbers array if provided
+    let sdgNumbersArray = [];
+    if (activityData.sdg_numbers) {
+      sdgNumbersArray = Array.isArray(activityData.sdg_numbers) 
+        ? activityData.sdg_numbers 
+        : [activityData.sdg_numbers];
+    }
+
     // Prepare activity data with proper types
     const newActivity = {
       program_id: activityData.program_id,
@@ -381,12 +425,11 @@ router.post("/activities", authenticateToken, async (req, res) => {
       partner_name: activityData.partner_name || null,
       partner_type: activityData.partner_type || null,
       partner_nature: activityData.partner_nature || null,
-      budget: activityData.budget ? parseFloat(activityData.budget) : null,
-      allocated_budget: activityData.allocated_budget ? parseFloat(activityData.allocated_budget) : 0,
-      liquidated_budget: activityData.liquidated_budget ? parseFloat(activityData.liquidated_budget) : 0,
-      budget_amount: activityData.budget_amount ? parseFloat(activityData.budget_amount) : null,
-      budget_type: activityData.budget_type || null,
-      sdg_number: activityData.sdg_number ? parseInt(activityData.sdg_number) : null,
+      // Store budget amounts and types as JSON arrays in existing columns
+      budget_amount: budgetsArray.length > 0 ? JSON.stringify(budgetsArray.map(b => b.amount)) : null,
+      budget_type: budgetsArray.length > 0 ? JSON.stringify(budgetsArray.map(b => b.type)) : null,
+      // Store SDG numbers as JSON array in existing sdg_number column
+      sdg_number: sdgNumbersArray.length > 0 ? JSON.stringify(sdgNumbersArray) : null,
       phase: activityData.phase || null,
       status: 'pending', // Status is always pending on creation, controlled by Unit Director
       report_url: activityData.report_url || null, // URL link to report
@@ -703,6 +746,26 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
       return res.status(403).json({ error: "Access denied" });
     }
 
+    // Parse budgets array if provided
+    let budgetsArray = [];
+    if (updateData.budgets) {
+      try {
+        budgetsArray = typeof updateData.budgets === 'string' 
+          ? JSON.parse(updateData.budgets) 
+          : updateData.budgets;
+      } catch (e) {
+        console.error('Error parsing budgets:', e);
+      }
+    }
+
+    // Parse SDG numbers array if provided
+    let sdgNumbersArray = [];
+    if (updateData.sdg_numbers) {
+      sdgNumbersArray = Array.isArray(updateData.sdg_numbers) 
+        ? updateData.sdg_numbers 
+        : [updateData.sdg_numbers];
+    }
+
     // Prepare update data - simplified sanitization
     const sanitizedData = {};
     
@@ -740,11 +803,27 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     if (updateData.partner_type !== undefined) sanitizedData.partner_type = updateData.partner_type;
     if (updateData.partner_nature !== undefined) sanitizedData.partner_nature = updateData.partner_nature;
     
-    // Budget
-    if (updateData.budget_amount !== undefined) {
-      sanitizedData.budget_amount = updateData.budget_amount ? parseFloat(updateData.budget_amount) : null;
+    // Budget amounts and types as JSON arrays
+    if (updateData.budgets !== undefined && budgetsArray.length > 0) {
+      sanitizedData.budget_amount = JSON.stringify(budgetsArray.map(b => b.amount));
+      sanitizedData.budget_type = JSON.stringify(budgetsArray.map(b => b.type));
+    } else {
+      // Handle direct budget_amount and budget_type updates
+      if (updateData.budget_amount !== undefined) {
+        sanitizedData.budget_amount = updateData.budget_amount;
+      }
+      if (updateData.budget_type !== undefined) {
+        sanitizedData.budget_type = updateData.budget_type;
+      }
     }
-    if (updateData.budget_type !== undefined) sanitizedData.budget_type = updateData.budget_type;
+    
+    // SDG numbers array stored in sdg_number column
+    if (updateData.sdg_numbers !== undefined && sdgNumbersArray.length > 0) {
+      sanitizedData.sdg_number = JSON.stringify(sdgNumbersArray);
+    } else if (updateData.sdg_number !== undefined) {
+      // Handle direct sdg_number updates
+      sanitizedData.sdg_number = updateData.sdg_number;
+    }
     
     // Other fields
     if (updateData.report_url !== undefined) sanitizedData.report_url = updateData.report_url;

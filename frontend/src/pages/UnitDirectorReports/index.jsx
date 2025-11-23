@@ -62,57 +62,57 @@ export default function UnitDirectorReports() {
         const acronym = (activity.office_acronym || "CCES").toLowerCase();
         const logoFile = logoMap[acronym] || "cces_logo_small.webp";
 
-        return {
-          id: activity.id,
-          office: activity.office_acronym || "CCES",
-          program: activity.program_title || "Untitled Program",
-          activity: activity.activity_name || "Untitled Activity",
-          due: activity.end_date
-            ? (() => {
-                const date = new Date(activity.end_date);
-                const datePart = date
-                  .toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })
-                  .replace(",", "")
-                  .toUpperCase();
-                const timePart = date.toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                });
-                return `${datePart} | ${timePart}`;
-              })()
-            : "N/A",
-          submitted: activity.start_date
-            ? (() => {
-                const date = new Date(activity.start_date);
-                const datePart = date
-                  .toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })
-                  .replace(",", "")
-                  .toUpperCase();
-                const timePart = date.toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                });
-                return `${datePart} | ${timePart}`;
-              })()
-            : "N/A",
-          status: activity.status || "planned",
-          participants: activity.participants_count || 0,
-          budget: activity.budget || 0,
-          isNew: false,
-          logo: `/images/${logoFile}`,
-          createdAt: new Date(activity.start_date || activity.created_at),
-        };
-      }) || [];
+      return {
+        id: activity.id,
+        office: activity.office_acronym || 'CCES',
+        program: activity.program_title || 'Untitled Program',
+        activity: activity.activity_name || 'Untitled Activity',
+        due: activity.end_date ? (() => {
+          const date = new Date(activity.end_date);
+          const datePart = date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          }).replace(',', '').toUpperCase();
+          const timePart = date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+          });
+          return `${datePart} | ${timePart}`;
+        })() : 'N/A',
+        submitted: activity.start_date ? (() => {
+          const date = new Date(activity.start_date);
+          const datePart = date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          }).replace(',', '').toUpperCase();
+          const timePart = date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+          });
+          return `${datePart} | ${timePart}`;
+        })() : 'N/A',
+        status: activity.status || 'planned',
+        participants: activity.participants_count || 0,
+        budget: (() => {
+          try {
+            if (activity.budget_amount) {
+              const amounts = typeof activity.budget_amount === 'string' ? JSON.parse(activity.budget_amount) : [activity.budget_amount];
+              return amounts.reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
+            }
+          } catch {
+            return parseFloat(activity.budget_amount) || 0;
+          }
+          return 0;
+        })(),
+        isNew: false,
+        logo: `/images/${logoFile}`,
+        createdAt: new Date(activity.start_date || activity.created_at),
+      };
+    }) || [];
 
     // Apply sorting and filtering
     if (sortBy && transformed.length > 0) {
@@ -193,15 +193,17 @@ export default function UnitDirectorReports() {
               onSearchChange={setSearchQuery}
             />
 
-            <div className="bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className={`bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-hidden flex flex-col min-h-0 `}
+            
+            >
               {/* Sort Controls */}
               <div className="flex gap-3 items-center mb-4">
                 {/* Custom Sort by Dropdown */}
-                <div className="relative">
+                <div className="relative ">
                   <button
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="bg-white px-6 py-2.5 pr-10 rounded-full text-sm font-semibold text-[#040195] border-none shadow-md focus:outline-none focus:ring-2 focus:ring-[#4D49FC] cursor-pointer flex items-center gap-2"
-                    style={{ fontFamily: "Inter, sans-serif" }}
+                    className={`bg-white px-6 py-2.5 pr-10 rounded-full  ${showSortDropdown ? 'ring-2 ring-[#4D49FC]' : 'ring-0'}  text-sm font-semibold text-[#040195] border-none shadow-md  cursor-pointer flex items-center gap-2`}
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     <span>
                       {sortBy
@@ -227,7 +229,7 @@ export default function UnitDirectorReports() {
                   </button>
 
                   {showSortDropdown && (
-                    <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-10 overflow-hidden min-w-[200px]">
+                    <div className="absolute top-full  left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-10 overflow-hidden min-w-[200px]">
                       {[
                         { value: "", label: "Sort by" },
                         { value: "recent", label: "Recent" },
@@ -245,9 +247,9 @@ export default function UnitDirectorReports() {
                             setSortBy(option.value);
                             setShowSortDropdown(false);
                           }}
-                          className={`w-full px-4 py-2 text-left text-sm font-semibold hover:bg-[#C7D2FE] transition-colors text-[#040195]
-                          ${sortBy === option.value ? "bg-[#E0E7FF]" : ""}`}
-                          style={{ fontFamily: "Inter, sans-serif" }}
+                          className={`w-full px-4 py-2 text-left text-sm font-semibold hover:cursor-pointer hover:bg-[#C7D2FE] transition-colors text-[#040195]
+                          ${sortBy === option.value ? 'bg-[#E0E7FF]' : ''}`}
+                          style={{ fontFamily: 'Inter, sans-serif' }}
                         >
                           {option.label}
                         </button>

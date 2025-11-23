@@ -16,14 +16,30 @@ export default function UsersManagement() {
   
   // Mock data - TODO: Replace with actual API calls
   const mockUsers = useMemo(() => [
-    { id: 1, username: 'acca_director', role: 'Office Director', office: 'ACCA', email: 'acca@adzu.edu.ph', status: 'active' },
-    { id: 2, username: 'aces_director', role: 'Office Director', office: 'ACES', email: 'aces@adzu.edu.ph', status: 'active' },
-    { id: 3, username: 'aclg_director', role: 'Office Director', office: 'ACLG', email: 'aclg@adzu.edu.ph', status: 'active' },
+    { id: 1, username: 'acca_director', role: 'Office Director', office: 'ACCA', email: 'acca@adzu.edu.ph', status: 'active', lastPasswordUpdate: '2025-11-15 10:30 AM' },
+    { id: 2, username: 'aces_director', role: 'Office Director', office: 'ACES', email: 'aces@adzu.edu.ph', status: 'active', lastPasswordUpdate: '2025-11-18 02:15 PM' },
+    { id: 3, username: 'aclg_director', role: 'Office Director', office: 'ACLG', email: 'aclg@adzu.edu.ph', status: 'active', lastPasswordUpdate: '2025-11-20 09:45 AM' },
+    { id: 4, username: 'altec_director', role: 'Office Director', office: 'ALTEC', email: 'altec@adzu.edu.ph', status: 'active', lastPasswordUpdate: '2025-11-19 03:20 PM' },
+    { id: 5, username: 'apc_director', role: 'Office Director', office: 'APC', email: 'apc@adzu.edu.ph', status: 'active', lastPasswordUpdate: '2025-11-21 11:00 AM' },
+    { id: 6, username: 'cces_director', role: 'Office Director', office: 'CCES', email: 'cces@adzu.edu.ph', status: 'active', lastPasswordUpdate: '2025-11-22 04:30 PM' },
   ], []);
 
+  const getOfficeLogo = (acronym) => {
+    const logos = {
+      'ACCA': '/logos/officeLogo/acca_logo_big.webp',
+      'ACES': '/logos/officeLogo/aces_logo_big.webp',
+      'ACLG': '/logos/officeLogo/aclg_logo_big.webp',
+      'ALTEC': '/logos/officeLogo/altec_logo_big.webp',
+      'APC': '/logos/officeLogo/apc_logo_big.webp',
+      'CCES': '/logos/officeLogo/cces_logo_big.webp',
+    };
+    return logos[acronym] || null;
+  };
+
   const mockResetRequests = [
-    { id: 1, username: 'acca_director', office: 'ACCA', requestDate: '2025-11-20', reason: 'Forgot password', status: 'pending' },
-    { id: 2, username: 'aces_director', office: 'ACES', requestDate: '2025-11-22', reason: 'Security concern', status: 'pending' },
+    { id: 1, username: 'acca_director', office: 'ACCA', requestDate: '2025-11-20', status: 'pending' },
+    { id: 2, username: 'aces_director', office: 'ACES', requestDate: '2025-11-22', status: 'pending' },
+    { id: 3, username: 'apc_director', office: 'APC', requestDate: '2025-11-23', status: 'pending' },
   ];
 
   // Filter users by search
@@ -158,10 +174,10 @@ export default function UsersManagement() {
                 `}</style>
                 
                 {/* Table Header */}
-                <div className="bg-[#040195] text-white rounded-xl px-6 py-3 mb-1 grid grid-cols-[200px_1fr_200px] gap-4 items-center flex-shrink-0">
-                  <div className="text-xs font-semibold uppercase">Username</div>
+                <div className="bg-[#040195] text-white rounded-xl px-6 py-3 mb-1 grid grid-cols-[250px_1fr_250px] gap-4 items-center flex-shrink-0">
+                  <div className="text-xs font-semibold uppercase">Office</div>
                   <div className="text-xs font-semibold uppercase">Active Status</div>
-                  <div className="text-xs font-semibold uppercase text-right">Credential Update</div>
+                  <div className="text-xs font-semibold uppercase text-right">Last Password Update</div>
                 </div>
 
                 {/* Table Body - Scrollable Container */}
@@ -180,9 +196,16 @@ export default function UsersManagement() {
                       {filteredUsers.map((user) => (
                         <div 
                           key={user.id}
-                          className="bg-[#F4F4F4] hover:bg-[#E5E5FF] transition-colors rounded-lg px-6 py-3 grid grid-cols-[200px_1fr_200px] gap-4 items-center"
+                          className="bg-[#F4F4F4] hover:bg-[#E5E5FF] transition-colors rounded-lg px-6 py-3 grid grid-cols-[250px_1fr_250px] gap-4 items-center"
                         >
-                          <div className="flex items-center">
+                          <div className="flex items-center gap-3">
+                            {getOfficeLogo(user.office) && (
+                              <img 
+                                src={getOfficeLogo(user.office)} 
+                                alt={`${user.office} Logo`}
+                                className="w-10 h-10 object-contain rounded-lg"
+                              />
+                            )}
                             <span className="text-[#4D49FC] font-semibold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
                               {user.office}
                             </span>
@@ -196,12 +219,9 @@ export default function UsersManagement() {
                             </span>
                           </div>
                           <div className="flex items-center justify-end">
-                            <button
-                              className="px-4 py-1.5 bg-[#4D49FC] text-white cursor-pointer font-semibold rounded-md hover:bg-[#201f65] transition-colors text-xs"
-                              style={{ fontFamily: 'Inter, sans-serif' }}
-                            >
-                              Approve Change
-                            </button>
+                            <span className="text-gray-600 text-xs font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+                              {user.lastPasswordUpdate}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -231,15 +251,23 @@ export default function UsersManagement() {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3">
-                              <div className="w-12 h-12 bg-[#FFAE00] rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                {request.username.charAt(0).toUpperCase()}
-                              </div>
+                              {getOfficeLogo(request.office) ? (
+                                <img 
+                                  src={getOfficeLogo(request.office)} 
+                                  alt={`${request.office} Logo`}
+                                  className="w-12 h-12 object-contain rounded-lg"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 bg-[#FFAE00] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                  {request.office.charAt(0).toUpperCase()}
+                                </div>
+                              )}
                               <div>
                                 <h3 className="text-lg font-bold text-[#040195]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                                  {request.username}
+                                  {request.office}
                                 </h3>
                                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                                  {request.office}
+                                  Password Reset Request
                                 </p>
                               </div>
                             </div>
@@ -251,14 +279,6 @@ export default function UsersManagement() {
                                 </svg>
                                 <span className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
                                   Requested on: <strong>{request.requestDate}</strong>
-                                </span>
-                              </div>
-                              <div className="flex items-start gap-2 text-sm">
-                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                                  Reason: <strong>{request.reason}</strong>
                                 </span>
                               </div>
                             </div>
