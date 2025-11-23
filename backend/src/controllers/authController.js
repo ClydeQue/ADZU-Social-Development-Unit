@@ -657,10 +657,10 @@ class AuthController {
 
       if (fetchError || !user) {
         console.log("User not found:", username);
-        // Return generic message for security (don't reveal if username exists)
+        // Return user-friendly message
         return res.status(404).json({
           success: false,
-          error: "Username not found",
+          error: "No user exists with this username",
         });
       }
 
