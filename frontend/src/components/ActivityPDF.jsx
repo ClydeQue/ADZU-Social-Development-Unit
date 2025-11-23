@@ -1,35 +1,20 @@
-import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import PropTypes from 'prop-types';
-
-// Register fonts
-Font.register({
-  family: 'Times New Roman',
-  src: 'https://fonts.gstatic.com/s/timesnewroman/v1/3Gg8L-Q7ShZJmGqTfepd4gNPxVXBH_Y.ttf',
-});
-
-Font.register({
-  family: 'Inter',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2' },
-    { src: 'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiA.woff2', fontWeight: 'bold' },
-  ]
-});
 
 // Create styles for PDF
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 11,
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     backgroundColor: '#FFFFFF',
   },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: 30,
     paddingBottom: 15,
-    borderBottom: '2 solid #040195',
   },
   headerLeft: {
     flex: 1,
@@ -50,7 +35,7 @@ const styles = StyleSheet.create({
   },
   universityName: {
     fontSize: 18,
-    fontFamily: 'Times New Roman',
+    fontFamily: 'Times-Roman',
     fontWeight: 'bold',
     color: '#040195',
     textAlign: 'center',
@@ -58,7 +43,7 @@ const styles = StyleSheet.create({
   },
   universitySubtitle: {
     fontSize: 9,
-    fontFamily: 'Times New Roman',
+    fontFamily: 'Times-Roman',
     fontStyle: 'italic',
     color: '#666666',
     textAlign: 'center',
@@ -66,104 +51,180 @@ const styles = StyleSheet.create({
   },
   unitName: {
     fontSize: 11,
-    fontFamily: 'Times New Roman',
+    fontFamily: 'Times-Roman',
     fontWeight: 'bold',
     color: '#040195',
     textAlign: 'center',
   },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'Inter',
-    color: '#040195',
-    marginBottom: 5,
-    marginTop: 10,
-  },
-  subtitle: {
-    fontSize: 10,
-    fontFamily: 'Inter',
-    color: '#666666',
-    marginBottom: 3,
-  },
-  section: {
+  officeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 15,
   },
-  sectionTitle: {
-    fontSize: 13,
+  officeLogo: {
+    width: 30,
+    height: 30,
+    marginRight: 10,
+  },
+  officeName: {
+    fontSize: 16,
     fontWeight: 'bold',
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     color: '#040195',
-    marginBottom: 8,
-    borderBottom: '1 solid #E5E7EB',
-    paddingBottom: 4,
   },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 6,
-  },
-  label: {
-    width: '30%',
-    fontWeight: 'bold',
-    fontFamily: 'Inter',
-    color: '#374151',
-  },
-  value: {
-    width: '70%',
-    fontFamily: 'Inter',
-    color: '#1F2937',
-  },
-  badge: {
-    display: 'inline-block',
-    padding: '4 8',
-    borderRadius: 4,
-    fontSize: 9,
-    fontWeight: 'bold',
-    fontFamily: 'Inter',
-    marginRight: 4,
-    marginBottom: 4,
+  statusBadgeContainer: {
+    alignSelf: 'flex-end',
+    marginBottom: 15,
   },
   statusBadge: {
     backgroundColor: '#E0E7FF',
     color: '#4338CA',
     padding: '6 12',
     borderRadius: 6,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     textTransform: 'uppercase',
   },
-  sdgContainer: {
+  inceptionBox: {
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  inceptionLabel: {
+    fontSize: 9,
+    fontFamily: 'Helvetica',
+    color: '#374151',
+    width: 100,
+  },
+  inceptionValue: {
+    fontSize: 9,
+    fontFamily: 'Helvetica',
+    color: '#1F2937',
+    fontWeight: 'bold',
+  },
+  activityTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: 'Helvetica',
+    color: '#040195',
+    marginBottom: 10,
+  },
+  description: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#374151',
+    lineHeight: 1.4,
+    marginBottom: 15,
+  },
+  divider: {
+    borderBottom: '3 solid #000000',
+    marginVertical: 15,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'Helvetica',
+    color: '#040195',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  sectionContent: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#374151',
+    lineHeight: 1.5,
+    marginBottom: 15,
+  },
+  threeColumnRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  column: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  columnTitle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'Helvetica',
+    color: '#040195',
+    marginBottom: 5,
+    textTransform: 'uppercase',
+  },
+  columnContent: {
+    fontSize: 9,
+    fontFamily: 'Helvetica',
+    color: '#374151',
+    lineHeight: 1.4,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 3,
+  },
+  infoLabel: {
+    fontSize: 9,
+    fontFamily: 'Helvetica',
+    color: '#374151',
+    width: 80,
+  },
+  infoValue: {
+    fontSize: 9,
+    fontFamily: 'Helvetica',
+    color: '#1F2937',
+    flex: 1,
+  },
+  sdgList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: 5,
   },
-  sdgBadge: {
+  sdgItem: {
+    fontSize: 9,
+    fontFamily: 'Helvetica',
+    color: '#040195',
+    marginRight: 8,
+    marginBottom: 3,
+  },
+  partnersList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 5,
+  },
+  partnerBadge: {
     backgroundColor: '#F3F4F6',
     padding: '4 8',
     borderRadius: 4,
-    fontSize: 9,
-    fontFamily: 'Inter',
-    color: '#040195',
+    fontSize: 8,
+    fontFamily: 'Helvetica',
+    color: '#374151',
     marginRight: 6,
     marginBottom: 4,
   },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
-    textAlign: 'center',
-    fontSize: 9,
-    fontFamily: 'Inter',
+  partnerType: {
+    fontSize: 8,
+    fontFamily: 'Helvetica',
+    fontStyle: 'italic',
     color: '#9CA3AF',
-    borderTop: '1 solid #E5E7EB',
-    paddingTop: 10,
   },
-  textBlock: {
-    marginBottom: 4,
-    fontFamily: 'Inter',
-    color: '#1F2937',
-    lineHeight: 1.4,
+  budgetSection: {
+    marginTop: 15,
+  },
+  budgetRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  budgetLabel: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#374151',
+  },
+  budgetValue: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#040195',
+    fontWeight: 'bold',
   },
 });
 
@@ -196,6 +257,18 @@ const ActivityPDF = ({ activity, report }) => {
     }
   }
 
+  // Parse partners
+  let partnersData = [];
+  if (activity?.partners) {
+    try {
+      const partnersStr = typeof activity.partners === 'string' ? activity.partners : '';
+      // Split by comma and create array
+      partnersData = partnersStr.split(',').map(p => p.trim()).filter(Boolean);
+    } catch (e) {
+      console.error('Error parsing partners:', e);
+    }
+  }
+
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return 'Not set';
@@ -203,20 +276,26 @@ const ActivityPDF = ({ activity, report }) => {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  const formatDateShort = (dateString) => {
+    if (!dateString) return 'Not set';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+  };
+
+  // Get office acronym
+  const officeAcronym = activity?.programs?.offices?.acronym || 'OFFICE';
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header with Logos */}
         <View style={styles.headerContainer}>
-          {/* Left Logo */}
           <View style={styles.headerLeft}>
             <Image
-              src={`${window.location.origin}/logos/pdflogo/adzu_logo_print.webp`}
+              src="/logos/pdflogo/adzu_logo_print.webp"
               style={styles.logo}
             />
           </View>
-
-          {/* Center Text */}
           <View style={styles.headerCenter}>
             <Text style={styles.universityName}>Ateneo de Zamboanga University</Text>
             <Text style={styles.universitySubtitle}>
@@ -224,149 +303,148 @@ const ActivityPDF = ({ activity, report }) => {
             </Text>
             <Text style={styles.unitName}>SOCIAL DEVELOPMENT UNIT</Text>
           </View>
-
-          {/* Right Logo */}
           <View style={styles.headerRight}>
             <Image
-              src={`${window.location.origin}/logos/pdflogo/sdu_logo_pdf.webp`}
+              src="/logos/pdflogo/sdu_logo_pdf.webp"
               style={styles.logo}
             />
           </View>
         </View>
 
+        {/* Office Header with Logo and Status */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 }}>
+          <View style={styles.officeHeader}>
+            {officeAcronym && (
+              <Image
+                src={`/logos/officeLogoTransparent/${officeAcronym}.webp`}
+                style={styles.officeLogo}
+              />
+            )}
+            <Text style={styles.officeName}>{officeAcronym}</Text>
+          </View>
+          <View style={styles.statusBadgeContainer}>
+            <Text style={styles.statusBadge}>{activity?.status?.toUpperCase() || 'NO STATUS'}</Text>
+          </View>
+        </View>
+
+        {/* Inception and Implementation Dates */}
+        <View style={{ marginBottom: 10 }}>
+          <View style={styles.inceptionBox}>
+            <Text style={styles.inceptionLabel}>INCEPTION</Text>
+            <Text style={styles.inceptionValue}>: {formatDateShort(activity?.start_date)}</Text>
+          </View>
+          <View style={styles.inceptionBox}>
+            <Text style={styles.inceptionLabel}>IMPLEMENTATION</Text>
+            <Text style={styles.inceptionValue}>: {formatDateShort(activity?.end_date)}</Text>
+          </View>
+        </View>
+
         {/* Activity Title */}
-        <Text style={styles.title}>{activity?.title || 'Activity Report'}</Text>
-        <Text style={styles.subtitle}>
-          {activity?.programs?.offices?.name || 'Office'} - Activity Report
-        </Text>
-        <Text style={styles.subtitle}>
-          Generated on: {new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}
+        <Text style={styles.activityTitle}>{activity?.title || 'Untitled Activity'}</Text>
+
+        {/* Description */}
+        <Text style={styles.description}>
+          {activity?.objectives || activity?.description || 'No description available.'}
         </Text>
 
-        {/* Activity Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Activity Information</Text>
-          
-          <View style={styles.row}>
-            <Text style={styles.label}>Office:</Text>
-            <Text style={styles.value}>{activity?.programs?.offices?.name || 'N/A'}</Text>
-          </View>
+        {/* Divider */}
+        <View style={styles.divider} />
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Program:</Text>
-            <Text style={styles.value}>{activity?.programs?.name || 'N/A'}</Text>
-          </View>
+        {/* OBJECTIVES Section */}
+        <Text style={styles.sectionTitle}>OBJECTIVES</Text>
+        <Text style={styles.sectionContent}>
+          {activity?.objectives || 'No objectives specified.'}
+        </Text>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Status:</Text>
-            <Text style={[styles.value, { textTransform: 'capitalize' }]}>
-              {activity?.status || 'Pending'}
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* SUSTAINABLE DEVELOPMENT GOALS */}
+        <Text style={styles.sectionTitle}>SUSTAINABLE DEVELOPMENT GOALS</Text>
+        {sdgNumbers.length > 0 ? (
+          <View style={styles.sdgList}>
+            {sdgNumbers.map((sdg, index) => (
+              <Text key={index} style={styles.sdgItem}>
+                {index + 1}. SDG {sdg}
+              </Text>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.sectionContent}>No SDG goals specified.</Text>
+        )}
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Three Column Layout: Venue, Participant Demographics, Sex Count */}
+        <View style={styles.threeColumnRow}>
+          {/* VENUE */}
+          <View style={styles.column}>
+            <Text style={styles.columnTitle}>VENUE</Text>
+            <Text style={styles.columnContent}>
+              {[venueData.street, venueData.barangay, venueData.city, venueData.province]
+                .filter(Boolean)
+                .join(', ') || 'Not specified'}
             </Text>
           </View>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Start Date:</Text>
-            <Text style={styles.value}>{formatDate(activity?.start_date)}</Text>
+          {/* PARTICIPANT DEMOGRAPHICS */}
+          <View style={styles.column}>
+            <Text style={styles.columnTitle}>PARTICIPANT DEMOGRAPHICS</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>TOTAL</Text>
+              <Text style={styles.infoValue}>: {activity?.participants || '0'}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>CLASSIFICATION</Text>
+              <Text style={styles.infoValue}>: {activity?.classification || 'N/A'}</Text>
+            </View>
           </View>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>End Date:</Text>
-            <Text style={styles.value}>{formatDate(activity?.end_date)}</Text>
+          {/* SEX COUNT */}
+          <View style={styles.column}>
+            <Text style={styles.columnTitle}>SEX COUNT</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>MALE</Text>
+              <Text style={styles.infoValue}>: {activity?.male_count || '0'}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>FEMALE</Text>
+              <Text style={styles.infoValue}>: {activity?.female_count || '0'}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Objectives */}
-        {activity?.objectives && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Objectives</Text>
-            <Text style={styles.textBlock}>{activity.objectives}</Text>
-          </View>
-        )}
+        {/* Divider */}
+        <View style={styles.divider} />
 
-        {/* SDG Goals */}
-        {sdgNumbers.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Sustainable Development Goals (SDG)</Text>
-            <View style={styles.sdgContainer}>
-              {sdgNumbers.map((sdg, index) => (
-                <Text key={index} style={styles.sdgBadge}>
-                  SDG {sdg}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Venue */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Venue</Text>
-          <Text style={styles.textBlock}>
-            {[venueData.street, venueData.barangay, venueData.city, venueData.province]
-              .filter(Boolean)
-              .join(', ') || 'Not specified'}
-          </Text>
-        </View>
-
-        {/* Participants */}
-        {activity?.participants && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Participants</Text>
-            <Text style={styles.textBlock}>{activity.participants}</Text>
-          </View>
-        )}
-
-        {/* Partners */}
-        {activity?.partners && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Partners</Text>
-            <Text style={styles.textBlock}>{activity.partners}</Text>
-          </View>
-        )}
-
-        {/* Budget */}
-        {activity?.budget && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Budget</Text>
-            <Text style={styles.textBlock}>
-              ₱{parseFloat(activity.budget).toLocaleString('en-US', { 
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2 
-              })}
-            </Text>
-          </View>
-        )}
-
-        {/* Report Information */}
-        {report && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Report Details</Text>
-            
-            <View style={styles.row}>
-              <Text style={styles.label}>Submitted:</Text>
-              <Text style={styles.value}>{formatDate(report.created_at)}</Text>
-            </View>
-
-            {report.report_url && (
-              <View style={styles.row}>
-                <Text style={styles.label}>Report Link:</Text>
-                <Text style={[styles.value, { color: '#4D49FC' }]}>
-                  {report.report_url}
+        {/* PARTNERS */}
+        <Text style={styles.sectionTitle}>PARTNERS</Text>
+        {partnersData.length > 0 ? (
+          <View style={styles.partnersList}>
+            {partnersData.map((partner, index) => (
+              <View key={index} style={{ marginRight: 15, marginBottom: 8 }}>
+                <Text style={styles.partnerBadge}>{partner}</Text>
+                <Text style={styles.partnerType}>
+                  {index % 3 === 0 ? 'Government' : index % 3 === 1 ? 'Non-Government' : 'Institutional'}
                 </Text>
               </View>
-            )}
+            ))}
           </View>
+        ) : (
+          <Text style={styles.sectionContent}>{activity?.partners || 'No partners specified.'}</Text>
         )}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>Social Development Unit - Ateneo de Zamboanga University</Text>
-          <Text>This document was generated automatically</Text>
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* BUDGET OVERVIEW */}
+        <Text style={styles.sectionTitle}>BUDGET OVERVIEW</Text>
+        <View style={styles.budgetSection}>
+          <View style={styles.budgetRow}>
+            <Text style={styles.budgetLabel}>₱ {parseFloat(activity?.budget || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+            <Text style={styles.budgetLabel}>External Fund</Text>
+          </View>
         </View>
       </Page>
     </Document>
