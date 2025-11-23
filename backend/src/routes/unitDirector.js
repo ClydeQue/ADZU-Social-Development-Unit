@@ -51,7 +51,7 @@ router.get(
   }
 );
 
-// Get upcoming activities (next 3 closest to current date)
+// Get upcoming activities (all pending activities sorted by due date)
 router.get(
   "/upcoming-activities",
   authenticateToken,
@@ -62,8 +62,8 @@ router.get(
       today.setHours(0, 0, 0, 0);
       const currentDate = today.toISOString();
 
-      // Query activities where end_date >= today (not ended yet)
-      // Ordered by end_date to show activities due soonest first
+      // Query all activities from all offices where end_date >= today (not ended yet)
+      // Ordered by end_date ascending to show activities due soonest first
       const { data: activities, error } = await supabase
         .from("activities")
         .select(
@@ -81,12 +81,11 @@ router.get(
         `
         )
         .gte("end_date", currentDate)
-        .order("end_date", { ascending: true })
-        .limit(3);
+        .order("end_date", { ascending: true });
 
       if (error) throw error;
 
-      // Transform to frontend format
+      // Transform all activities to frontend format (no status filtering)
       const upcomingActivities = activities.map((activity) => ({
         id: activity.id,
         office: activity.programs?.offices?.acronym || "N/A",
@@ -334,7 +333,8 @@ router.get(
 
       const { data: activity, error } = await supabase
         .from("activities")
-        .select(`
+        .select(
+          `
           *,
           programs(
             id, 
@@ -342,7 +342,8 @@ router.get(
             office_id,
             offices(id, name, acronym)
           )
-        `)
+        `
+        )
         .eq("id", activityId)
         .single();
 
@@ -374,22 +375,29 @@ router.put(
       const { status } = req.body;
 
       // Validate status value
-      const validStatuses = ['pending', 'in-progress', 'completed', 'cancelled'];
+      const validStatuses = [
+        "pending",
+        "in-progress",
+        "completed",
+        "cancelled",
+      ];
       if (!status || !validStatuses.includes(status.toLowerCase())) {
-        return res.status(400).json({ 
-          error: "Invalid status. Must be one of: pending, in-progress, completed, cancelled" 
+        return res.status(400).json({
+          error:
+            "Invalid status. Must be one of: pending, in-progress, completed, cancelled",
         });
       }
 
       // Update the activity status
       const { data: updatedActivity, error } = await supabase
         .from("activities")
-        .update({ 
+        .update({
           status: status,
           updated_at: new Date().toISOString(),
         })
         .eq("id", activityId)
-        .select(`
+        .select(
+          `
           *,
           programs(
             id, 
@@ -397,7 +405,8 @@ router.put(
             office_id,
             offices(id, name, acronym)
           )
-        `)
+        `
+        )
         .single();
 
       if (error) {
@@ -409,9 +418,9 @@ router.put(
         return res.status(404).json({ error: "Activity not found" });
       }
 
-      res.json({ 
+      res.json({
         message: "Activity status updated successfully",
-        activity: updatedActivity 
+        activity: updatedActivity,
       });
     } catch (error) {
       console.error("Unit director update status error:", error);

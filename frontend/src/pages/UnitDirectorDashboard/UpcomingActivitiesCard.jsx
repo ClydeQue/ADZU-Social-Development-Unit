@@ -1,11 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import DashboardService from '@/services/dashboardService';
-import ListSkeleton from '@/components/ListSkeleton';
+import { useQuery } from "@tanstack/react-query";
+import DashboardService from "@/services/dashboardService";
+import ListSkeleton from "@/components/ListSkeleton";
 
 const UpcomingActivitiesCard = () => {
   // Fetch upcoming activities (next 3 closest to current date)
   const { data: upcomingData, isLoading } = useQuery({
-    queryKey: ['upcoming-activities'],
+    queryKey: ["upcoming-activities"],
     queryFn: DashboardService.getUpcomingActivities,
     staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes
     refetchOnWindowFocus: true,
@@ -15,21 +15,21 @@ const UpcomingActivitiesCard = () => {
 
   // Logo mapping for offices
   const logoMap = {
-    'ACCA': '/images/acca_logo_small.webp',
-    'ACES': '/images/aces_logo_small.webp',
-    'ACLG': '/images/aclg_logo_small.webp',
-    'ALTEC': '/images/altec_logo_small.webp',
-    'APC': '/images/apc_logo_small.webp',
-    'CCES': '/images/cces_logo_small.webp',
+    ACCA: "/images/acca_logo_small.webp",
+    ACES: "/images/aces_logo_small.webp",
+    ACLG: "/images/aclg_logo_small.webp",
+    ALTEC: "/images/altec_logo_small.webp",
+    APC: "/images/apc_logo_small.webp",
+    CCES: "/images/cces_logo_small.webp",
   };
 
   // Format date to display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -40,7 +40,6 @@ const UpcomingActivitiesCard = () => {
           <h6 className="text-[#040195] text-base sm:text-lg font-semibold leading-[1.5]">
             Upcoming
           </h6>
-        
         </div>
 
         <div className="flex flex-col gap-2 sm:gap-3 flex-1 overflow-auto">
@@ -48,17 +47,19 @@ const UpcomingActivitiesCard = () => {
             <ListSkeleton items={3} />
           ) : upcoming.length === 0 ? (
             <div className="flex items-center justify-center py-8">
-              <span className="text-[0.75rem] text-gray-400">No upcoming activities</span>
+              <span className="text-[0.75rem] text-gray-400">
+                No upcoming activities
+              </span>
             </div>
           ) : (
             upcoming.map((item, index) => (
-              <div 
+              <div
                 key={item.id || index}
                 className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-lg hover:bg-[#f8f9ff] transition-colors flex-shrink-0"
               >
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  <img 
-                    src={logoMap[item.office] || '/images/default_logo.webp'} 
+                  <img
+                    src={logoMap[item.office] || "/images/default_logo.webp"}
                     alt={item.office}
                     className="w-full h-full object-contain p-1"
                   />
