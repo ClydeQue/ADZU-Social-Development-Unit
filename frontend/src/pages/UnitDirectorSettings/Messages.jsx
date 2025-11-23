@@ -106,7 +106,7 @@ export default function MessagesManagement() {
         <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-hidden">
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
             {/* Navbar */}
-            <SettingsNavbar showSearch={false} />
+            <SettingsNavbar title="Messages" showSearch={false} />
 
             <div className="bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-y-auto">
               {/* Back Button */}

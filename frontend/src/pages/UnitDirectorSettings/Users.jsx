@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import WhiteContainer from '@/components/WhiteContainer';
@@ -204,7 +204,7 @@ export default function UsersManagement() {
                   onClick={() => setActiveTab("reset-requests")}
                   className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-colors ${
                     activeTab === "reset-requests"
-                      ? "bg-[#FFAE00] text-white"
+                      ? "bg-[#FF0022] text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                   style={{ fontFamily: "Inter, sans-serif" }}

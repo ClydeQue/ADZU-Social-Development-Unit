@@ -528,40 +528,14 @@ export default function MainSettings() {
                       </div>
                     </div>
 
-                    {/* Info Card */}
-                    <div className="bg-gradient-to-br from-[#F0F4FF] to-[#E8EAFF] rounded-2xl p-6 border-2 border-[#7E7DC5]">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-[#040195] rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg
-                            className="w-6 h-6 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <h3
-                            className="font-bold text-[#040195] text-sm mb-2"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            Quick Tip
-                          </h3>
-                          <p
-                            className="text-xs text-gray-600 leading-relaxed"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            Regularly update your password and review user
-                            permissions to maintain system security.
-                          </p>
-                        </div>
-                      </div>
+                    {/* Quick Tip Note */}
+                    <div className="mt-4 px-2">
+                      <p
+                        className="text-xs text-gray-500 italic"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        Note: Regularly update your password and review user permissions to maintain system security.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -593,24 +567,24 @@ export default function MainSettings() {
                   </button>
 
                   <form onSubmit={handlePasswordChange} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Username (read-only display) */}
-                      <div>
-                        <label
-                          className="block text-base font-bold text-[#040195] mb-2"
-                          style={{ fontFamily: "Inter, sans-serif" }}
-                        >
-                          Username
-                        </label>
-                        <input
-                          type="text"
-                          value="Social Development Unit"
-                          readOnly
-                          className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
-                          style={{ fontFamily: "Inter, sans-serif" }}
-                        />
+                    {/* Username Display (read-only) */}
+                    <div className="mb-6 p-4 bg-gray-100 border-2 border-gray-300 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <div>
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide" style={{ fontFamily: "Inter, sans-serif" }}>
+                            Username
+                          </label>
+                          <p className="text-base font-bold text-gray-700 mt-0.5" style={{ fontFamily: "Inter, sans-serif" }}>
+                            Social Development Unit
+                          </p>
+                        </div>
                       </div>
+                    </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Current Password */}
                       <div>
                         <label

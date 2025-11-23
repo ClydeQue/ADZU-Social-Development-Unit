@@ -222,7 +222,7 @@ export default function Sidebar() {
                     <div className="ml-6 mb-2 space-y-1">
                       <button
                         onClick={() => handleNavigation('/unit-director/settings/users')}
-                        className={`w-full rounded-lg py-2 px-4 flex items-center gap-2 transition-all duration-200 ${
+                        className={`w-full rounded-lg py-2 px-4 flex items-center gap-2 transition-all duration-200 cursor-pointer ${
                           location.pathname === '/unit-director/settings/users'
                             ? 'bg-[#E8EAFF] text-[#4D49FC]'
                             : 'text-[#6B7280] hover:bg-[#E8EAFF] hover:text-[#4D49FC]'
@@ -238,7 +238,7 @@ export default function Sidebar() {
 
                       <button
                         onClick={() => handleNavigation('/unit-director/settings/programs')}
-                        className={`w-full rounded-lg py-2 px-4 flex items-center gap-2 transition-all duration-200 ${
+                        className={`w-full rounded-lg py-2 px-4 flex items-center gap-2 transition-all duration-200 cursor-pointer ${
                           location.pathname === '/unit-director/settings/programs'
                             ? 'bg-[#E8EAFF] text-[#4D49FC]'
                             : 'text-[#6B7280] hover:bg-[#E8EAFF] hover:text-[#4D49FC]'
@@ -254,7 +254,7 @@ export default function Sidebar() {
 
                       <button
                         onClick={() => handleNavigation('/unit-director/settings/messages')}
-                        className={`w-full rounded-lg py-2 px-4 flex items-center gap-2 transition-all duration-200 ${
+                        className={`w-full rounded-lg py-2 px-4 flex items-center gap-2 transition-all duration-200 cursor-pointer ${
                           location.pathname === '/unit-director/settings/messages'
                             ? 'bg-[#E8EAFF] text-[#4D49FC]'
                             : 'text-[#6B7280] hover:bg-[#E8EAFF] hover:text-[#4D49FC]'

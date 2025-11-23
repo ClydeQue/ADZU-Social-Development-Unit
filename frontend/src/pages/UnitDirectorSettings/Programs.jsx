@@ -58,7 +58,7 @@ export default function ProgramsManagement() {
         <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-hidden">
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
             {/* Navbar */}
-            <SettingsNavbar showSearch={false} />
+            <SettingsNavbar title="Programs" showSearch={false} />
 
             <div className="bg-[#F4F4F4] rounded-[15px] p-8 mx-4 flex-1 overflow-y-auto">
               {/* Back Button */}
@@ -79,7 +79,7 @@ export default function ProgramsManagement() {
                   className="text-4xl font-bold text-[#040195] mb-2"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  Programs
+                  Program Management
                 </h1>
                 <p className="text-gray-500 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
                   Manage programs for each office
