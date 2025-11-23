@@ -121,10 +121,50 @@ router.get("/:officeId/dashboard", authenticateToken, async (req, res) => {
       upcoming_programs: programs.filter((p) => p.status === "upcoming").length,
     };
 
+    // Get all upcoming activities (where end_date >= today) sorted in ascending order
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentDate = today.toISOString();
+
+    let upcomingActivities = [];
+    if (programIds.length > 0) {
+      const { data: upcomingData, error: upcomingError } = await supabase
+        .from("activities")
+        .select(
+          `
+          id,
+          activity_name,
+          start_date,
+          end_date,
+          status,
+          program_id,
+          programs(
+            id,
+            title
+          )
+        `
+        )
+        .in("program_id", programIds)
+        .gte("end_date", currentDate)
+        .order("end_date", { ascending: true });
+
+      if (!upcomingError && upcomingData) {
+        upcomingActivities = upcomingData.map((activity) => ({
+          id: activity.id,
+          activity: activity.activity_name || "Untitled Activity",
+          due: activity.end_date,
+          start_date: activity.start_date,
+          status: activity.status || "pending",
+          program: activity.programs?.title || "Unknown Program",
+        }));
+      }
+    }
+
     res.json({
       office,
       programs,
       statistics,
+      upcomingPrograms: upcomingActivities,
     });
   } catch (error) {
     console.error("Get office dashboard error:", error);
@@ -287,8 +327,14 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
     const totalBudget = activities.reduce((sum, a) => {
       try {
         if (a.budget_amount) {
-          const amounts = typeof a.budget_amount === 'string' ? JSON.parse(a.budget_amount) : [a.budget_amount];
-          const activityTotal = amounts.reduce((total, amount) => total + (parseFloat(amount) || 0), 0);
+          const amounts =
+            typeof a.budget_amount === "string"
+              ? JSON.parse(a.budget_amount)
+              : [a.budget_amount];
+          const activityTotal = amounts.reduce(
+            (total, amount) => total + (parseFloat(amount) || 0),
+            0
+          );
           return sum + activityTotal;
         }
       } catch (e) {
@@ -305,9 +351,13 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
     activities.forEach((a) => {
       if (a.sdg_number) {
         try {
-          const sdgNumbers = typeof a.sdg_number === 'string' ? JSON.parse(a.sdg_number) : 
-                            (Array.isArray(a.sdg_number) ? a.sdg_number : [a.sdg_number]);
-          sdgNumbers.forEach(sdgNum => {
+          const sdgNumbers =
+            typeof a.sdg_number === "string"
+              ? JSON.parse(a.sdg_number)
+              : Array.isArray(a.sdg_number)
+              ? a.sdg_number
+              : [a.sdg_number];
+          sdgNumbers.forEach((sdgNum) => {
             const sdg = parseInt(sdgNum);
             if (!isNaN(sdg)) {
               sdgDistribution[sdg] = (sdgDistribution[sdg] || 0) + 1;
@@ -387,8 +437,8 @@ router.post("/activities", authenticateToken, async (req, res) => {
 
     // Validate required fields
     if (!activityData.activity_name || !activityData.program_id) {
-      return res.status(400).json({ 
-        error: "activity_name and program_id are required" 
+      return res.status(400).json({
+        error: "activity_name and program_id are required",
       });
     }
 
@@ -404,7 +454,10 @@ router.post("/activities", authenticateToken, async (req, res) => {
     }
 
     // Check if user has access to this office
-    if (req.user.userType !== "unit_director" && req.user.office_id != program.office_id) {
+    if (
+      req.user.userType !== "unit_director" &&
+      req.user.office_id != program.office_id
+    ) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -412,19 +465,20 @@ router.post("/activities", authenticateToken, async (req, res) => {
     let budgetsArray = [];
     if (activityData.budgets) {
       try {
-        budgetsArray = typeof activityData.budgets === 'string' 
-          ? JSON.parse(activityData.budgets) 
-          : activityData.budgets;
+        budgetsArray =
+          typeof activityData.budgets === "string"
+            ? JSON.parse(activityData.budgets)
+            : activityData.budgets;
       } catch (e) {
-        console.error('Error parsing budgets:', e);
+        console.error("Error parsing budgets:", e);
       }
     }
 
     // Parse SDG numbers array if provided
     let sdgNumbersArray = [];
     if (activityData.sdg_numbers) {
-      sdgNumbersArray = Array.isArray(activityData.sdg_numbers) 
-        ? activityData.sdg_numbers 
+      sdgNumbersArray = Array.isArray(activityData.sdg_numbers)
+        ? activityData.sdg_numbers
         : [activityData.sdg_numbers];
     }
 
@@ -434,15 +488,23 @@ router.post("/activities", authenticateToken, async (req, res) => {
       activity_name: activityData.activity_name,
       start_date: activityData.start_date || null,
       end_date: activityData.end_date || null,
-      participants_count: activityData.participants_count ? parseInt(activityData.participants_count) : 0,
-      male_participants: activityData.male_participants ? parseInt(activityData.male_participants) : 0,
-      female_participants: activityData.female_participants ? parseInt(activityData.female_participants) : 0,
-      venue: activityData.venue || JSON.stringify({
-        street: '',
-        barangay: '',
-        city: '',
-        province: ''
-      }),
+      participants_count: activityData.participants_count
+        ? parseInt(activityData.participants_count)
+        : 0,
+      male_participants: activityData.male_participants
+        ? parseInt(activityData.male_participants)
+        : 0,
+      female_participants: activityData.female_participants
+        ? parseInt(activityData.female_participants)
+        : 0,
+      venue:
+        activityData.venue ||
+        JSON.stringify({
+          street: "",
+          barangay: "",
+          city: "",
+          province: "",
+        }),
       description: activityData.description || null,
       objectives: activityData.objectives || null,
       classification: activityData.classification || null,
@@ -451,12 +513,19 @@ router.post("/activities", authenticateToken, async (req, res) => {
       partner_type: activityData.partner_type || null,
       partner_nature: activityData.partner_nature || null,
       // Store budget amounts and types as JSON arrays in existing columns
-      budget_amount: budgetsArray.length > 0 ? JSON.stringify(budgetsArray.map(b => b.amount)) : null,
-      budget_type: budgetsArray.length > 0 ? JSON.stringify(budgetsArray.map(b => b.type)) : null,
+      budget_amount:
+        budgetsArray.length > 0
+          ? JSON.stringify(budgetsArray.map((b) => b.amount))
+          : null,
+      budget_type:
+        budgetsArray.length > 0
+          ? JSON.stringify(budgetsArray.map((b) => b.type))
+          : null,
       // Store SDG numbers as JSON array in existing sdg_number column
-      sdg_number: sdgNumbersArray.length > 0 ? JSON.stringify(sdgNumbersArray) : null,
+      sdg_number:
+        sdgNumbersArray.length > 0 ? JSON.stringify(sdgNumbersArray) : null,
       phase: activityData.phase || null,
-      status: 'pending', // Status is always pending on creation, controlled by Unit Director
+      status: "pending", // Status is always pending on creation, controlled by Unit Director
       report_url: activityData.report_url || null, // URL link to report
       notes: activityData.notes || null,
       created_by: userId,
@@ -480,30 +549,28 @@ router.post("/activities", authenticateToken, async (req, res) => {
 
     // Create notification for unit director about new activity
     try {
-      await supabase
-        .from("notifications")
-        .insert({
-          activity_id: createdActivity.id,
-          office_id: program.office_id,
-          type: "Report",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+      await supabase.from("notifications").insert({
+        activity_id: createdActivity.id,
+        office_id: program.office_id,
+        type: "Report",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       console.log("Notification created for new activity");
     } catch (notifError) {
       console.error("Failed to create notification:", notifError);
       // Don't fail the request if notification fails
     }
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: "Activity created successfully",
-      activity: createdActivity 
+      activity: createdActivity,
     });
   } catch (error) {
     console.error("Create activity error:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Server error",
-      details: error.message 
+      details: error.message,
     });
   }
 });
@@ -699,7 +766,8 @@ router.get("/activities/:activityId", authenticateToken, async (req, res) => {
 
     const { data: activity, error } = await supabase
       .from("activities")
-      .select(`
+      .select(
+        `
         *,
         programs(
           id, 
@@ -707,7 +775,8 @@ router.get("/activities/:activityId", authenticateToken, async (req, res) => {
           office_id,
           offices(id, name, acronym)
         )
-      `)
+      `
+      )
       .eq("id", activityId)
       .single();
 
@@ -723,7 +792,10 @@ router.get("/activities/:activityId", authenticateToken, async (req, res) => {
     console.log("Activity data:", JSON.stringify(activity, null, 2));
 
     // Check if user has access to this office
-    if (req.user.userType !== "unit_director" && req.user.office_id != activity.programs.office_id) {
+    if (
+      req.user.userType !== "unit_director" &&
+      req.user.office_id != activity.programs.office_id
+    ) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -745,9 +817,12 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     console.log("Request body keys:", Object.keys(updateData));
     console.log("Description received:", updateData.description);
     console.log("Description type:", typeof updateData.description);
-    console.log("Description is undefined?", updateData.description === undefined);
+    console.log(
+      "Description is undefined?",
+      updateData.description === undefined
+    );
     console.log("Description is null?", updateData.description === null);
-    console.log("Description is empty string?", updateData.description === '');
+    console.log("Description is empty string?", updateData.description === "");
     console.log("================================\n");
 
     // First, get the activity to check permissions
@@ -767,7 +842,10 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     }
 
     // Check if user has access to this office
-    if (req.user.userType !== "unit_director" && req.user.office_id != existingActivity.programs.office_id) {
+    if (
+      req.user.userType !== "unit_director" &&
+      req.user.office_id != existingActivity.programs.office_id
+    ) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -775,63 +853,87 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     let budgetsArray = [];
     if (updateData.budgets) {
       try {
-        budgetsArray = typeof updateData.budgets === 'string' 
-          ? JSON.parse(updateData.budgets) 
-          : updateData.budgets;
+        budgetsArray =
+          typeof updateData.budgets === "string"
+            ? JSON.parse(updateData.budgets)
+            : updateData.budgets;
       } catch (e) {
-        console.error('Error parsing budgets:', e);
+        console.error("Error parsing budgets:", e);
       }
     }
 
     // Parse SDG numbers array if provided
     let sdgNumbersArray = [];
     if (updateData.sdg_numbers) {
-      sdgNumbersArray = Array.isArray(updateData.sdg_numbers) 
-        ? updateData.sdg_numbers 
+      sdgNumbersArray = Array.isArray(updateData.sdg_numbers)
+        ? updateData.sdg_numbers
         : [updateData.sdg_numbers];
     }
 
     // Prepare update data - simplified sanitization
     const sanitizedData = {};
-    
+
     // Simple mapping - just pass through the allowed fields
-    if (updateData.activity_name !== undefined) sanitizedData.activity_name = updateData.activity_name;
-    if (updateData.program_id !== undefined) sanitizedData.program_id = updateData.program_id;
-    if (updateData.start_date !== undefined) sanitizedData.start_date = updateData.start_date;
-    if (updateData.end_date !== undefined) sanitizedData.end_date = updateData.end_date;
-    
+    if (updateData.activity_name !== undefined)
+      sanitizedData.activity_name = updateData.activity_name;
+    if (updateData.program_id !== undefined)
+      sanitizedData.program_id = updateData.program_id;
+    if (updateData.start_date !== undefined)
+      sanitizedData.start_date = updateData.start_date;
+    if (updateData.end_date !== undefined)
+      sanitizedData.end_date = updateData.end_date;
+
     // Numeric fields
     if (updateData.participants_count !== undefined) {
-      sanitizedData.participants_count = updateData.participants_count ? parseInt(updateData.participants_count) : null;
+      sanitizedData.participants_count = updateData.participants_count
+        ? parseInt(updateData.participants_count)
+        : null;
     }
     if (updateData.male_participants !== undefined) {
-      sanitizedData.male_participants = updateData.male_participants ? parseInt(updateData.male_participants) : null;
+      sanitizedData.male_participants = updateData.male_participants
+        ? parseInt(updateData.male_participants)
+        : null;
     }
     if (updateData.female_participants !== undefined) {
-      sanitizedData.female_participants = updateData.female_participants ? parseInt(updateData.female_participants) : null;
+      sanitizedData.female_participants = updateData.female_participants
+        ? parseInt(updateData.female_participants)
+        : null;
     }
-    
+
     // Venue as JSON string
     if (updateData.venue !== undefined) {
-      sanitizedData.venue = typeof updateData.venue === 'string' ? updateData.venue : JSON.stringify(updateData.venue);
+      sanitizedData.venue =
+        typeof updateData.venue === "string"
+          ? updateData.venue
+          : JSON.stringify(updateData.venue);
     }
-    
+
     // Text fields - THE KEY FIX: Just pass them through as-is
-    if (updateData.description !== undefined) sanitizedData.description = updateData.description;
-    if (updateData.objectives !== undefined) sanitizedData.objectives = updateData.objectives;
-    if (updateData.classification !== undefined) sanitizedData.classification = updateData.classification;
+    if (updateData.description !== undefined)
+      sanitizedData.description = updateData.description;
+    if (updateData.objectives !== undefined)
+      sanitizedData.objectives = updateData.objectives;
+    if (updateData.classification !== undefined)
+      sanitizedData.classification = updateData.classification;
     if (updateData.phase !== undefined) sanitizedData.phase = updateData.phase;
     if (updateData.notes !== undefined) sanitizedData.notes = updateData.notes;
-    
+
     // Partners
-    if (updateData.partner_name !== undefined) sanitizedData.partner_name = updateData.partner_name;
-    if (updateData.partner_type !== undefined) sanitizedData.partner_type = updateData.partner_type;
-    if (updateData.partner_nature !== undefined) sanitizedData.partner_nature = updateData.partner_nature;
-    
+    if (updateData.partner_name !== undefined)
+      sanitizedData.partner_name = updateData.partner_name;
+    if (updateData.partner_type !== undefined)
+      sanitizedData.partner_type = updateData.partner_type;
+    if (updateData.partner_nature !== undefined)
+      sanitizedData.partner_nature = updateData.partner_nature;
+
     // Budget amounts and types as JSON arrays
     if (updateData.budgets !== undefined && budgetsArray.length > 0) {
-      sanitizedData.budget_amount = JSON.stringify(budgetsArray.map(b => b.amount));
-      sanitizedData.budget_type = JSON.stringify(budgetsArray.map(b => b.type));
+      sanitizedData.budget_amount = JSON.stringify(
+        budgetsArray.map((b) => b.amount)
+      );
+      sanitizedData.budget_type = JSON.stringify(
+        budgetsArray.map((b) => b.type)
+      );
     } else {
       // Handle direct budget_amount and budget_type updates
       if (updateData.budget_amount !== undefined) {
@@ -841,7 +943,7 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
         sanitizedData.budget_type = updateData.budget_type;
       }
     }
-    
+
     // SDG numbers array stored in sdg_number column
     if (updateData.sdg_numbers !== undefined && sdgNumbersArray.length > 0) {
       sanitizedData.sdg_number = JSON.stringify(sdgNumbersArray);
@@ -849,11 +951,13 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
       // Handle direct sdg_number updates
       sanitizedData.sdg_number = updateData.sdg_number;
     }
-    
+
     // Other fields
-    if (updateData.report_url !== undefined) sanitizedData.report_url = updateData.report_url;
-    if (updateData.implementing_partners !== undefined) sanitizedData.implementing_partners = updateData.implementing_partners;
-    
+    if (updateData.report_url !== undefined)
+      sanitizedData.report_url = updateData.report_url;
+    if (updateData.implementing_partners !== undefined)
+      sanitizedData.implementing_partners = updateData.implementing_partners;
+
     console.log("\n=== SANITIZED DATA ===");
     console.log("Description:", sanitizedData.description);
     console.log("All fields:", Object.keys(sanitizedData));
@@ -865,17 +969,17 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     // Update the activity
     console.log("\n=== UPDATING DATABASE ===");
     console.log("Fields being updated:", Object.keys(sanitizedData));
-    console.log("Description field included?", 'description' in sanitizedData);
+    console.log("Description field included?", "description" in sanitizedData);
     console.log("Description value:", sanitizedData.description);
     console.log("Full sanitizedData:", JSON.stringify(sanitizedData, null, 2));
-    
+
     const updatePayload = {
       ...sanitizedData,
       updated_at: new Date().toISOString(),
     };
-    
+
     console.log("Full update payload:", JSON.stringify(updatePayload, null, 2));
-    
+
     const { data: updatedActivity, error: updateError } = await supabase
       .from("activities")
       .update(updatePayload)
@@ -886,7 +990,10 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     console.log("Update complete.");
     console.log("Update error?", updateError);
     console.log("Updated activity description:", updatedActivity?.description);
-    console.log("Full updated activity:", JSON.stringify(updatedActivity, null, 2));
+    console.log(
+      "Full updated activity:",
+      JSON.stringify(updatedActivity, null, 2)
+    );
     console.log("=========================\n");
 
     if (updateError) {
@@ -898,30 +1005,28 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
 
     // Create notification for unit director about activity update
     try {
-      await supabase
-        .from("notifications")
-        .insert({
-          activity_id: updatedActivity.id,
-          office_id: existingActivity.programs.office_id,
-          type: "Updated",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+      await supabase.from("notifications").insert({
+        activity_id: updatedActivity.id,
+        office_id: existingActivity.programs.office_id,
+        type: "Updated",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       console.log("Notification created for updated activity");
     } catch (notifError) {
       console.error("Failed to create notification:", notifError);
       // Don't fail the request if notification fails
     }
 
-    res.json({ 
+    res.json({
       message: "Activity updated successfully",
-      activity: updatedActivity 
+      activity: updatedActivity,
     });
   } catch (error) {
     console.error("Update activity error:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Server error",
-      details: error.message 
+      details: error.message,
     });
   }
 });
@@ -934,7 +1039,10 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
     const { officeId } = req.params;
 
     // Check if user has access to this office
-    if (req.user.userType !== "unit_director" && req.user.office_id != officeId) {
+    if (
+      req.user.userType !== "unit_director" &&
+      req.user.office_id != officeId
+    ) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -946,13 +1054,14 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
 
     if (programsError) throw programsError;
 
-    const programIds = programs.map(p => p.id);
+    const programIds = programs.map((p) => p.id);
     let activities = [];
-    
+
     if (programIds.length > 0) {
       const { data: activitiesData, error: activitiesError } = await supabase
         .from("activities")
-        .select(`
+        .select(
+          `
           id,
           activity_name,
           start_date,
@@ -963,7 +1072,8 @@ router.get("/:officeId/activities", authenticateToken, async (req, res) => {
           objectives,
           notes,
           programs(id, title)
-        `)
+        `
+        )
         .in("program_id", programIds)
         .order("start_date", { ascending: true });
 
