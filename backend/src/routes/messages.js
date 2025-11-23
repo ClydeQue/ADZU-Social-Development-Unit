@@ -523,30 +523,38 @@ router.get(
   requireRole(["unit_director"]),
   async (req, res) => {
     try {
-      const { data: credentials, error } = await supabase
+      // Get all offices from the offices table
+      const { data: offices, error: officesError } = await supabase
+        .from("offices")
+        .select("id, name, acronym")
+        .order("acronym");
+
+      if (officesError) throw officesError;
+
+      // Get all active office user credentials to map to offices
+      const { data: credentials, error: credError } = await supabase
         .from("office_credentials")
-        .select(
-          `
-        id,
-        name,
-        user_type,
-        office_id,
-        offices(id, name, acronym)
-      `
-        )
+        .select("id, name, office_id")
         .eq("user_type", "office_user")
-        .eq("is_active", true)
-        .order("name");
+        .eq("is_active", true);
 
-      if (error) throw error;
+      if (credError) throw credError;
 
-      const formattedOffices = credentials.map((cred) => ({
-        id: cred.id,
-        name: cred.name,
-        office: cred.offices?.name || "Unknown Office",
-        acronym: cred.offices?.acronym || "N/A",
-        officeId: cred.office_id,
-      }));
+      // Map offices with their credentials
+      const formattedOffices = offices.map((office) => {
+        const cred = credentials.find((c) => c.office_id === office.id);
+        return {
+          id: cred?.id || office.id, // Use credential ID if exists, otherwise office ID
+          name: office.name,
+          office: office.name,
+          acronym: office.acronym,
+          officeId: office.id,
+          credentialId: cred?.id,
+          hasCredential: !!cred,
+        };
+      }); // Show all offices, even without credentials
+
+      console.log(`Found ${formattedOffices.length} offices (${formattedOffices.filter(o => o.hasCredential).length} with credentials)`);
 
       res.json({
         success: true,

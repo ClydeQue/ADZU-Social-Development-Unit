@@ -53,24 +53,44 @@ const Navbar = () => {
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+      <Toolbar sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            flexGrow: 1,
+            fontSize: { xs: '0.9rem', sm: '1rem', md: '1.25rem' },
+            display: { xs: 'none', sm: 'block' }
+          }}
+        >
           ADZU Social Development Unit
         </Typography>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            flexGrow: 1,
+            fontSize: '0.9rem',
+            display: { xs: 'block', sm: 'none' }
+          }}
+        >
+          ADZU SDU
+        </Typography>
         {user && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1, md: 2 } }}>
             {/* Notification Icon */}
             <IconButton
               color="inherit"
               onClick={handleNotificationClick}
               sx={{
+                p: { xs: 0.5, sm: 1 },
                 '&:hover': {
                   backgroundColor: 'rgba(255,255,255,0.1)'
                 }
               }}
             >
               <Badge badgeContent={unreadCount} color="error">
-                <NotificationsIcon />
+                <NotificationsIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
               </Badge>
             </IconButton>
 
@@ -81,8 +101,9 @@ const Navbar = () => {
               onClose={handleNotificationClose}
               PaperProps={{
                 sx: {
-                  width: 280,
-                  maxHeight: 350,
+                  width: { xs: '90vw', sm: 320, md: 360 },
+                  maxWidth: 400,
+                  maxHeight: { xs: '70vh', sm: 400, md: 450 },
                   mt: 1.5,
                   borderRadius: 2,
                   boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
@@ -91,6 +112,13 @@ const Navbar = () => {
               }}
               transformOrigin={{ horizontal: 'right', vertical: 'top' }}
               anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              slotProps={{
+                paper: {
+                  style: {
+                    maxHeight: 'calc(100vh - 100px)'
+                  }
+                }
+              }}
             >
               {/* Header */}
               <Box sx={{ px: 1.5, py: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, bgcolor: 'white', zIndex: 1 }}>
@@ -281,7 +309,14 @@ const Navbar = () => {
               </Box>
             </Menu>
 
-            <Typography variant="body2" sx={{ color: 'white' }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: 'white',
+                display: { xs: 'none', md: 'block' },
+                fontSize: { md: '0.875rem' }
+              }}
+            >
               Welcome, {user.name}
             </Typography>
             <LogoutButton 
@@ -290,6 +325,10 @@ const Navbar = () => {
               sx={{ 
                 color: 'white', 
                 borderColor: 'white',
+                fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                px: { xs: 1, sm: 2 },
+                py: { xs: 0.25, sm: 0.5 },
+                minWidth: { xs: 'auto', sm: '64px' },
                 '&:hover': {
                   borderColor: 'white',
                   backgroundColor: 'rgba(255,255,255,0.1)'

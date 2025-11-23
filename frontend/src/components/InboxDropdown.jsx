@@ -97,39 +97,40 @@ function InboxDropdown({ onMessageClick }) {
 
       {/* Dropdown Panel */}
       {showInbox && (
-        <div className="absolute right-0 top-full mt-2 w-100 bg-white rounded-xl shadow-2xl z-50 border border-gray-100">
+        <div className="absolute right-0 top-full mt-2 w-[90vw] sm:w-96 md:w-[400px] bg-white rounded-xl shadow-2xl z-50 border border-gray-100 max-w-[calc(100vw-2rem)]">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-100">
+          <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold text-[#040195]">Inbox</h3>
+              <h3 className="text-sm sm:text-base font-bold text-[#040195]">Inbox</h3>
 
               <button
                 onClick={() => {
                   setShowCompose(true);
                   setShowInbox(false);
                 }}
-                className="p-1.5 bg-[#4D49FC] flex items-center gap-1.5 text-white rounded-lg - 8px px-3 py-1 hover:bg-[#3D39EC] transition-colors"
+                className="p-1 sm:p-1.5 bg-[#4D49FC] flex items-center gap-1 sm:gap-1.5 text-white rounded-lg px-2 sm:px-3 py-1 hover:bg-[#3D39EC] transition-colors"
                 title="Compose message"
               >
                 <svg
-                  width="16"
-                  height="16"
+                  width="14"
+                  height="14"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  className="sm:w-4 sm:h-4"
                 >
                   <path
                     d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 000-1.41l-2.34-2.34a.996.996 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
                     fill="currentColor"
                   />
                 </svg>
-                <span className="text-xs font-semibold">Compose</span>
+                <span className="text-[10px] sm:text-xs font-semibold">Compose</span>
               </button>
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex gap-1 sm:gap-1.5">
               <button
                 onClick={() => setInboxFilter("all")}
-                className={`px-3 py-1 rounded-full hover:cursor-pointer text-[10px] font-semibold transition-colors ${
+                className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full hover:cursor-pointer text-[9px] sm:text-[10px] font-semibold transition-colors ${
                   inboxFilter === "all"
                     ? "bg-[#CDCCFF] text-[#040195]"
                     : "text-[#040195] bg-[#F4F4FF] hover:bg-[#E6E6FF]"
@@ -139,7 +140,7 @@ function InboxDropdown({ onMessageClick }) {
               </button>
               <button
                 onClick={() => setInboxFilter("unread")}
-                className={`px-3 py-1 hover:cursor-pointer rounded-full text-[10px] font-semibold transition-colors ${
+                className={`px-2 sm:px-3 py-0.5 sm:py-1 hover:cursor-pointer rounded-full text-[9px] sm:text-[10px] font-semibold transition-colors ${
                   inboxFilter === "unread"
                     ? "bg-[#E8E7FF] text-[#040195]"
                     : "text-[#040195] bg-[#F4F4FF] hover:bg-[#E6E6FF]"
@@ -151,7 +152,7 @@ function InboxDropdown({ onMessageClick }) {
           </div>
 
           {/* Messages List */}
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
             {isLoading ? (
               <div className="px-4 py-8 text-center">
                 <p className="text-xs text-gray-400">Loading messages...</p>
@@ -165,9 +166,9 @@ function InboxDropdown({ onMessageClick }) {
                 <div
                   key={message.id}
                   onClick={() => handleConversationClick(message)}
-                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
+                  className="px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     {/* Office Logo */}
                     <div className="flex-shrink-0 mt-0.5">
                       <img
@@ -176,7 +177,7 @@ function InboxDropdown({ onMessageClick }) {
                           "/logos/officeLogoTransparent/default.png"
                         }
                         alt={message.office || message.sender}
-                        className="w-8 h-8 object-contain"
+                        className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src =
@@ -188,25 +189,25 @@ function InboxDropdown({ onMessageClick }) {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-gray-900 mb-0.5">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] sm:text-xs font-bold text-gray-900 mb-0.5 truncate">
                             {message.office || message.sender}
                           </p>
-                          <p className="text-[10px] text-gray-600 mb-0.5">
+                          <p className="text-[9px] sm:text-[10px] text-gray-600 mb-0.5 truncate">
                             {message.subject}
                           </p>
-                          <p className="text-[10px] text-gray-400 line-clamp-1">
+                          <p className="text-[9px] sm:text-[10px] text-gray-400 line-clamp-1">
                             {message.preview}
                           </p>
                         </div>
 
-                        {/* Time and Unread Indicator */}
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="text-[9px] text-gray-400 whitespace-nowrap">
+                        {/* Time and Indicator */}
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className="text-[8px] sm:text-[9px] text-gray-400 whitespace-nowrap">
                             {message.time}
                           </span>
                           {message.unread && (
-                            <span className="w-2 h-2 bg-[#5B6FED] rounded-full"></span>
+                            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#5B6FED] rounded-full"></span>
                           )}
                         </div>
                       </div>

@@ -107,16 +107,16 @@ function NotificationDropdown({ onNotificationClick }) {
 
       {/* Dropdown Panel */}
       {showNotifications && (
-        <div className="absolute right-0 top-full mt-2 w-100 bg-white rounded-xl shadow-2xl z-50 border border-gray-100">
+        <div className="absolute right-0 top-full mt-2 w-[90vw] sm:w-96 md:w-[400px] bg-white rounded-xl shadow-2xl z-50 border border-gray-100 max-w-[calc(100vw-2rem)]">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h3 className="text-base font-bold text-[#040195] mb-2">
+          <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
+            <h3 className="text-sm sm:text-base font-bold text-[#040195] mb-2">
               Notifications
             </h3>
-            <div className="flex gap-1.5">
+            <div className="flex gap-1 sm:gap-1.5">
               <button
                 onClick={() => setNotificationFilter("all")}
-                className={`px-3 py-1 rounded-full hover:cursor-pointer text-[10px] font-semibold transition-colors ${
+                className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full hover:cursor-pointer text-[9px] sm:text-[10px] font-semibold transition-colors ${
                   notificationFilter === "all"
                     ? "bg-[#CDCCFF] text-[#040195]"
                     : "text-[#040195] bg-[#F4F4FF] hover:bg-[#E6E6FF]"
@@ -126,7 +126,7 @@ function NotificationDropdown({ onNotificationClick }) {
               </button>
               <button
                 onClick={() => setNotificationFilter("unread")}
-                className={`px-3 py-1 hover:cursor-pointer rounded-full text-[10px] font-semibold transition-colors ${
+                className={`px-2 sm:px-3 py-0.5 sm:py-1 hover:cursor-pointer rounded-full text-[9px] sm:text-[10px] font-semibold transition-colors ${
                   notificationFilter === "unread"
                     ? "bg-[#E8E7FF] text-[#040195]"
                     : "text-[#040195] bg-[#F4F4FF] hover:bg-[#E6E6FF]"
@@ -138,7 +138,7 @@ function NotificationDropdown({ onNotificationClick }) {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
             {notificationsLoading ? (
               <div className="px-4 py-6 text-center text-xs text-gray-400">
                 Loading notifications...
@@ -186,13 +186,13 @@ function NotificationDropdown({ onNotificationClick }) {
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0 ${
+                    className={`px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0 ${
                       notification.unread
                         ? "bg-[#F0EFFF]"
                         : ""
                     }`}
                   >
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-1.5 sm:gap-2">
                       {/* Office Logo */}
                       <div className="flex-shrink-0 mt-0.5">
                         <img
@@ -203,7 +203,7 @@ function NotificationDropdown({ onNotificationClick }) {
                           alt={
                             notification.officeAcronym || notification.office
                           }
-                          className="w-8 h-8 object-contain"
+                          className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src =
@@ -214,16 +214,16 @@ function NotificationDropdown({ onNotificationClick }) {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-1.5">
-                          <div className="flex-1">
-                            <p className="text-[10px] font-bold text-gray-500 mb-0.5">
+                        <div className="flex items-start justify-between gap-1 sm:gap-1.5">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 mb-0.5 truncate">
                               {notification.officeAcronym ||
                                 notification.office}
                             </p>
-                            <p className="text-xs font-black text-[#4D49FC] mb-0.5 line-clamp-2">
+                            <p className="text-[10px] sm:text-xs font-black text-[#4D49FC] mb-0.5 line-clamp-2">
                               {notification.activity}
                             </p>
-                            <p className="text-[10px] text-gray-400">
+                            <p className="text-[9px] sm:text-[10px] text-gray-400 truncate">
                               {dateLabel}:{" "}
                               <span style={{ color: "#4D49FC" }}>
                                 {dateValue}
@@ -232,13 +232,13 @@ function NotificationDropdown({ onNotificationClick }) {
                           </div>
 
                           {/* Badge and Indicator */}
-                          <div className="flex items-end gap-1.5 justify-center min-w-[60px]">
+                          <div className="flex items-end gap-1 sm:gap-1.5 justify-center min-w-[50px] sm:min-w-[60px] flex-shrink-0">
                             {/* Type Badge - Standardized to #8988CD */}
                             <span
                               style={{
                                 backgroundColor: "#8988CD",
                               }}
-                              className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-[#ffffff]"
+                              className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-semibold text-[#ffffff]"
                             >
                               {notification.type}
                             </span>
@@ -254,9 +254,9 @@ function NotificationDropdown({ onNotificationClick }) {
                                     ? "0 0 4px #ef444460"
                                     : "0 0 4px #22c55e40",
                                 }}
-                                className="w-2.5 h-2.5 rounded-full mb-0.5"
+                                className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full mb-0.5"
                               ></span>
-                              <span className="text-[9px] text-gray-400">
+                              <span className="text-[8px] sm:text-[9px] text-gray-400">
                                 {timeAgo}
                               </span>
                             </div>
