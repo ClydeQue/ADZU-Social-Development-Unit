@@ -4,6 +4,7 @@ import { Notifications as NotificationsIcon } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import NotificationService from "@/services/notificationService";
 import { getTimeAgo, formatDate } from "@/utils/timeFormat";
+import NotificationModal from "@/components/NotificationModal";
 
 /**
  * Reusable Notification Dropdown Component
@@ -12,6 +13,7 @@ import { getTimeAgo, formatDate } from "@/utils/timeFormat";
 function NotificationDropdown({ onNotificationClick }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationFilter, setNotificationFilter] = useState("all"); // 'all' or 'unread'
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const notificationRef = useRef(null);
 
   // Notifications Query
@@ -55,19 +57,34 @@ function NotificationDropdown({ onNotificationClick }) {
   }, []);
 
   // Handle notification click
-  const handleNotificationClick = async (notificationId) => {
+  const handleNotificationClick = async (notification) => {
+    // Open modal
+    setSelectedNotification(notification);
+    
+    // Close dropdown
+    setShowNotifications(false);
+    
     // Call parent handler if provided
     if (onNotificationClick) {
-      onNotificationClick(notificationId);
+      onNotificationClick(notification.id);
     }
 
-    // Mark as read
-    try {
-      await NotificationService.markAsRead(notificationId);
-      refetchNotifications();
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
+    // Mark as read and move to "all" filter
+    if (notification.unread) {
+      try {
+        await NotificationService.markAsRead(notification.id);
+        // Switch to "all" filter to show the notification was moved there
+        setNotificationFilter("all");
+        refetchNotifications();
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+      }
     }
+  };
+
+  // Close modal handler
+  const closeModal = () => {
+    setSelectedNotification(null);
   };
 
   return (
@@ -168,8 +185,12 @@ function NotificationDropdown({ onNotificationClick }) {
                 return (
                   <div
                     key={notification.id}
-                    onClick={() => handleNotificationClick(notification.id)}
-                    className="px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0"
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0 ${
+                      notification.unread && notificationFilter === "all"
+                        ? "bg-blue-50"
+                        : ""
+                    }`}
                   >
                     <div className="flex items-start gap-2">
                       {/* Office Logo */}
@@ -273,9 +294,15 @@ function NotificationDropdown({ onNotificationClick }) {
               </button>
             </div>
           )}
-
-          
         </div>
+      )}
+
+      {/* Notification Modal */}
+      {selectedNotification && (
+        <NotificationModal
+          notification={selectedNotification}
+          onClose={closeModal}
+        />
       )}
     </div>
   );
