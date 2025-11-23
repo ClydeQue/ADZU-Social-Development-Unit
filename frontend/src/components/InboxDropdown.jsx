@@ -200,7 +200,7 @@ function InboxDropdown({ onMessageClick }) {
                           </p>
                         </div>
 
-                        {/* Time and Indicator */}
+                        {/* Time and Unread Indicator */}
                         <div className="flex flex-col items-end gap-1">
                           <span className="text-[9px] text-gray-400 whitespace-nowrap">
                             {message.time}

@@ -562,7 +562,7 @@ router.get(
   }
 );
 
-// Cleanup old messages (older than 3 years) - Unit Director only
+// Cleanup old messages (older than 1 year) - Unit Director only
 router.delete(
   "/cleanup",
   authenticateToken,
@@ -571,30 +571,84 @@ router.delete(
     try {
       console.log("Starting message cleanup...");
 
-      // Calculate date 3 years ago
-      const threeYearsAgo = new Date();
-      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+      // Calculate date 1 year ago
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
       // Delete old messages
       const { data, error, count } = await supabase
         .from("messages")
         .delete({ count: "exact" })
-        .lt("created_at", threeYearsAgo.toISOString());
+        .lt("created_at", oneYearAgo.toISOString());
 
       if (error) throw error;
 
-      console.log(`Cleaned up ${count || 0} messages older than 3 years`);
+      console.log(`Cleaned up ${count || 0} messages older than 1 year`);
 
       res.json({
         success: true,
         message: `Successfully cleaned up ${count || 0} old messages`,
         deletedCount: count || 0,
-        cutoffDate: threeYearsAgo.toISOString(),
+        cutoffDate: oneYearAgo.toISOString(),
       });
     } catch (error) {
       console.error("Cleanup messages error:", error);
       res.status(500).json({
         error: "Error cleaning up messages",
+        details: error.message,
+      });
+    }
+  }
+);
+
+// Delete all messages from a specific office - Unit Director only
+router.delete(
+  "/office/:officeUserId",
+  authenticateToken,
+  requireRole(["unit_director"]),
+  async (req, res) => {
+    try {
+      const { officeUserId } = req.params;
+      console.log(`Deleting all messages from office user: ${officeUserId}`);
+
+      // Verify the office user exists
+      const { data: officeUser, error: userError } = await supabase
+        .from("office_credentials")
+        .select("id, name, offices(name)")
+        .eq("id", officeUserId)
+        .eq("user_type", "office_user")
+        .single();
+
+      if (userError || !officeUser) {
+        return res.status(404).json({
+          error: "Office user not found",
+        });
+      }
+
+      // Delete all messages where this office user is sender or receiver
+      const { data, error, count } = await supabase
+        .from("messages")
+        .delete({ count: "exact" })
+        .or(`sender_id.eq.${officeUserId},receiver_id.eq.${officeUserId}`);
+
+      if (error) throw error;
+
+      console.log(
+        `Deleted ${count || 0} messages from ${officeUser.offices?.name}`
+      );
+
+      res.json({
+        success: true,
+        message: `Successfully deleted ${count || 0} messages from ${
+          officeUser.offices?.name
+        }`,
+        deletedCount: count || 0,
+        office: officeUser.offices?.name,
+      });
+    } catch (error) {
+      console.error("Delete office messages error:", error);
+      res.status(500).json({
+        error: "Error deleting office messages",
         details: error.message,
       });
     }
@@ -615,14 +669,14 @@ router.get(
 
       if (totalError) throw totalError;
 
-      // Messages older than 3 years
-      const threeYearsAgo = new Date();
-      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+      // Messages older than 1 year
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
       const { count: oldCount, error: oldError } = await supabase
         .from("messages")
         .select("*", { count: "exact", head: true })
-        .lt("created_at", threeYearsAgo.toISOString());
+        .lt("created_at", oneYearAgo.toISOString());
 
       if (oldError) throw oldError;
 
@@ -640,8 +694,8 @@ router.get(
           total: totalCount || 0,
           oldMessages: oldCount || 0,
           unread: unreadCount || 0,
-          retentionPeriod: "3 years",
-          cutoffDate: threeYearsAgo.toISOString(),
+          retentionPeriod: "1 year",
+          cutoffDate: oneYearAgo.toISOString(),
         },
       });
     } catch (error) {
@@ -673,17 +727,17 @@ function getTimeAgo(dateString) {
 // Automatic cleanup check on server start (runs once)
 const performStartupCleanup = async () => {
   try {
-    const threeYearsAgo = new Date();
-    threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
     const { count } = await supabase
       .from("messages")
       .delete({ count: "exact" })
-      .lt("created_at", threeYearsAgo.toISOString());
+      .lt("created_at", oneYearAgo.toISOString());
 
     if (count && count > 0) {
       console.log(
-        `✅ Startup cleanup: Removed ${count} messages older than 3 years`
+        `✅ Startup cleanup: Removed ${count} messages older than 1 year`
       );
     }
   } catch (error) {

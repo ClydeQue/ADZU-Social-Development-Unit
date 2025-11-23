@@ -118,7 +118,7 @@ class MessageService {
 
   /**
    * Cleanup old messages (Unit Director only)
-   * Deletes messages older than 3 years
+   * Deletes messages older than 1 year
    */
   async cleanupOldMessages() {
     try {
@@ -126,6 +126,20 @@ class MessageService {
       return response;
     } catch (error) {
       console.error("Cleanup messages error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete all messages from a specific office user (Unit Director only)
+   * @param {string} officeUserId - ID of the office user
+   */
+  async deleteOfficeMessages(officeUserId) {
+    try {
+      const response = await api.delete(`api/messages/office/${officeUserId}`);
+      return response;
+    } catch (error) {
+      console.error("Delete office messages error:", error);
       throw error;
     }
   }
