@@ -20,6 +20,23 @@ const settingsService = {
   },
 
   /**
+   * Change Unit Director username
+   * @param {string} newUsername - New username
+   * @param {string} currentPassword - Current password for verification
+   * @returns {Promise} Response with success status
+   */
+  changeUnitDirectorUsername: async (newUsername, currentPassword) => {
+    const response = await api.put(
+      "api/settings/unit-director/change-username",
+      {
+        newUsername,
+        currentPassword,
+      }
+    );
+    return response;
+  },
+
+  /**
    * Change office account password (by Unit Director)
    * @param {number} officeId - Office ID
    * @param {string} newPassword - New password

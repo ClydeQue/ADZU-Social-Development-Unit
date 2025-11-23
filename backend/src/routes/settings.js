@@ -148,6 +148,113 @@ router.put(
   }
 );
 
+// Change Unit Director username
+router.put(
+  "/unit-director/change-username",
+  authenticateToken,
+  requireRole(["unit_director"]),
+  async (req, res) => {
+    try {
+      const { newUsername, currentPassword } = req.body;
+      const userId = req.user.userId; // From JWT token
+
+      console.log("Change username request for Unit Director:", userId);
+
+      // Validation
+      if (!newUsername || !currentPassword) {
+        return res.status(400).json({
+          success: false,
+          error: "New username and current password are required",
+        });
+      }
+
+      if (newUsername.length < 3) {
+        return res.status(400).json({
+          success: false,
+          error: "Username must be at least 3 characters",
+        });
+      }
+
+      // Get current user credentials
+      const { data: user, error: fetchError } = await supabase
+        .from("office_credentials")
+        .select("id, username, password, user_type")
+        .eq("id", userId)
+        .eq("user_type", "unit_director")
+        .single();
+
+      if (fetchError || !user) {
+        console.error("Error fetching user:", fetchError);
+        return res.status(404).json({
+          success: false,
+          error: "User not found",
+        });
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+
+      if (!isValidPassword) {
+        console.log("Invalid current password for:", user.username);
+        return res.status(401).json({
+          success: false,
+          error: "Current password is incorrect",
+        });
+      }
+
+      // Check if new username already exists
+      const { data: existingUser, error: checkError } = await supabase
+        .from("office_credentials")
+        .select("id")
+        .eq("username", newUsername.trim().toLowerCase())
+        .neq("id", userId)
+        .single();
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          error: "Username already exists",
+        });
+      }
+
+      console.log(
+        "Updating username for Unit Director:",
+        user.username,
+        "->",
+        newUsername
+      );
+
+      // Update username
+      const { error: updateError } = await supabase
+        .from("office_credentials")
+        .update({ username: newUsername.trim().toLowerCase() })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
+
+      console.log("Username updated successfully");
+
+      res.json({
+        success: true,
+        message: "Username updated successfully",
+      });
+    } catch (error) {
+      console.error("Change Unit Director username error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error changing username",
+        details: error.message,
+      });
+    }
+  }
+);
+
 // Change Unit Director password
 router.put(
   "/unit-director/change-password",
