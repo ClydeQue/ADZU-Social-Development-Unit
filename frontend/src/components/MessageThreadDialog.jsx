@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MessageService from "@/services/messageService";
 import { useAuth } from "@/context/AuthContext";
 import { formatDate } from "@/utils/timeFormat";
+import ErrorModal from "@/components/alerts/ErrorModal";
 
 /**
  * Message Thread Dialog
@@ -16,6 +17,8 @@ export default function MessageThreadDialog({ contact, onClose }) {
   const messagesEndRef = useRef(null);
   const [messageText, setMessageText] = useState("");
   const [subject, setSubject] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch all messages
   const { data: allMessagesData } = useQuery({
@@ -53,18 +56,23 @@ export default function MessageThreadDialog({ contact, onClose }) {
       setSubject("");
     },
     onError: (error) => {
-      alert(`Failed to send message: ${error.message || "Unknown error"}`);
+      setErrorMessage(
+        `Failed to send message: ${error.message || "Unknown error"}`
+      );
+      setShowErrorModal(true);
     },
   });
 
   const handleSend = () => {
     if (!messageText.trim()) {
-      alert("Please enter a message");
+      setErrorMessage("Please enter a message");
+      setShowErrorModal(true);
       return;
     }
 
     if (!subject.trim()) {
-      alert("Please enter a subject");
+      setErrorMessage("Please enter a subject");
+      setShowErrorModal(true);
       return;
     }
 
@@ -256,6 +264,13 @@ export default function MessageThreadDialog({ contact, onClose }) {
           </div>
         </div>
       </div>
+
+      {/* Error Modal */}
+      <ErrorModal
+        show={showErrorModal}
+        message={errorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </div>
   );
 }

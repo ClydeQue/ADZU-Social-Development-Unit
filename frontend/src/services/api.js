@@ -11,12 +11,12 @@ const getAPIBaseURL = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  
+
   // In production (Vercel), use the production backend URL
   if (import.meta.env.PROD) {
     return "https://adzu-sdu-backend-delta.vercel.app";
   }
-  
+
   // Local development fallback
   return "http://localhost:5001";
 };
@@ -25,7 +25,7 @@ const API_BASE = getAPIBaseURL();
 
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: API_BASE,  // Remove /api since Express routes already include it
+  baseURL: API_BASE, // Remove /api since Express routes already include it
   headers: {
     "Content-Type": "application/json",
   },
@@ -42,14 +42,14 @@ let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
       prom.resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -82,11 +82,11 @@ axiosInstance.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(token => {
+          .then((token) => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return axiosInstance(originalRequest);
           })
-          .catch(err => {
+          .catch((err) => {
             return Promise.reject(err);
           });
       }
@@ -113,35 +113,35 @@ axiosInstance.interceptors.response.use(
         // Refresh failed, process queue with error
         processQueue(refreshError, null);
         isRefreshing = false;
-        
+
         // Clear auth data and redirect to login
         const { default: AuthService } = await import("./authService.js");
         AuthService.clearAuth();
-        
+
         // Only redirect if not already on login page
-        if (window.location.pathname !== '/') {
+        if (window.location.pathname !== "/") {
           window.location.href = "/";
         }
-        
-        return Promise.reject(new Error("Session expired. Please login again."));
+
+        return Promise.reject(
+          new Error("Session expired. Please login again.")
+        );
       }
     }
 
-    // Extract error message
-    const message =
-      error.response?.data?.message || error.message || "Request failed";
-    
-    // Log 404 errors for debugging
-    if (error.response?.status === 404) {
-      console.error("[API 404 Error]", {
+    // Log errors for debugging
+    if (import.meta.env.DEV) {
+      console.error("[API Error]", {
+        status: error.response?.status,
         url: error.config?.url,
         baseURL: error.config?.baseURL,
-        fullURL: error.config?.baseURL + '/' + error.config?.url,
         method: error.config?.method,
+        data: error.response?.data,
       });
     }
-    
-    return Promise.reject(new Error(message));
+
+    // Preserve the original error structure so components can access response.data
+    return Promise.reject(error);
   }
 );
 
@@ -153,7 +153,7 @@ class ApiService {
 
   async post(endpoint, body, options = {}) {
     return axiosInstance.post(endpoint, body, options);
-  } 
+  }
 
   async put(endpoint, body, options = {}) {
     return axiosInstance.put(endpoint, body, options);

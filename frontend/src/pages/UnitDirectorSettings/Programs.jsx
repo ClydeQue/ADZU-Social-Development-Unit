@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import SettingsNavbar from "./SettingsNavbar";
 import UnitDirectorService from "@/services/unitDirectorService";
 import TableSkeleton from "@/components/TableSkeleton";
+import SuccessModal from "@/components/SuccessModal";
 
 /**
  * Programs Management Page
@@ -17,6 +18,7 @@ export default function ProgramsManagement() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [newProgramName, setNewProgramName] = useState("");
   const [editingProgram, setEditingProgram] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Fetch offices data
   const {
@@ -381,6 +383,7 @@ export default function ProgramsManagement() {
                   // TODO: Update program API call
                   console.log("Updating program:", editingProgram);
                   setEditingProgram(null);
+                  setShowSuccessModal(true);
                 }}
                 className="flex-1 px-6 py-3 bg-[#4D49FC] text-white font-semibold rounded-lg hover:bg-[#3D39EC] transition-colors"
                 style={{ fontFamily: "Inter, sans-serif" }}
@@ -391,6 +394,14 @@ export default function ProgramsManagement() {
           </div>
         </div>
       )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        show={showSuccessModal}
+        title="Successfully Updated"
+        message="The program has been updated successfully."
+        onClose={() => setShowSuccessModal(false)}
+      />
     </div>
   );
 }

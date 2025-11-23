@@ -8,6 +8,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import MessageService from "@/services/messageService";
 import { formatDate } from "@/utils/timeFormat";
+import SuccessModal from "@/components/SuccessModal";
+import ErrorModal from "@/components/alerts/ErrorModal";
 
 /**
  * View Message Dialog
@@ -16,17 +18,22 @@ import { formatDate } from "@/utils/timeFormat";
 export default function ViewMessageDialog({ message, onClose, onReply }) {
   const queryClient = useQueryClient();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Delete message mutation
   const deleteMessageMutation = useMutation({
     mutationFn: () => MessageService.deleteMessage(message.id),
     onSuccess: () => {
       queryClient.invalidateQueries(["messages"]);
-      alert("Message deleted successfully!");
-      onClose();
+      setShowSuccessModal(true);
     },
     onError: (error) => {
-      alert(`Failed to delete message: ${error.message || "Unknown error"}`);
+      setErrorMessage(
+        `Failed to delete message: ${error.message || "Unknown error"}`
+      );
+      setShowErrorModal(true);
     },
   });
 
@@ -201,6 +208,24 @@ export default function ViewMessageDialog({ message, onClose, onReply }) {
           </div>
         </div>
       )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        show={showSuccessModal}
+        action="deleted"
+        itemName="Message"
+        onClose={() => {
+          setShowSuccessModal(false);
+          onClose();
+        }}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        show={showErrorModal}
+        message={errorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </>
   );
 }

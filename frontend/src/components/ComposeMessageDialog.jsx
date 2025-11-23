@@ -4,6 +4,8 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MessageService from "@/services/messageService";
 import { useAuth } from "@/context/AuthContext";
+import SuccessModal from "@/components/SuccessModal";
+import ErrorModal from "@/components/alerts/ErrorModal";
 
 /**
  * Compose Message Dialog
@@ -18,6 +20,9 @@ export default function ComposeMessageDialog({ onClose, replyTo }) {
     subject: replyTo?.subject ? `Re: ${replyTo.subject}` : "",
     message: "",
   });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch offices list if user is unit director
   const { data: officesData } = useQuery({
@@ -49,26 +54,31 @@ export default function ComposeMessageDialog({ onClose, replyTo }) {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries(["messages"]);
-      alert("Message sent successfully!");
-      onClose();
+      setShowSuccessModal(true);
     },
     onError: (error) => {
-      alert(`Failed to send message: ${error.message || "Unknown error"}`);
+      setErrorMessage(
+        `Failed to send message: ${error.message || "Unknown error"}`
+      );
+      setShowErrorModal(true);
     },
   });
 
   const handleSend = () => {
     // Validation
     if (user?.userType === "unit_director" && !formData.receiverId) {
-      alert("Please select a recipient");
+      setErrorMessage("Please select a recipient");
+      setShowErrorModal(true);
       return;
     }
     if (!formData.subject.trim()) {
-      alert("Please enter a subject");
+      setErrorMessage("Please enter a subject");
+      setShowErrorModal(true);
       return;
     }
     if (!formData.message.trim()) {
-      alert("Please enter a message");
+      setErrorMessage("Please enter a message");
+      setShowErrorModal(true);
       return;
     }
 
@@ -217,6 +227,24 @@ export default function ComposeMessageDialog({ onClose, replyTo }) {
           </button>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <SuccessModal
+        show={showSuccessModal}
+        action="sent"
+        itemName="Message"
+        onClose={() => {
+          setShowSuccessModal(false);
+          onClose();
+        }}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        show={showErrorModal}
+        message={errorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </div>
   );
 }
