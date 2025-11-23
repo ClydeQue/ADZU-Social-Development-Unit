@@ -1,17 +1,20 @@
-import { useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useRef, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Close as CloseIcon,
 } from "@mui/icons-material";
 import { useAuth } from "@/context/AuthContext";
 import UnitDirectorService from "@/services/unitDirectorService";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import InboxDropdown from "@/components/InboxDropdown";
 import CalendarSkeleton from "@/components/CalendarSkeleton";
+import SuccessModal from "@/components/SuccessModal";
+import ErrorModal from "@/components/alerts/ErrorModal";
+import { getOfficeLogo } from "@/utils/officeLogos";
+import { getSDGIcons } from "@/utils/sdgData";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -43,9 +46,15 @@ const STATUS_COLORS = {
 
 export default function UnitDirectorCalendar() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const calendarRef = useRef(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEventId, setSelectedEventId] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedStatus, setSelectedStatus] = useState("pending");
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch all activities
   const {
@@ -56,6 +65,17 @@ export default function UnitDirectorCalendar() {
     queryKey: ["unit-director-activities"],
     queryFn: () => UnitDirectorService.getAllActivities(),
     staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+
+  // Fetch full activity details when an event is selected
+  const {
+    data: activityDetails,
+    isLoading: isLoadingDetails,
+  } = useQuery({
+    queryKey: ["activity-details", selectedEventId],
+    queryFn: () => UnitDirectorService.getActivityById(selectedEventId),
+    enabled: !!selectedEventId,
+    staleTime: 2 * 60 * 1000,
   });
 
   // Transform activities to FullCalendar events
@@ -100,15 +120,61 @@ export default function UnitDirectorCalendar() {
       };
     }) || [];
 
-  // Handle event click
-  const handleEventClick = (clickInfo) => {
-    setSelectedEvent({
-      title: clickInfo.event.title,
-      start: clickInfo.event.start,
-      end: clickInfo.event.end,
-      ...clickInfo.event.extendedProps,
-    });
+  // Update status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: (newStatus) =>
+      UnitDirectorService.updateActivityStatus(selectedEventId, newStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["activity-details", selectedEventId]);
+      queryClient.invalidateQueries(["unit-director-activities"]);
+      queryClient.invalidateQueries(["unit-director-reports"]);
+      setShowSuccessModal(true);
+    },
+    onError: (error) => {
+      console.error("Update status error:", error);
+      setErrorMessage(
+        `Failed to update status: ${
+          error.response?.data?.error || error.message
+        }`
+      );
+      setShowErrorModal(true);
+      setSelectedStatus(activityDetails?.status || "pending");
+    },
+  });
+
+  const handleStatusChange = (newStatus) => {
+    if (newStatus === selectedStatus) return;
+
+    if (confirm(`Change activity status to "${newStatus}"?`)) {
+      setSelectedStatus(newStatus);
+      updateStatusMutation.mutate(newStatus);
+    }
   };
+
+  // Handle event click - store activity ID to fetch full details
+  const handleEventClick = (clickInfo) => {
+    const activityId = clickInfo.event.id;
+    setSelectedEventId(activityId);
+    setSelectedStatus(clickInfo.event.extendedProps.status || "pending");
+  };
+
+  // Close modal handler
+  const handleCloseModal = () => {
+    setSelectedEventId(null);
+    setShowStatusDropdown(false);
+  };
+
+  // Listen for escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && selectedEventId) {
+        handleCloseModal();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [selectedEventId]);
 
   // Handle date change
   const handleDatesSet = (dateInfo) => {
@@ -291,123 +357,614 @@ export default function UnitDirectorCalendar() {
         </main>
       </WhiteContainer>
 
-      {/* Event Details Modal */}
-      {selectedEvent && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedEvent(null)}
-        >
+      {/* Activity Details Modal - ReportDetailModal Style */}
+      {selectedEventId && activityDetails && !isLoadingDetails && (() => {
+        const activity = activityDetails;
+        
+        // Parse venue from JSON string
+        let venueData = { street: "", barangay: "", city: "", province: "" };
+        if (activity?.venue) {
+          try {
+            venueData =
+              typeof activity.venue === "string"
+                ? JSON.parse(activity.venue)
+                : activity.venue;
+          } catch (e) {
+            console.error("Error parsing venue:", e);
+          }
+        }
+
+        // Format date
+        const formatDate = (dateString) => {
+          if (!dateString) return "Not set";
+          const date = new Date(dateString);
+          return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        };
+
+        // Get status badge colors
+        const getStatusStyle = (status) => {
+          const statusLower = status?.toLowerCase();
+
+          switch (statusLower) {
+            case "pending":
+              return {
+                bg: "bg-[#4D49FC]",
+                text: "text-white",
+                border: "border-2 border-[#4D49FC]",
+              };
+            case "in progress":
+            case "in-progress":
+              return {
+                bg: "bg-[#FFAE00]",
+                text: "text-white",
+                border: "border-2 border-[#4D49FC]",
+              };
+            case "completed":
+              return {
+                bg: "bg-[#18B703]",
+                text: "text-white",
+                border: "border-2 border-[#4D49FC]",
+              };
+            case "cancelled":
+              return {
+                bg: "bg-[#FF0022]",
+                text: "text-white",
+                border: "border-2 border-[#4D49FC]",
+              };
+            default:
+              return {
+                bg: "bg-gray-100",
+                text: "text-[#040195]",
+                border: "border-2 border-[#4D49FC]",
+              };
+          }
+        };
+
+        // Format budget
+        const formatBudget = (amount) => {
+          if (!amount && amount !== 0) return "₱ 0.00";
+          return `₱ ${parseFloat(amount).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`;
+        };
+
+        // Parse SDG numbers
+        let sdgNumbers = [];
+        try {
+          if (activity.sdg_number) {
+            sdgNumbers =
+              typeof activity.sdg_number === "string"
+                ? JSON.parse(activity.sdg_number)
+                : Array.isArray(activity.sdg_number)
+                ? activity.sdg_number
+                : [activity.sdg_number];
+          }
+        } catch (e) {
+          console.error("Error parsing SDG numbers:", e);
+          if (activity.sdg_number && !isNaN(activity.sdg_number)) {
+            sdgNumbers = [parseInt(activity.sdg_number)];
+          }
+        }
+
+        const sdgs = sdgNumbers.flatMap((num) => getSDGIcons(num));
+
+        return (
           <div
-            className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+            style={{ backgroundColor: "rgba(4, 1, 149, 0.4)", overflow: "hidden" }}
+            onClick={handleCloseModal}
+            role="dialog"
+            aria-modal="true"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-[#040195] mb-2">
-                  {selectedEvent.title}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-medium text-white"
-                    style={{ backgroundColor: selectedEvent.statusColor }}
+            {/* Modal Container */}
+            <div
+              className="bg-[#fafafa] rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto modal-scrollbar relative"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                fontFamily: "Inter, sans-serif",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              <style>{`
+                .modal-scrollbar::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
+
+              {/* Action Buttons at Top */}
+              <div className="flex items-center justify-end gap-2 mb-2">
+                {/* Print Button */}
+                <button
+                  onClick={() => window.print()}
+                  className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
+                  bg-[#4D49FC] text-white text-sm font-bold"
+                  title="Print Report"
+                >
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    {selectedEvent.status?.toUpperCase() || "PENDING"}
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    {selectedEvent.office_name} ({selectedEvent.office_acronym})
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-              >
-                <CloseIcon className="text-gray-600" fontSize="small" />
-              </button>
-            </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
+                  </svg>
+                  PRINT
+                </button>
 
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                  Program
-                </h3>
-                <p className="text-gray-600">{selectedEvent.program_title}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                    Start Date
-                  </h3>
-                  <p className="text-gray-600">
-                    {new Date(selectedEvent.start).toLocaleString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                    End Date
-                  </h3>
-                  <p className="text-gray-600">
-                    {selectedEvent.end
-                      ? new Date(selectedEvent.end).toLocaleString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "N/A"}
-                  </p>
-                </div>
+                {/* Close Button */}
+                <button
+                  onClick={handleCloseModal}
+                  className="w-10 h-10 sm:w-8 sm:h-8 flex ml-2 items-center justify-center rounded-full 
+                  bg-white ring-3 ring-[#4D49FC] hover:cursor-pointer hover:bg-gray-300 transition-colors"
+                  title="Close"
+                >
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-[#4D49FC]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
 
-              {selectedEvent.venue && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                    Venue
-                  </h3>
-                  <p className="text-gray-600">{selectedEvent.venue}</p>
-                </div>
-              )}
+              {/* Header Section with Program Logo/Image */}
+              <div className="relative sm:p-2 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between">
+                <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
+                  {/* Logo/Icon Container */}
+                  <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+                    <img
+                      src={activity.image_url || "/reports/default.webp"}
+                      alt={activity.activity_name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/reports/default.webp";
+                      }}
+                    />
+                  </div>
 
-              {selectedEvent.participants_count && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                    Participants
-                  </h3>
-                  <p className="text-gray-600">
-                    {selectedEvent.participants_count} people
-                  </p>
+                  {/* Program Title and Description */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1">
+                      {getOfficeLogo(activity.office_acronym) && (
+                        <img
+                          src={getOfficeLogo(activity.office_acronym)}
+                          alt={activity.office_acronym}
+                          className="w-5 h-5 object-contain"
+                        />
+                      )}
+                      <span className="text-[#4D49FC] text-sm font-bold uppercase tracking-wider">
+                        {activity.office_acronym || activity.office_name}
+                      </span>
+                    </div>
+                    <h2 className="text-[#4D49FC] w-80 lg:w-100 text-xl sm:text-3xl font-black mb-2 leading-tight uppercase">
+                      {activity.activity_name}
+                    </h2>
+                    <div className="text-[#040195] text-xs sm:text-sm font-semibold mb-1">
+                      {activity.program_title}
+                    </div>
+                    <p className="text-[#040195] text-xs leading-relaxed line-clamp-2 sm:line-clamp-none">
+                      {activity.description || "Activity description"}
+                    </p>
+                  </div>
                 </div>
-              )}
 
-              {selectedEvent.objectives && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                    Objectives
-                  </h3>
-                  <p className="text-gray-600">{selectedEvent.objectives}</p>
-                </div>
-              )}
+                {/* Status Badge and Dates */}
+                <div className="w-full sm:w-auto mt-3 sm:mt-0">
+                  {/* Custom Status Badge Dropdown */}
+                  <div className="mb-2 relative">
+                    <button
+                      onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                      disabled={updateStatusMutation.isPending}
+                      className={`w-full sm:w-56 px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-full text-center mb-2 ${
+                        getStatusStyle(selectedStatus).bg
+                      } ${getStatusStyle(selectedStatus).border}
+                      disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90 transition-opacity
+                      flex items-center justify-center gap-2`}
+                    >
+                      <span
+                        className={`text-xs font-bold uppercase tracking-wider ${
+                          getStatusStyle(selectedStatus).text
+                        }`}
+                      >
+                        {selectedStatus === "in-progress"
+                          ? "IN PROGRESS"
+                          : selectedStatus.toUpperCase()}
+                      </span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${
+                          showStatusDropdown ? "rotate-180" : ""
+                        } ${getStatusStyle(selectedStatus).text}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
 
-              {selectedEvent.notes && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                    Notes
-                  </h3>
-                  <p className="text-gray-600">{selectedEvent.notes}</p>
+                    {/* Dropdown Menu */}
+                    {showStatusDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-10 overflow-hidden">
+                        {[
+                          { value: "pending", label: "Pending" },
+                          { value: "completed", label: "Completed" },
+                          { value: "cancelled", label: "Cancelled" },
+                        ].map((status) => (
+                          <button
+                            key={status.value}
+                            onClick={() => {
+                              handleStatusChange(status.value);
+                              setShowStatusDropdown(false);
+                            }}
+                            className={`w-full px-4 py-2 text-left text-xs font-semibold hover:bg-gray-100 transition-colors
+                            ${selectedStatus === status.value ? "bg-blue-50" : ""}`}
+                          >
+                            {status.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {updateStatusMutation.isPending && (
+                      <div className="text-center mt-1">
+                        <span className="text-xs text-gray-500">Updating...</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-[#040195] text-xs w-full sm:w-56">
+                    <div className="space-y-1">
+                      <div className="flex items-center">
+                        <span className="font-semibold">INCEPTION</span>
+                        <span className="flex-1 text-center">:</span>
+                        <span>{formatDate(activity.start_date)}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-semibold">IMPLEMENTATION</span>
+                        <span className="flex-1 text-center">:</span>
+                        <span>{formatDate(activity.end_date)}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Thick Rounded Divider */}
+              <div className="mx-3 sm:mx-6 my-3 sm:my-2 h-1 bg-[#040195] rounded-full"></div>
+
+              {/* Content Section */}
+              <div className="p-3 sm:p-6 pt-0">
+                {/* Row 1: Objectives (Left) and SDG Goals (Right) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                  <div className="sm:col-span-2">
+                    <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                      OBJECTIVES
+                    </h3>
+                    <p className="text-[#040195] text-xs sm:text-sm leading-relaxed">
+                      {activity.objectives || "No objectives specified"}
+                    </p>
+                  </div>
+
+                  {/* SDG Goals - Right Side */}
+                  {sdgs.length > 0 && (
+                    <div className="sm:border-l-2 border-t-2 sm:border-t-0 border-[#040195] pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
+                      <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-3 uppercase">
+                        SDG Goals
+                      </h3>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {sdgs.map((sdg) => (
+                          <div
+                            key={sdg.id}
+                            className="w-12 h-12 rounded-lg overflow-hidden shadow-lg"
+                            title={sdg.label}
+                          >
+                            <img
+                              src={sdg.icon}
+                              alt={sdg.label}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <hr className="my-4 sm:my-6 border-[#040195]" />
+
+                {/* Row 2: Three Columns - Venue, Participant Demographics, Sex */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                  {/* Column 1: Venue */}
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                      VENUE
+                    </h3>
+                    <div className="text-[#040195] text-xs leading-relaxed">
+                      {venueData.street && <div>{venueData.street}</div>}
+                      {venueData.barangay && <div>Zone {venueData.barangay}</div>}
+                      {venueData.city && <div>{venueData.city}</div>}
+                      {venueData.province && <div>{venueData.province}</div>}
+                      {!venueData.street &&
+                        !venueData.barangay &&
+                        !venueData.city &&
+                        !venueData.province && (
+                          <div className="text-gray-400">No venue information</div>
+                        )}
+                    </div>
+                  </div>
+
+                  {/* Column 2: Participant Demographics */}
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                      PARTICIPANT DEMOGRAPHICS
+                    </h3>
+                    <div className="text-[#040195] text-xs leading-relaxed space-y-1">
+                      <div className="flex items-center">
+                        <span className="font-semibold flex-1 text-left">TOTAL</span>
+                        <span className="mx-2">:</span>
+                        <span className="flex-1 text-left">
+                          {activity.participants_count ||
+                            (activity.male_participants || 0) +
+                              (activity.female_participants || 0)}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-semibold flex-1 text-left">
+                          CLASSIFICATION
+                        </span>
+                        <span className="mx-2">:</span>
+                        <span className="flex-1 text-left">
+                          {activity.partner_type || "General Participants"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 3: Sex */}
+                  <div className="sm:border-l-2 border-t-2 sm:border-t-0 border-[#040195] pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
+                    <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                      SEX COUNT
+                    </h3>
+                    <div className="text-[#040195] text-xs leading-relaxed space-y-1">
+                      <div className="flex items-center">
+                        <span className="font-semibold flex-1 text-left">MALE</span>
+                        <span className="mx-2">:</span>
+                        <span className="flex-2 text-left">
+                          {activity.male_participants || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-semibold flex-1 text-left">FEMALE</span>
+                        <span className="mx-2">:</span>
+                        <span className="flex-2 text-left">
+                          {activity.female_participants || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <hr className="my-4 sm:my-6 border-[#040195]" />
+
+                {/* Row 3: Partners */}
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                    PARTNERS
+                  </h3>
+                  {activity.partner_name || activity.implementing_partners ? (
+                    <div className="space-y-2">
+                      {activity.partner_name ? (
+                        (() => {
+                          const names = activity.partner_name
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                          const types = activity.partner_type
+                            ? activity.partner_type
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean)
+                            : [];
+                          const natures = activity.partner_nature
+                            ? activity.partner_nature
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean)
+                            : [];
+
+                          return names.map((name, index) => (
+                            <div
+                              key={index}
+                              className="text-[#040195] text-xs leading-relaxed"
+                            >
+                              <span className="font-semibold">{name}</span>
+                              {types[index] && (
+                                <span className="italic text-gray-600 ml-2">
+                                  {types[index]}
+                                </span>
+                              )}
+                              {natures[index] && (
+                                <span className="text-gray-600 ml-2">
+                                  {natures[index]}
+                                </span>
+                              )}
+                            </div>
+                          ));
+                        })()
+                      ) : (
+                        <div className="text-[#040195] text-xs leading-relaxed">
+                          {activity.implementing_partners}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-gray-400 text-xs">
+                      No partner information
+                    </div>
+                  )}
+                </div>
+
+                <hr className="my-4 sm:my-6 border-[#040195]" />
+
+                {/* Row 4: Budget Overview */}
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                    BUDGET OVERVIEW
+                  </h3>
+                  {(() => {
+                    let budgets = [];
+                    try {
+                      if (activity.budget_amount && activity.budget_type) {
+                        const amounts =
+                          typeof activity.budget_amount === "string"
+                            ? JSON.parse(activity.budget_amount)
+                            : [activity.budget_amount];
+                        const types =
+                          typeof activity.budget_type === "string"
+                            ? JSON.parse(activity.budget_type)
+                            : [activity.budget_type];
+                        budgets = amounts.map((amount, index) => ({
+                          amount: amount,
+                          type: types[index] || "external",
+                        }));
+                      } else if (activity.budget_amount) {
+                        budgets = [
+                          {
+                            amount: activity.budget_amount,
+                            type: activity.budget_type || "external",
+                          },
+                        ];
+                      }
+                    } catch (e) {
+                      console.error("Error parsing budgets:", e);
+                      if (activity.budget_amount) {
+                        budgets = [
+                          {
+                            amount: activity.budget_amount,
+                            type: activity.budget_type || "external",
+                          },
+                        ];
+                      }
+                    }
+
+                    return budgets.length > 0 ? (
+                      <div className="space-y-2">
+                        {budgets.map((budget, index) => (
+                          <div
+                            key={index}
+                            className="text-[#040195] text-xs leading-relaxed"
+                          >
+                            <div className="flex items-center gap-4">
+                              <span className="font-semibold min-w-[100px]">
+                                {formatBudget(budget.amount)}
+                              </span>
+                              <span className="italic text-gray-600">
+                                {budget.type === "external"
+                                  ? "External Fund"
+                                  : "Internal Fund"}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 text-xs">
+                        No budget information
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Notes - Optional Row */}
+                {activity.notes && (
+                  <>
+                    <hr className="my-4 sm:my-6 border-[#040195]" />
+                    <div className="mb-4 sm:mb-6">
+                      <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                        NOTES
+                      </h3>
+                      <p className="text-[#040195] text-xs leading-relaxed">
+                        {activity.notes}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* View Full Report Button */}
+                {activity.report_url ? (
+                  <div className="flex justify-end mt-6">
+                    <button
+                      onClick={() => window.open(activity.report_url, "_blank")}
+                      className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      VIEW FULL REPORT
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex justify-end mt-6">
+                    <span className="text-gray-500 text-sm italic">
+                      No link provided
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
+
+      {/* Success Modal */}
+      <SuccessModal
+        show={showSuccessModal}
+        action="updated"
+        itemName="Status"
+        onClose={() => {
+          setShowSuccessModal(false);
+          handleCloseModal();
+        }}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        show={showErrorModal}
+        message={errorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
 
       {/* Custom CSS for FullCalendar */}
       <style>{`
