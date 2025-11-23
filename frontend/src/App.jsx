@@ -17,6 +17,9 @@ import UnitDirectorReports from "@/pages/UnitDirectorReports";
 import UnitDirectorCalendar from "@/pages/UnitDirectorCalendar";
 import UnitDirectorHelp from "@/pages/UnitDirectorHelp";
 import UnitDirectorSettings from "@/pages/UnitDirectorSettings";
+import MainSettings from "@/pages/UnitDirectorSettings/MainSettings";
+import ProgramsManagement from "@/pages/UnitDirectorSettings/Programs";
+import UsersManagement from "@/pages/UnitDirectorSettings/Users";
 
 // Office Dashboards (6 offices)
 import CCESDashboard from "@/pages/CCESDashboard";
@@ -98,8 +101,33 @@ const AppContent = () => {
           path="/unit-director/settings"
           element={
             <ProtectedRoute requiredRole="unit_director">
-          <UnitDirectorSettings />
-            </ProtectedRoute>}
+              <UnitDirectorSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/unit-director/settings/main"
+          element={
+            <ProtectedRoute requiredRole="unit_director">
+              <MainSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/unit-director/settings/programs"
+          element={
+            <ProtectedRoute requiredRole="unit_director">
+              <ProgramsManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/unit-director/settings/users"
+          element={
+            <ProtectedRoute requiredRole="unit_director">
+              <UsersManagement />
+            </ProtectedRoute>
+          }
         />
 
         {/* Protected Office Routes - Each office has its own dashboard */}

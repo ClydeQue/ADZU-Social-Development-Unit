@@ -13,6 +13,7 @@ import { getSDGIcons } from '@/utils/sdgData';
 export default function ReportDetailModal({ report, activity, onClose }) {
   const queryClient = useQueryClient();
   const [selectedStatus, setSelectedStatus] = useState(activity?.status || 'pending');
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
   // Parse venue from JSON string
   let venueData = { street: '', barangay: '', city: '', province: '' };
@@ -64,20 +65,33 @@ export default function ReportDetailModal({ report, activity, onClose }) {
 
   if (!report || !activity) return null;
 
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not set';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
   // Get status badge colors
   const getStatusStyle = (status) => {
     const statusLower = status?.toLowerCase();
     
     switch (statusLower) {
       case 'pending':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-700' };
+        return { bg: 'bg-[#4D49FC]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
       case 'in progress':
       case 'in-progress':
-        return { bg: 'bg-blue-100', text: 'text-blue-700' };
+        return { bg: 'bg-[#FFAE00]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
       case 'completed':
-        return { bg: 'bg-green-100', text: 'text-green-700' };
+        return { bg: 'bg-[#18B703]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
+      case 'cancelled':
+        return { bg: 'bg-[#FF0022]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
       default:
-        return { bg: 'bg-gray-100', text: 'text-[#040195]' };
+        return { bg: 'bg-gray-100', text: 'text-[#040195]', border: 'border-2 border-[#4D49FC]' };
     }
   };
 
@@ -92,20 +106,57 @@ export default function ReportDetailModal({ report, activity, onClose }) {
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', overflow: 'hidden' }}
+      style={{ backgroundColor: 'rgba(4, 1, 149, 0.4)', overflow: 'hidden' }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
     >
       {/* Modal Container */}
       <div 
-        className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+        className="bg-[#fafafa] rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto modal-scrollbar relative"
         onClick={(e) => e.stopPropagation()}
-        style={{ fontFamily: 'Inter, sans-serif' }}
+        style={{ 
+          fontFamily: 'Inter, sans-serif',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
       >
+        <style>{`
+          .modal-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+        {/* Action Buttons at Top */}
+        <div className="flex items-center justify-end gap-2 mb-2">
+          {/* Print Button */}
+          <button
+            onClick={() => window.print()}
+            className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
+            bg-[#4D49FC] text-white text-sm font-bold"
+            title="Print Report"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            PRINT
+          </button>
+          
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="w-10 h-10 sm:w-8 sm:h-8 flex ml-2 items-center justify-center rounded-full 
+            bg-white ring-3 ring-[#4D49FC] hover:cursor-pointer hover:bg-gray-300 transition-colors"
+            title="Close"
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#4D49FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
         {/* Header Section with Program Logo/Image */}
         <div 
-          className="relative p-3 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between"
+          className="relative sm:p-2 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between"
         >
           <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
             {/* Logo/Icon Container */}
@@ -148,23 +199,70 @@ export default function ReportDetailModal({ report, activity, onClose }) {
           </div>
 
           {/* Status Badge and Dates */}
-          <div className="sm:absolute sm:top-6 sm:right-6 w-full sm:w-auto mt-3 sm:mt-0">
-            <div className={`px-3 sm:px-4 py-1.5 sm:py-0 rounded-full text-center mb-2 ${getStatusStyle(activity.status).bg}`}>
-              <span className={`text-xs font-bold uppercase tracking-wider ${getStatusStyle(activity.status).text}`}>
-                {activity.status || 'NO STATUS'}
-              </span>
+          <div className="w-full sm:w-auto mt-3 sm:mt-0">
+            {/* Custom Status Badge Dropdown */}
+            <div className="mb-2 relative">
+              <button
+                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                disabled={updateStatusMutation.isPending}
+                className={`w-full sm:w-56 px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-full text-center mb-2 ${getStatusStyle(selectedStatus).bg} ${getStatusStyle(selectedStatus).border}
+                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:opacity-90 transition-opacity
+                flex items-center justify-center gap-2`}
+              >
+                <span className={`text-xs font-bold uppercase tracking-wider ${getStatusStyle(selectedStatus).text}`}>
+                  {selectedStatus === 'in-progress' ? 'IN PROGRESS' : selectedStatus.toUpperCase()}
+                </span>
+                <svg 
+                  className={`w-4 h-4 transition-transform ${showStatusDropdown ? 'rotate-180' : ''} ${getStatusStyle(selectedStatus).text}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Dropdown Menu */}
+              {showStatusDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-10 overflow-hidden">
+                  {[
+                    { value: 'pending', label: 'Pending' },
+                    { value: 'in-progress', label: 'In Progress' },
+                    { value: 'completed', label: 'Completed' },
+                    { value: 'cancelled', label: 'Cancelled' }
+                  ].map((status) => (
+                    <button
+                      key={status.value}
+                      onClick={() => {
+                        handleStatusChange(status.value);
+                        setShowStatusDropdown(false);
+                      }}
+                      className={`w-full px-4 py-2 text-left text-xs font-semibold hover:bg-gray-100 transition-colors
+                      ${selectedStatus === status.value ? 'bg-blue-50' : ''}`}
+                    >
+                      {status.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {updateStatusMutation.isPending && (
+                <div className="text-center mt-1">
+                  <span className="text-xs text-gray-500">Updating...</span>
+                </div>
+              )}
             </div>
-            <div className="text-[#040195] text-xs">
+            <div className="text-[#040195] text-xs w-full sm:w-56">
               <div className="space-y-1">
                 <div className="flex items-center">
-                  <span className="font-semibold">SUBMITTED</span>
-                  <span className="mx-2">:</span>
-                  <span>{report.submitted}</span>
+                  <span className="font-semibold">INCEPTION</span>
+                  <span className="flex-1 text-center">:</span>
+                  <span>{formatDate(activity.start_date)}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="font-semibold">DUE DATE</span>
-                  <span className="mx-2">:</span>
-                  <span>{report.due}</span>
+                  <span className="font-semibold">IMPLEMENTATION</span>
+                  <span className="flex-1 text-center">:</span>
+                  <span>{formatDate(activity.end_date)}</span>
                 </div>
               </div>
             </div>
@@ -276,10 +374,10 @@ export default function ReportDetailModal({ report, activity, onClose }) {
                   <div>
                     {activity.partner_name}
                     {activity.partner_type && (
-                      <span className="italic ml-2">({activity.partner_type})</span>
+                      <span className="italic ml-2">{activity.partner_type}</span>
                     )}
                     {activity.partner_nature && (
-                      <span className="ml-2">- {activity.partner_nature}</span>
+                      <span className="ml-2"> {activity.partner_nature}</span>
                     )}
                   </div>
                 ) : (
@@ -289,7 +387,7 @@ export default function ReportDetailModal({ report, activity, onClose }) {
             ) : (
               <div className="text-gray-400 text-xs">No partner information</div>
             )}
-          </div>
+              </div>
 
           <hr className="my-4 sm:my-6 border-[#040195]" />
 
@@ -299,13 +397,13 @@ export default function ReportDetailModal({ report, activity, onClose }) {
             {activity.budget_amount ? (
               <div className="text-[#040195] text-xs leading-relaxed flex items-center">
                 <span className="flex-1 text-left">{formatBudget(activity.budget_amount)}</span>
-                <span className="italic flex-1 text-left">
-                  ({activity.budget_type === 'external' ? 'External Fund' : 'Internal Fund'})
+                <span className="italic flex-5 text-left">
+                  {activity.budget_type === 'external' ? 'External Fund' : 'Internal Fund'}
                 </span>
               </div>
             ) : (
               <>
-                {(activity.allocated_budget > 0 || activity.liquidated_budget > 0 || report.budget > 0) ? (
+                {(activity.allocated_budget > 0 || activity.liquidated_budget > 0) ? (
                   <div className="text-[#040195] text-xs leading-relaxed w-80 space-y-1">
                     {activity.allocated_budget > 0 && (
                       <div className="flex items-center">
@@ -317,12 +415,6 @@ export default function ReportDetailModal({ report, activity, onClose }) {
                       <div className="flex items-center">
                         <span className="flex-1 text-left">{formatBudget(activity.liquidated_budget)}</span>
                         <span className="italic flex-1 text-left">Internal Fund</span>
-                      </div>
-                    )}
-                    {!activity.allocated_budget && !activity.liquidated_budget && report.budget > 0 && (
-                      <div className="flex items-center">
-                        <span className="flex-1 text-left">{formatBudget(report.budget)}</span>
-                        <span className="italic flex-1 text-left">Total Budget</span>
                       </div>
                     )}
                   </div>
@@ -347,65 +439,33 @@ export default function ReportDetailModal({ report, activity, onClose }) {
           )}
 
           {/* View Full Report Button */}
-          {activity.report_url && (
-            <div className="flex justify-end mt-4">
-              <a
-                href={activity.report_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+          {activity.report_url ? (
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => window.open(activity.report_url, '_blank')}
+                className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg 
+                  className="w-4 h-4" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
                 VIEW FULL REPORT
-              </a>
+              </button>
             </div>
-          )}
-        </div>
+          ) : <div className="flex justify-end mt-6">
+   <span className="text-gray-500 text-sm italic">
+    No link provided
+  </span>
+</div> }
 
-        {/* Footer Actions */}
-        <div className="border-[#040195] p-2 flex justify-between items-center gap-3">
-          {/* Status Dropdown */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-bold text-[#040195]">
-              Mark Status:
-            </label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              disabled={updateStatusMutation.isPending}
-              className="px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-semibold text-[#040195] 
-              focus:border-[#4D49FC] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            {updateStatusMutation.isPending && (
-              <span className="text-xs text-gray-500">Updating...</span>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 sm:px-5 py-2 bg-gray-200 text-[#040195] text-xs sm:text-sm font-bold hover:bg-gray-300 transition-colors 
-              rounded-xl shadow-md flex items-center gap-2"
-            >
-              CLOSE
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="px-4 sm:px-5 py-2 text-white text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity 
-              rounded-xl shadow-xl flex items-center gap-2"
-              style={{ backgroundColor: "#4D49FC" }}
-            >
-              PRINT REPORT
-            </button>
-          </div>
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import OfficeService from '@/services/officeService';
 import ActivityDetailModal from './ActivityDetailModal';
+import CardGridSkeleton from '@/components/CardGridSkeleton';
 
 /**
  * Reusable Office Projects Component
@@ -124,17 +125,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="flex flex-col items-center gap-3">
-          <div 
-            className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
-            style={{ borderColor: officeColor, borderTopColor: 'transparent' }}
-          ></div>
-          <p className="text-sm text-gray-500">Loading projects...</p>
-        </div>
-      </div>
-    );
+    return <CardGridSkeleton cards={8} />;
   }
 
   return (

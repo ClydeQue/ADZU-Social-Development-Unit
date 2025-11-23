@@ -1,9 +1,9 @@
 import { 
   Search as SearchIcon,
-  Email as EmailIcon,
-  Notifications as NotificationsIcon,
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
+import NotificationDropdown from '@/components/NotificationDropdown';
+import InboxDropdown from '@/components/InboxDropdown';
 import PropTypes from 'prop-types';
 
 export default function ReportsNavbar({ searchQuery, onSearchChange }) {
@@ -29,13 +29,12 @@ export default function ReportsNavbar({ searchQuery, onSearchChange }) {
 
       {/* Right Side Icons */}
       <div className="flex items-center gap-4">
-        {/* IconButton mimic */}
-        <button className="w-10 h-10 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors">
-          <EmailIcon className="text-[#5B6FED]" sx={{ fontSize: 20 }} />
-        </button>
-        <button className="w-10 h-10 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded-full transition-colors">
-          <NotificationsIcon className="text-[#5B6FED]" sx={{ fontSize: 20 }} />
-        </button>
+        {/* Inbox Dropdown */}
+        <InboxDropdown />
+
+        {/* Notification Dropdown */}
+        <NotificationDropdown />
+
         {/* Avatar and User Info */}
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-white text-[#5B6FED] flex items-center justify-center font-medium">

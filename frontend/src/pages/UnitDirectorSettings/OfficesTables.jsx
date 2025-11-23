@@ -17,7 +17,7 @@ export default function OfficesTable({ offices, onEditOffice }) {
       `}</style>
 
       {/* Header Row */}
-      <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[35px_150px_1.5fr_1.2fr_1.5fr_120px] gap-3 items-center">
+      <div className="bg-[#040195] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[35px_150px_1.5fr_1.2fr_1.5fr_120px] gap-3 items-center">
         <div className="text-xs font-semibold">No.</div>
         <div className="text-xs font-semibold">Acronym</div>
         <div className="text-xs font-semibold">Office Name</div>
@@ -30,7 +30,7 @@ export default function OfficesTable({ offices, onEditOffice }) {
           {offices.map((office, idx) => (
             <div
               key={office.id}
-              className={`bg-white hover:bg-[#D4D1FF] transition-colors rounded-lg px-3 py-2 grid grid-cols-[35px_150px_1.5fr_1.2fr_1.5fr_120px] gap-3 items-center`}
+              className={`bg-[#F4F4F4] hover:bg-[#E5E5FF] transition-colors rounded-lg px-3 py-2 grid grid-cols-[35px_150px_1.5fr_1.2fr_1.5fr_120px] gap-3 items-center`}
             >
               <div className="text-[#4D49FC] text-[0.7rem] font-semibold">
                 {idx + 1}
@@ -57,7 +57,7 @@ export default function OfficesTable({ offices, onEditOffice }) {
               <div className="flex justify-end">
                 <button
                   onClick={() => onEditOffice(office)}
-                  className="px-3 py-1 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#3D39EC] transition-colors"
+                  className="px-3 py-1 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#201f65] transition-colors"
                 >
                   Edit
                 </button>

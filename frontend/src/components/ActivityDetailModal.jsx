@@ -56,14 +56,16 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
     
     switch (statusLower) {
       case 'pending':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-700' };
+        return { bg: 'bg-[#4D49FC]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
       case 'in progress':
       case 'in-progress':
-        return { bg: 'bg-blue-100', text: 'text-blue-700' };
+        return { bg: 'bg-[#FFAE00]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
       case 'completed':
-        return { bg: 'bg-green-100', text: 'text-green-700' };
+        return { bg: 'bg-[#18B703]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
+      case 'cancelled':
+        return { bg: 'bg-[#FF0022]', text: 'text-white', border: 'border-2 border-[#4D49FC]' };
       default:
-        return { bg: 'bg-gray-100', text: 'text-[#040195]' };
+        return { bg: 'bg-gray-100', text: 'text-[#040195]', border: 'border-2 border-[#4D49FC]' };
     }
   };
 
@@ -184,21 +186,21 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
 
           {/* Status Badge and Dates */}
           <div className="w-full sm:w-auto mt-3 sm:mt-0">
-            <div className={`px-3 sm:px-4 py-1.5 sm:py-0 rounded-full text-center mb-2 ${getStatusStyle(activity.status).bg}`}>
+            <div className={`w-full sm:w-56 px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-full text-center mb-2 ${getStatusStyle(activity.status).bg} ${getStatusStyle(activity.status).border}`}>
               <span className={`text-xs font-bold uppercase tracking-wider ${getStatusStyle(activity.status).text}`}>
                 {activity.status || 'NO STATUS'}
               </span>
             </div>
-            <div className="text-[#040195] text-xs">
+            <div className="text-[#040195] text-xs w-full sm:w-56">
               <div className="space-y-1">
                 <div className="flex items-center">
                   <span className="font-semibold">INCEPTION</span>
-                  <span className="mx-2">:</span>
+                  <span className="flex-1 text-center">:</span>
                   <span>{formatDate(activity.start_date)}</span>
                 </div>
                 <div className="flex items-center">
                   <span className="font-semibold">IMPLEMENTATION</span>
-                  <span className="mx-2">:</span>
+                  <span className="flex-1 text-center">:</span>
                   <span>{formatDate(activity.end_date)}</span>
                 </div>
               </div>
@@ -384,8 +386,17 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
                 rel="noopener noreferrer"
                 className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg 
+                  className="w-4 h-4" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
                 VIEW FULL REPORT
               </a>
