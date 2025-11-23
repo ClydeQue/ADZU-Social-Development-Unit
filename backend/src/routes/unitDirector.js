@@ -433,50 +433,90 @@ router.put(
 // USER MANAGEMENT ENDPOINTS
 // ========================================
 
-// Get all users (for User Management page)
+/**
+ * Helper function to determine if a user is logged in
+ * A user is considered logged in (active) if:
+ * - is_active flag is true (set on login, cleared on logout)
+ *
+ * @param {Object} user - User object with is_active and last_login fields
+ * @returns {boolean} - true if logged in, false if inactive
+ */
+function isUserLoggedIn(user) {
+  // Check if is_active flag is true
+  return user.is_active === true;
+}
+
+// Get all office users (for User Management page)
 router.get(
   "/users",
   authenticateToken,
   requireRole("unit_director"),
   async (req, res) => {
     try {
-      const { data: users, error } = await supabase
+      // First, fetch all office_user credentials
+      const { data: credentials, error: credError } = await supabase
         .from("office_credentials")
-        .select(`
-          id,
-          username,
-          name,
-          user_type,
-          is_active,
-          last_login,
-          created_at,
-          office_id,
-          offices (
-            id,
-            name,
-            acronym
-          )
-        `)
+        .select(
+          "id, username, name, user_type, is_active, last_login, created_at, office_id"
+        )
+        .eq("user_type", "office_user")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (credError) throw credError;
 
-      // Format response
-      const formattedUsers = users.map(user => ({
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        role: user.user_type === "unit_director" ? "Unit Director" : "Office Director",
-        office: user.offices ? user.offices.acronym : "N/A",
-        status: user.is_active ? "active" : "inactive",
-        lastLogin: user.last_login,
-        createdAt: user.created_at
-      }));
+      console.log(
+        "Raw credentials from DB:",
+        credentials.map((c) => ({
+          username: c.username,
+          is_active: c.is_active,
+          is_active_type: typeof c.is_active,
+        }))
+      );
 
-      res.json({ users: formattedUsers });
+      // Fetch all offices
+      const { data: offices, error: officeError } = await supabase
+        .from("offices")
+        .select("id, name, acronym");
+
+      if (officeError) throw officeError;
+
+      // Create a map of office_id to office data for quick lookup
+      const officeMap = {};
+      offices.forEach((office) => {
+        officeMap[office.id] = office;
+      });
+
+      // Format response by joining credentials with offices
+      const formattedUsers = credentials.map((user) => {
+        const office = officeMap[user.office_id] || {};
+        const loggedIn = isUserLoggedIn(user);
+
+        return {
+          id: user.id,
+          username: user.username,
+          name: user.name,
+          office: office.acronym || "N/A",
+          officeName: office.name || "N/A",
+          officeId: user.office_id,
+          isActive: loggedIn, // true if logged in, false if inactive
+          status: loggedIn ? "active" : "inactive", // Status string for display
+          lastLogin: user.last_login,
+          lastPasswordUpdate: user.created_at, // Use created_at as fallback
+          createdAt: user.created_at,
+        };
+      });
+
+      console.log(`Found ${formattedUsers.length} office users`);
+      console.log("Sample user data:", formattedUsers[0]);
+
+      res.json({ success: true, users: formattedUsers });
     } catch (error) {
       console.error("Get users error:", error);
-      res.status(500).json({ error: "Server error" });
+      res.status(500).json({
+        success: false,
+        error: "Server error",
+        details: error.message,
+      });
     }
   }
 );
@@ -576,7 +616,10 @@ router.put(
 
       if (updateError) throw updateError;
 
-      console.log("Password updated successfully for user:", updatedUser.username);
+      console.log(
+        "Password updated successfully for user:",
+        updatedUser.username
+      );
 
       res.json({
         success: true,

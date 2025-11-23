@@ -62,6 +62,20 @@ const settingsService = {
     const response = await api.get("api/settings");
     return response;
   },
+
+  /**
+   * Get all office users (for user management)
+   * @returns {Promise} Response with users data
+   */
+  getOfficeUsers: async () => {
+    try {
+      const response = await api.get("api/unit-director/users");
+      return response;
+    } catch (error) {
+      console.error("Get office users error:", error);
+      throw error;
+    }
+  },
 };
 
 export default settingsService;

@@ -24,4 +24,7 @@ router.post("/refresh", AuthController.refreshToken);
 // Change password (for office users and unit director)
 router.post("/change-password", AuthController.changePassword);
 
+// Change username (for office users and unit director)
+router.post("/change-username", AuthController.changeUsername);
+
 module.exports = router;

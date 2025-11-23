@@ -14,6 +14,13 @@ class UserService {
   }
 
   /**
+   * Change username
+   */
+  async changeUsername(usernameData) {
+    return await api.post("api/auth/change-username", usernameData);
+  }
+
+  /**
    * Get user profile
    */
   async getProfile() {
