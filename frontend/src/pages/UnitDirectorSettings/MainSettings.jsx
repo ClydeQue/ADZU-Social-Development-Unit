@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
 import { Eye, EyeOff, RefreshCw } from "lucide-react";
@@ -13,6 +14,7 @@ import SuccessModal from "@/components/SuccessModal";
  */
 export default function MainSettings() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeForm, setActiveForm] = useState(null); // null, 'password', 'username'
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: "", message: "" });
@@ -636,7 +638,7 @@ export default function MainSettings() {
                             Username
                           </label>
                           <p className="text-base font-bold text-gray-700 mt-0.5" style={{ fontFamily: "Inter, sans-serif" }}>
-                            Social Development Unit
+                            {user?.username || 'Unit Director'}
                           </p>
                         </div>
                       </div>
@@ -871,7 +873,7 @@ export default function MainSettings() {
                         </label>
                         <input
                           type="text"
-                          value="Social Development Unit"
+                          value={user?.username || 'Unit Director'}
                           readOnly
                           className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
                           style={{ fontFamily: "Inter, sans-serif" }}
