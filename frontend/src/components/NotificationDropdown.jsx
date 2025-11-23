@@ -187,8 +187,8 @@ function NotificationDropdown({ onNotificationClick }) {
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-b-0 ${
-                      notification.unread && notificationFilter === "all"
-                        ? "bg-blue-50"
+                      notification.unread
+                        ? "bg-[#F0EFFF]"
                         : ""
                     }`}
                   >
@@ -233,17 +233,10 @@ function NotificationDropdown({ onNotificationClick }) {
 
                           {/* Badge and Indicator */}
                           <div className="flex items-end gap-1.5 justify-center min-w-[60px]">
-                            {/* Type Badge */}
+                            {/* Type Badge - Standardized to #8988CD */}
                             <span
                               style={{
-                                backgroundColor:
-                                  notification.type === "Reminder"
-                                    ? "#ef4444"
-                                    : notification.type === "Report"
-                                    ? "#22c55e"
-                                    : notification.type === "Updated"
-                                    ? "#3b82f6"
-                                    : "#8988CD",
+                                backgroundColor: "#8988CD",
                               }}
                               className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-[#ffffff]"
                             >
@@ -254,14 +247,12 @@ function NotificationDropdown({ onNotificationClick }) {
                             <div className="flex flex-col items-center">
                               <span
                                 style={{
-                                  backgroundColor:
-                                    notification.indicatorColor ||
-                                    (notification.unread
-                                      ? "#ef4444"
-                                      : "#22c55e"),
-                                  boxShadow: `0 0 4px ${
-                                    notification.indicatorColor || "#ef4444"
-                                  }40`,
+                                  backgroundColor: notification.unread
+                                    ? "#ef4444"
+                                    : "#8988CD",
+                                  boxShadow: notification.unread
+                                    ? "0 0 4px #ef444460"
+                                    : "0 0 4px #8988CD40",
                                 }}
                                 className="w-2.5 h-2.5 rounded-full mb-0.5"
                               ></span>
