@@ -168,14 +168,17 @@ const WelcomePage = () => {
       };
 
       const apiUrl = `${getAPIBaseURL()}/api/auth/forgot-password`;
+      console.log('Sending forgot password request to:', apiUrl);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: forgotPasswordUsername })
+        body: JSON.stringify({ username: forgotPasswordUsername.trim() })
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.ok && data.success) {
         setForgotPasswordSuccess(true);
