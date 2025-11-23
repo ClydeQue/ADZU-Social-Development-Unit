@@ -59,9 +59,28 @@ router.get("/all", authenticateToken, async (req, res) => {
         u.user_type === "unit_director"
           ? "Unit Director"
           : u.offices?.name || u.name;
+
+      // Map office acronym to logo or use SDU logo for unit director
+      let officeLogo;
+      if (u.user_type === "unit_director") {
+        officeLogo = "/logos/sdu-logo-colored.webp";
+      } else {
+        const acronymLower = u.offices?.acronym?.toLowerCase();
+        const logoMap = {
+          acca: "/images/acca_logo_small.webp",
+          aces: "/images/aces_logo_small.webp",
+          aclg: "/images/aclg_logo_small.webp",
+          altec: "/images/altec_logo_small.webp",
+          apc: "/images/apc_logo_small.webp",
+          cces: "/images/cces_logo_small.webp",
+        };
+        officeLogo = logoMap[acronymLower] || "/images/default_logo.webp";
+      }
+
       userMap[u.id] = {
         name: displayName,
         user_type: u.user_type,
+        officeLogo: officeLogo,
       };
     });
 
@@ -72,6 +91,9 @@ router.get("/all", authenticateToken, async (req, res) => {
 
         // Show "Message deleted" if the message is deleted and user is not the one who deleted it
         const isDeletedByOther = msg.is_deleted && msg.deleted_by !== userId;
+
+        const otherPartyId = isSender ? msg.receiver_id : msg.sender_id;
+        const otherParty = userMap[otherPartyId];
 
         return {
           id: msg.id,
@@ -90,6 +112,8 @@ router.get("/all", authenticateToken, async (req, res) => {
           isRead: msg.is_read,
           isDeleted: msg.is_deleted || false,
           deletedBy: msg.deleted_by || null,
+          officeLogo: otherParty?.officeLogo,
+          office: otherParty?.name,
         };
       }) || [];
 
@@ -170,22 +194,28 @@ router.get("/", authenticateToken, async (req, res) => {
           ? "Unit Director"
           : u.offices?.name || u.name;
 
-      // Map office acronym to logo
-      const acronymLower = u.offices?.acronym?.toLowerCase();
-      const logoMap = {
-        acca: "/images/acca_logo_small.webp",
-        aces: "/images/aces_logo_small.webp",
-        aclg: "/images/aclg_logo_small.webp",
-        altec: "/images/altec_logo_small.webp",
-        apc: "/images/apc_logo_small.webp",
-        cces: "/images/cces_logo_small.webp",
-      };
+      // Map office acronym to logo or use SDU logo for unit director
+      let officeLogo;
+      if (u.user_type === "unit_director") {
+        officeLogo = "/logos/sdu-logo-colored.webp";
+      } else {
+        const acronymLower = u.offices?.acronym?.toLowerCase();
+        const logoMap = {
+          acca: "/images/acca_logo_small.webp",
+          aces: "/images/aces_logo_small.webp",
+          aclg: "/images/aclg_logo_small.webp",
+          altec: "/images/altec_logo_small.webp",
+          apc: "/images/apc_logo_small.webp",
+          cces: "/images/cces_logo_small.webp",
+        };
+        officeLogo = logoMap[acronymLower] || "/images/default_logo.webp";
+      }
 
       userMap[u.id] = {
         name: displayName,
         user_type: u.user_type,
         office: u.offices?.name,
-        officeLogo: logoMap[acronymLower] || "/images/default_logo.webp",
+        officeLogo: officeLogo,
       };
     });
 

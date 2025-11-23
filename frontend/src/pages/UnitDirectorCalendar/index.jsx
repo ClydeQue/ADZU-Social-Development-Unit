@@ -1,44 +1,44 @@
-import { useState, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import WhiteContainer from '@/components/WhiteContainer';
-import Sidebar from '@/components/Sidebar';
-import { 
+import { useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import WhiteContainer from "@/components/WhiteContainer";
+import Sidebar from "@/components/Sidebar";
+import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Close as CloseIcon,
-} from '@mui/icons-material';
-import { useAuth } from '@/context/AuthContext';
-import UnitDirectorService from '@/services/unitDirectorService';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import InboxDropdown from '@/components/InboxDropdown';
-import CalendarSkeleton from '@/components/CalendarSkeleton';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
+} from "@mui/icons-material";
+import { useAuth } from "@/context/AuthContext";
+import UnitDirectorService from "@/services/unitDirectorService";
+import NotificationDropdown from "@/components/NotificationDropdown";
+import InboxDropdown from "@/components/InboxDropdown";
+import CalendarSkeleton from "@/components/CalendarSkeleton";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
 
 // Office color mapping - using single color
-const OFFICE_COLOR = '#4D49FC';
+const OFFICE_COLOR = "#4D49FC";
 
 // Office logo mapping
 const OFFICE_LOGOS = {
-  'CCES': '/logos/officeLogoTransparent/ccesLogo.webp',
-  'ACCA': '/logos/officeLogoTransparent/accaLogo.webp',
-  'ACES': '/logos/officeLogoTransparent/acesLogo.webp',
-  'ALTEC': '/logos/officeLogoTransparent/altecLogo.webp',
-  'APC': '/logos/officeLogoTransparent/apcLogo.webp',
-  'ACLG': '/logos/officeLogoTransparent/aclgLogo.webp',
+  CCES: "/logos/officeLogoTransparent/ccesLogo.webp",
+  ACCA: "/logos/officeLogoTransparent/accaLogo.webp",
+  ACES: "/logos/officeLogoTransparent/acesLogo.webp",
+  ALTEC: "/logos/officeLogoTransparent/altecLogo.webp",
+  APC: "/logos/officeLogoTransparent/apcLogo.webp",
+  ACLG: "/logos/officeLogoTransparent/aclgLogo.webp",
 };
 
 // Status color mapping
 const STATUS_COLORS = {
-  'completed': '#4CAF50',
-  'in progress': '#FFB300',
-  'ongoing': '#FFB300',
-  'pending': '#9E9E9E',
-  'planned': '#9E9E9E',
-  'cancelled': '#F44336',
+  completed: "#4CAF50",
+  "in progress": "#FFB300",
+  ongoing: "#FFB300",
+  pending: "#9E9E9E",
+  planned: "#9E9E9E",
+  cancelled: "#F44336",
 };
 
 export default function UnitDirectorCalendar() {
@@ -48,50 +48,57 @@ export default function UnitDirectorCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // Fetch all activities
-  const { data: activitiesData, isLoading, error } = useQuery({
-    queryKey: ['unit-director-activities'],
+  const {
+    data: activitiesData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["unit-director-activities"],
     queryFn: () => UnitDirectorService.getAllActivities(),
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
   // Transform activities to FullCalendar events
-  const events = activitiesData?.activities?.map((activity) => {
-    const statusColor = STATUS_COLORS[activity.status?.toLowerCase()] || '#9E9E9E';
-    
-    // Ensure proper date formatting
-    const startDate = activity.start || activity.start_date;
-    let endDate = activity.end || activity.end_date;
-    
-    // FullCalendar needs end date to be exclusive (next day) for all-day events
-    if (endDate && !endDate.includes('T')) {
-      const endDateObj = new Date(endDate);
-      endDateObj.setDate(endDateObj.getDate() + 1);
-      endDate = endDateObj.toISOString().split('T')[0];
-    }
-    
-    return {
-      id: activity.id,
-      title: activity.title || activity.activity_name,
-      start: startDate,
-      end: endDate,
-      allDay: true, // All-day events for horizontal spanning across days
-      backgroundColor: OFFICE_COLOR,
-      borderColor: '#040195',
-      textColor: '#FFFFFF',
-      extendedProps: {
-        status: activity.status,
-        office_name: activity.office_name,
-        office_acronym: activity.office_acronym,
-        office_logo: OFFICE_LOGOS[activity.office_acronym] || OFFICE_LOGOS['CCES'],
-        program_title: activity.program_title,
-        venue: activity.venue,
-        participants_count: activity.participants_count,
-        objectives: activity.objectives,
-        notes: activity.notes,
-        statusColor: statusColor,
+  const events =
+    activitiesData?.activities?.map((activity) => {
+      const statusColor =
+        STATUS_COLORS[activity.status?.toLowerCase()] || "#9E9E9E";
+
+      // Ensure proper date formatting
+      const startDate = activity.start || activity.start_date;
+      let endDate = activity.end || activity.end_date;
+
+      // FullCalendar needs end date to be exclusive (next day) for all-day events
+      if (endDate && !endDate.includes("T")) {
+        const endDateObj = new Date(endDate);
+        endDateObj.setDate(endDateObj.getDate() + 1);
+        endDate = endDateObj.toISOString().split("T")[0];
       }
-    };
-  }) || [];
+
+      return {
+        id: activity.id,
+        title: activity.title || activity.activity_name,
+        start: startDate,
+        end: endDate,
+        allDay: true, // All-day events for horizontal spanning across days
+        backgroundColor: OFFICE_COLOR,
+        borderColor: "#040195",
+        textColor: "#FFFFFF",
+        extendedProps: {
+          status: activity.status,
+          office_name: activity.office_name,
+          office_acronym: activity.office_acronym,
+          office_logo:
+            OFFICE_LOGOS[activity.office_acronym] || OFFICE_LOGOS["CCES"],
+          program_title: activity.program_title,
+          venue: activity.venue,
+          participants_count: activity.participants_count,
+          objectives: activity.objectives,
+          notes: activity.notes,
+          statusColor: statusColor,
+        },
+      };
+    }) || [];
 
   // Handle event click
   const handleEventClick = (clickInfo) => {
@@ -124,10 +131,12 @@ export default function UnitDirectorCalendar() {
   };
 
   // Format month and year for display
-  const monthYear = currentDate.toLocaleDateString('en-US', { 
-    month: 'long',
-    year: 'numeric' 
-  }).toUpperCase();
+  const monthYear = currentDate
+    .toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    })
+    .toUpperCase();
 
   return (
     <div className="flex bg-[#EAE9E9] min-h-screen max-h-screen p-[35px] overflow-hidden">
@@ -142,20 +151,26 @@ export default function UnitDirectorCalendar() {
                 {/* Month and Navigation */}
                 <div className="flex items-center gap-3">
                   <h1 className="text-[#040195] text-lg sm:text-xl xl:text-2xl font-bold tracking-wide">
-                    {monthYear.split(' ')[0]}
+                    {monthYear.split(" ")[0]}
                   </h1>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={handlePrevious}
                       className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors"
                     >
-                      <ChevronLeftIcon className="text-[#040195]" fontSize="small" />
+                      <ChevronLeftIcon
+                        className="text-[#040195]"
+                        fontSize="small"
+                      />
                     </button>
                     <button
                       onClick={handleNext}
                       className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors"
                     >
-                      <ChevronRightIcon className="text-[#040195]" fontSize="small" />
+                      <ChevronRightIcon
+                        className="text-[#040195]"
+                        fontSize="small"
+                      />
                     </button>
                   </div>
                 </div>
@@ -170,9 +185,15 @@ export default function UnitDirectorCalendar() {
 
                   {/* Avatar - Same style as Overview */}
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 rounded-full bg-white text-[#5B6FED] flex items-center justify-center font-medium text-xs sm:text-sm xl:text-base">
-                      {user?.name?.charAt(0) || "U"}
-                    </div>
+                    <img
+                      src="/logos/sdu-logo-colored.webp"
+                      alt="Unit Director"
+                      className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 object-contain"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/images/default_logo.webp";
+                      }}
+                    />
                     <div className="hidden sm:block">
                       <div className="text-xs xl:text-sm font-semibold text-[rgba(0,0,0,0.87)]">
                         {user?.name || "Unit Director"}
@@ -191,18 +212,29 @@ export default function UnitDirectorCalendar() {
                   <CalendarSkeleton />
                 ) : error ? (
                   <div className="flex flex-col items-center justify-center h-full">
-                    <div className="text-red-500 text-sm mb-1">Error loading calendar</div>
+                    <div className="text-red-500 text-sm mb-1">
+                      Error loading calendar
+                    </div>
                     <div className="text-gray-600 text-xs">{error.message}</div>
                   </div>
                 ) : !events || events.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full">
-                    <div className="text-gray-500 text-sm mb-1">No activities found</div>
-                    <div className="text-gray-400 text-xs">There are currently no activities to display</div>
+                    <div className="text-gray-500 text-sm mb-1">
+                      No activities found
+                    </div>
+                    <div className="text-gray-400 text-xs">
+                      There are currently no activities to display
+                    </div>
                   </div>
                 ) : (
                   <FullCalendar
                     ref={calendarRef}
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                    plugins={[
+                      dayGridPlugin,
+                      timeGridPlugin,
+                      interactionPlugin,
+                      listPlugin,
+                    ]}
                     initialView="dayGridMonth"
                     headerToolbar={false}
                     events={events}
@@ -224,24 +256,24 @@ export default function UnitDirectorCalendar() {
                       const event = eventInfo.event;
                       const logo = event.extendedProps.office_logo;
                       const programTitle = event.extendedProps.program_title;
-                      
+
                       return (
                         <div className="h-full w-full flex items-center gap-1.5 px-2 py-1 overflow-hidden cursor-pointer">
                           {/* Office Logo - White filtered */}
                           {logo && (
-                            <img 
-                              src={logo} 
+                            <img
+                              src={logo}
                               alt={event.extendedProps.office_acronym}
                               className="w-4 h-4 flex-shrink-0 object-contain"
-                              style={{ filter: 'brightness(0) invert(1)' }}
+                              style={{ filter: "brightness(0) invert(1)" }}
                             />
                           )}
-                          
+
                           {/* Two-line text layout */}
                           <div className="flex-1 min-w-0 flex flex-col justify-center">
                             {/* Program name - super small text above */}
                             <div className="text-[8px] text-white/80 truncate leading-tight uppercase">
-                              {programTitle || 'Program'}
+                              {programTitle || "Program"}
                             </div>
                             {/* Activity name - bigger bold text below */}
                             <div className="font-bold text-[11px] text-white truncate leading-tight">
@@ -261,11 +293,11 @@ export default function UnitDirectorCalendar() {
 
       {/* Event Details Modal */}
       {selectedEvent && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedEvent(null)}
         >
-          <div 
+          <div
             className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -275,11 +307,11 @@ export default function UnitDirectorCalendar() {
                   {selectedEvent.title}
                 </h2>
                 <div className="flex items-center gap-2">
-                  <span 
+                  <span
                     className="px-3 py-1 rounded-full text-xs font-medium text-white"
                     style={{ backgroundColor: selectedEvent.statusColor }}
                   >
-                    {selectedEvent.status?.toUpperCase() || 'PENDING'}
+                    {selectedEvent.status?.toUpperCase() || "PENDING"}
                   </span>
                   <span className="text-sm text-gray-600">
                     {selectedEvent.office_name} ({selectedEvent.office_acronym})
@@ -296,61 +328,79 @@ export default function UnitDirectorCalendar() {
 
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-1">Program</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                  Program
+                </h3>
                 <p className="text-gray-600">{selectedEvent.program_title}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Start Date</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                    Start Date
+                  </h3>
                   <p className="text-gray-600">
-                    {new Date(selectedEvent.start).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(selectedEvent.start).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">End Date</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                    End Date
+                  </h3>
                   <p className="text-gray-600">
-                    {selectedEvent.end ? new Date(selectedEvent.end).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    }) : 'N/A'}
+                    {selectedEvent.end
+                      ? new Date(selectedEvent.end).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "N/A"}
                   </p>
                 </div>
               </div>
 
               {selectedEvent.venue && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Venue</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                    Venue
+                  </h3>
                   <p className="text-gray-600">{selectedEvent.venue}</p>
                 </div>
               )}
 
               {selectedEvent.participants_count && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Participants</h3>
-                  <p className="text-gray-600">{selectedEvent.participants_count} people</p>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                    Participants
+                  </h3>
+                  <p className="text-gray-600">
+                    {selectedEvent.participants_count} people
+                  </p>
                 </div>
               )}
 
               {selectedEvent.objectives && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Objectives</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                    Objectives
+                  </h3>
                   <p className="text-gray-600">{selectedEvent.objectives}</p>
                 </div>
               )}
 
               {selectedEvent.notes && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Notes</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                    Notes
+                  </h3>
                   <p className="text-gray-600">{selectedEvent.notes}</p>
                 </div>
               )}

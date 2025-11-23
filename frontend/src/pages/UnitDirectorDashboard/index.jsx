@@ -90,9 +90,15 @@ export default function UnitDirectorDashboard() {
 
                 {/* Avatar */}
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 rounded-full bg-white text-[#5B6FED] flex items-center justify-center font-medium text-xs sm:text-sm xl:text-base">
-                    {user?.name?.charAt(0) || "U"}
-                  </div>
+                  <img
+                    src="/logos/sdu-logo-colored.webp"
+                    alt="Unit Director"
+                    className="w-7 h-7 sm:w-8 sm:h-8 xl:w-9 xl:h-9 object-contain"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/images/default_logo.webp";
+                    }}
+                  />
                   <div className="hidden sm:block">
                     <div className="text-xs xl:text-sm font-semibold text-[rgba(0,0,0,0.87)]">
                       {user?.name || "Unit Director"}
