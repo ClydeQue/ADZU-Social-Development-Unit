@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import DashboardService from '@/services/dashboardService';
+import ListSkeleton from '@/components/ListSkeleton';
 
 const UpcomingActivitiesCard = () => {
   // Fetch upcoming activities (next 3 closest to current date)
@@ -44,9 +45,7 @@ const UpcomingActivitiesCard = () => {
 
         <div className="flex flex-col gap-2 sm:gap-3 flex-1 overflow-auto">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <span className="text-[0.75rem] text-gray-400">Loading...</span>
-            </div>
+            <ListSkeleton items={3} />
           ) : upcoming.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <span className="text-[0.75rem] text-gray-400">No upcoming activities</span>

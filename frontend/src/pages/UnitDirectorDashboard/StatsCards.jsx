@@ -1,8 +1,11 @@
 import { TrendingUp as TrendingUpIcon } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import DashboardService from '@/services/dashboardService';
 
 const StatsCards = () => {
+  const navigate = useNavigate();
+  
   // Fetch live dashboard statistics
   const { data: statsData, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -15,6 +18,10 @@ const StatsCards = () => {
   const inProgress = statsData?.statistics?.in_progress || '-';
   const pending = statsData?.statistics?.pending || '-';
 
+  const handleNavigateToReports = (status) => {
+    navigate(`/unit-director/reports?sort=${status}`);
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 flex-1 min-h-0 lg:grid-rows-3">
       {/* Completed */}
@@ -25,7 +32,15 @@ const StatsCards = () => {
               <h6 className="text-lg sm:text-xl md:text-[1.5rem] font-bold leading-[1]">
                 Completed
               </h6>
-             
+              <button
+                onClick={() => handleNavigateToReports('completed')}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-white flex cursor-pointer items-center justify-center hover:bg-white/20 transition-colors"
+                aria-label="View completed activities"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 11L11 1M11 1H1M11 1V11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0">
               {isLoading ? '...' : completed}
@@ -33,7 +48,7 @@ const StatsCards = () => {
             <div className="flex items-center gap-1.5 rounded-md px-2 py-1 w-fit flex-shrink-0">
               <TrendingUpIcon sx={{ fontSize: { xs: 10, sm: 12 } }} className="text-[#5B6FED]" />
               <span className="text-[0.6rem] sm:text-[0.7rem] text-[#C7D2FE]">
-                Activities completed
+                Activities with completed status
               </span>
             </div>
           </div>
@@ -48,7 +63,15 @@ const StatsCards = () => {
               <h6 className="text-lg sm:text-xl md:text-[1.5rem] font-bold leading-[1]">
                 In Progress
               </h6>
-              
+              <button
+                onClick={() => handleNavigateToReports('in-progress')}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#1E22AA] flex items-center justify-center cursor-pointer hover:bg-[#1E22AA]/10 transition-colors"
+                aria-label="View in-progress activities"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 11L11 1M11 1H1M11 1V11" stroke="#1E22AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0 text-[#5B6FED]">
               {isLoading ? '...' : inProgress}
@@ -56,7 +79,7 @@ const StatsCards = () => {
             <div className="flex items-center gap-1.5 rounded-md px-2 py-1 w-fit flex-shrink-0">
               <TrendingUpIcon sx={{ fontSize: { xs: 10, sm: 12 } }} className="text-[#5B6FED]" />
               <span className="text-[0.6rem] sm:text-[0.7rem] text-[#5B6FED]">
-                Activities ongoing
+                Offices currently in this phase
               </span>
             </div>
           </div>
@@ -71,13 +94,21 @@ const StatsCards = () => {
               <h6 className="text-lg sm:text-xl md:text-[1.5rem] font-bold leading-[1]">
                 Pending
               </h6>
-            
+              <button
+                onClick={() => handleNavigateToReports('pending')}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#1E22AA] flex items-center justify-center cursor-pointer hover:bg-[#1E22AA]/10 transition-colors"
+                aria-label="View pending activities"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 11L11 1M11 1H1M11 1V11" stroke="#1E22AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             </div>
             <h4 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-[1] my-1 flex-shrink-0 text-[#5B6FED]">
               {isLoading ? '...' : pending}
             </h4>
             <span className="text-[0.65rem] sm:text-[0.75rem] text-[#5B6FED] flex-shrink-0">
-              Activities planned
+              Activities with pending status
             </span>
           </div>
         </div>

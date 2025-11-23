@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import DashboardService from '@/services/dashboardService';
 import DonutChart from '@/ui/DonutChart';
+import ChartSkeleton from '@/components/ChartSkeleton';
 
 const FlagshipUpdateCard = () => {
   // Fetch live dashboard statistics
@@ -38,9 +39,7 @@ const FlagshipUpdateCard = () => {
         {/* Donut Chart */}
         <div className="flex justify-center items-center flex-1 relative min-h-0">
           {isLoading ? (
-            <div className="flex items-center justify-center">
-              <span className="text-sm text-gray-400">Loading...</span>
-            </div>
+            <ChartSkeleton />
           ) : total === 0 ? (
             <div className="flex items-center justify-center">
               <span className="text-sm text-gray-400">No activities yet</span>

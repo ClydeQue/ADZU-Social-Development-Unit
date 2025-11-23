@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useQuery } from '@tanstack/react-query';
 import UnitDirectorService from '@/services/unitDirectorService';
 import ReportDetailModal from './ReportDetailModal';
+import ReportModalSkeleton from '@/components/ReportModalSkeleton';
  
 const ReportsTable = ({ reports }) => {
   const [viewedReports, setViewedReports] = useState([]);
@@ -65,11 +66,10 @@ const ReportsTable = ({ reports }) => {
         }
       `}</style>
       {/* Header Row */}
-      <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center flex-shrink-0 flex-grow-0">
+      <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[180px_1.2fr_1.2fr_180px_160px] gap-3 items-center flex-shrink-0 flex-grow-0">
         <div className="text-xs font-semibold">Office</div>
         <div className="text-xs font-semibold">Program</div>
         <div className="text-xs font-semibold">Project / Activity</div>
-        <div className="text-xs font-semibold">Due</div>
         <div className="text-xs font-semibold">Submitted</div>
         <div></div>
       </div>
@@ -85,7 +85,7 @@ const ReportsTable = ({ reports }) => {
               key={report.id}
               className={`${
                 isNew ? 'bg-[#C7D2FE]' : 'bg-white'
-              } hover:bg-[#D4D1FF] transition-colors rounded-lg px-3 py-1 grid grid-cols-[180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center`}
+              } hover:bg-[#D4D1FF] transition-colors rounded-lg px-3 py-1 grid grid-cols-[180px_1.2fr_1.2fr_180px_160px] gap-3 items-center`}
             >
               <div className="flex items-center gap-1.5 overflow-hidden">
                 <img src={report.logo} alt={report.office} className="w-5 h-5 object-contain flex-shrink-0" />
@@ -98,7 +98,6 @@ const ReportsTable = ({ reports }) => {
               </div>
               <div className="text-[#4D49FC] text-[0.7rem] truncate">{report.program}</div>
               <div className="text-[#4D49FC] text-[0.7rem] truncate">{report.activity}</div>
-              <div className="text-[#4D49FC] font-semibold text-[0.7rem] whitespace-nowrap">{report.due}</div>
               <div className="text-[#4D49FC] text-[0.7rem] whitespace-nowrap">{report.submitted}</div>
               <div className="flex justify-end gap-1.5">
                 <button 
@@ -123,15 +122,9 @@ const ReportsTable = ({ reports }) => {
       {/* Report Detail Modal */}
       {selectedReport && currentReport && (
         isLoadingActivity ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg p-8 shadow-xl">
-              <div className="text-[#4D49FC] text-lg font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Loading report details...
-              </div>
-            </div>
-          </div>
+          <ReportModalSkeleton onClose={handleCloseModal} />
         ) : activityError ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={handleCloseModal}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(4, 1, 149, 0.4)' }} onClick={handleCloseModal}>
             <div className="bg-white rounded-lg p-8 shadow-xl max-w-md">
               <div className="text-red-600 text-lg font-semibold mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
                 Error Loading Report

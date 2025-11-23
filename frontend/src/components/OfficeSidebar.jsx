@@ -1,7 +1,10 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import PropTypes from 'prop-types';
+import { useQuery } from '@tanstack/react-query';
 import OfficeSidebarLogo from '@/components/officeSidebarLogo';
+import ActivityService from '@/services/activityService';
+import NotificationService from '@/services/notificationService';
 
 /**
  * Office Sidebar Component
@@ -17,6 +20,25 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
   const { logout } = useAuth();
 
   const officeColor = '#4D49FC'; // Single color for all offices
+
+  // Fetch activities to count new ones (projects badge)
+  const { data: activitiesData } = useQuery({
+    queryKey: ['office-activities-count', officeId],
+    queryFn: () => ActivityService.getActivitiesByOffice(officeId),
+    staleTime: 60000, // 1 minute
+    refetchInterval: 60000,
+  });
+
+  // Fetch notifications for overview badge
+  const { data: notificationsData } = useQuery({
+    queryKey: ['office-notifications-count'],
+    queryFn: () => NotificationService.getNotifications(),
+    staleTime: 60000,
+    refetchInterval: 60000,
+  });
+
+  const newActivitiesCount = activitiesData?.activities?.filter(a => a.isNew)?.length || 0;
+  const unreadNotificationsCount = notificationsData?.unread || 0;
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -47,6 +69,7 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
     { 
       text: 'Overview', 
       path: `${basePath}/dashboard`,
+      badgeCount: unreadNotificationsCount,
       iconComponent: (color) => (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
           <path d="M14 9C13.7167 9 13.4793 8.904 13.288 8.712C13.0967 8.52 13.0007 8.28267 13 8V4C13 3.71667 13.096 3.47933 13.288 3.288C13.48 3.09667 13.7173 3.00067 14 3H20C20.2833 3 20.521 3.096 20.713 3.288C20.905 3.48 21.0007 3.71733 21 4V8C21 8.28333 20.904 8.521 20.712 8.713C20.52 8.905 20.2827 9.00067 20 9H14ZM4 13C3.71667 13 3.47933 12.904 3.288 12.712C3.09667 12.52 3.00067 12.2827 3 12V4C3 3.71667 3.096 3.47933 3.288 3.288C3.48 3.09667 3.71733 3.00067 4 3H10C10.2833 3 10.521 3.096 10.713 3.288C10.905 3.48 11.0007 3.71733 11 4V12C11 12.2833 10.904 12.521 10.712 12.713C10.52 12.905 10.2827 13.0007 10 13H4ZM14 21C13.7167 21 13.4793 20.904 13.288 20.712C13.0967 20.52 13.0007 20.2827 13 20V12C13 11.7167 13.096 11.4793 13.288 11.288C13.48 11.0967 13.7173 11.0007 14 11H20C20.2833 11 20.521 11.096 20.713 11.288C20.905 11.48 21.0007 11.7173 21 12V20C21 20.2833 20.904 20.521 20.712 20.713C20.52 20.905 20.2827 21.0007 20 21H14ZM4 21C3.71667 21 3.47933 20.904 3.288 20.712C3.09667 20.52 3.00067 20.2827 3 20V16C3 15.7167 3.096 15.4793 3.288 15.288C3.48 15.0967 3.71733 15.0007 4 15H10C10.2833 15 10.521 15.096 10.713 15.288C10.905 15.48 11.0007 15.7173 11 16V20C11 20.2833 10.904 20.521 10.712 20.713C10.52 20.905 10.2827 21.0007 10 21H4Z" fill={color}/>
@@ -56,6 +79,7 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
     { 
       text: 'Projects', 
       path: `${basePath}/projects`,
+      badgeCount: newActivitiesCount,
       iconComponent: (color) => (
         <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
           <path d="M16.625 2.625H15.75C14.7835 2.625 14 3.4085 14 4.375V16.625C14 17.5915 14.7835 18.375 15.75 18.375H16.625C17.5915 18.375 18.375 17.5915 18.375 16.625V4.375C18.375 3.4085 17.5915 2.625 16.625 2.625Z" fill={color}/>
@@ -110,6 +134,11 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
                 isActive(item.path) ? 'bg-[#e6e1e1]' : 'bg-transparent hover:bg-[#E8EAFF]'
               }`}
             >
+              {item.badgeCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-[#4D49FC] text-white text-[0.6rem] font-semibold rounded-full flex items-center justify-center px-1">
+                  {item.badgeCount > 99 ? '99+' : item.badgeCount}
+                </span>
+              )}
               <div className="mb-0.5">
                 {item.iconComponent(isActive(item.path) ? officeColor : '#6B7280')}
               </div>
@@ -131,18 +160,21 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
       </div>
 
       {/* Desktop View: Sidebar */}
-      <div className="hidden md:block overflow-hidden pl-6 pt-6 pb-6 w-[15rem] flex-shrink-0 bg-transparent h-full">
-        <div className="w-full flex-shrink-0 h-full relative">
-          <div className="relative w-full box-border bg-[#F4F4F4] border-r-0 rounded-[15px] h-full overflow-y-auto">
+      <div className="hidden md:block  pl-6 pt-6 pb-6 w-[15rem] flex-shrink-0  h-full overflow-hidden">
+
+
+        <div className="w-full flex-shrink-0 h-full  relative">
+
+          <div className="relative w-full box-border bg-[#F4F4F4] border-r-0 rounded-[15px] h-full flex flex-col">
             {/* Logo */}
             <div className="p-3 py-6 flex items-center justify-center flex-shrink-0">
               <OfficeSidebarLogo officeId={officeId} officeName={officeName} /> 
             </div>
           
-
-            <div className="my-10 space-y-2">
+            {/* MENU Section */}
+            <div className="flex-shrink-0">
               {/* MENU Label */}
-              <div className="px-8 py-1 text-[#9CA3AF] font-semibold text-[0.7rem] tracking-[0.5px]">
+              <div className="px-8 pt-2 text-[#9CA3AF] font-semibold text-[0.7rem] tracking-[0.5px]">
                 MENU
               </div>
 
@@ -168,17 +200,27 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
                     <div className="min-w-[36px]">
                       {item.iconComponent(isActive(item.path) ? '#4D49FC' : '#040195')}
                     </div>
-                    <span className={`text-[0.9rem] ${isActive(item.path) ? 'font-semibold' : 'font-medium'}`}
+                    <span className={`text-[0.9rem] ${isActive(item.path) ? 'font-semibold' : 'font-medium'} flex-1`}
                       style={{ color: isActive(item.path) ? officeColor : '#040195' }}
                     >
                       {item.text}
                     </span>
+                    {item.badgeCount > 0 && (
+                      <span className="ml-auto min-w-[20px] h-5 bg-[#4D49FC] text-white text-[0.7rem] font-semibold rounded-full flex items-center justify-center px-1.5">
+                        {item.badgeCount > 99 ? '99+' : item.badgeCount}
+                      </span>
+                    )}
                   </button>
                 </div>
               ))}
+            </div>
 
-              {/* GENERAL Section */}
-              <div className="px-8 mt-15 text-[#9CA3AF] font-semibold text-[0.7rem] tracking-[0.5px]">
+            {/* Spacer to push GENERAL to bottom */}
+            <div className="flex-1"></div>
+
+            {/* GENERAL Section */}
+            <div className="flex-shrink-0 pb-4">
+              <div className="px-8 py-1 text-[#9CA3AF] font-semibold text-[0.7rem] tracking-[0.5px]">
                 GENERAL
               </div>
 

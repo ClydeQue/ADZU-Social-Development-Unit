@@ -6,6 +6,7 @@ import ReportsTable from "./OfficesTables";
 import ReportsNavbar from "./SettingsNavbar";
 import EditOfficeDialog from "./EditOfficeDialog";
 import UnitDirectorService from "@/services/unitDirectorService";
+import TableSkeleton from "@/components/TableSkeleton";
 
 export default function UnitDirectorSettings() {
   const [sortBy, setSortBy] = useState("office");
@@ -97,14 +98,7 @@ export default function UnitDirectorSettings() {
 
               {/* Reports Table */}
               {isLoading ? (
-                <div className="flex items-center justify-center flex-1">
-                  <div
-                    className="text-[#4D49FC] text-lg font-semibold"
-                    style={{ fontFamily: "Inter, sans-serif" }}
-                  >
-                    Loading Offices...
-                  </div>
-                </div>
+                <TableSkeleton rows={7} columns={3} />
               ) : error ? (
                 <div className="flex items-center justify-center flex-1">
                   <div

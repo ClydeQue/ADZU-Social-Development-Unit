@@ -25,7 +25,7 @@ export default function UpcomingProgramsList({ upcomingPrograms }) {
         </div>
         
         {/* Upcoming Programs List */}
-        <div className="flex-1 overflow-auto space-y-4 px-6 pb-6 custom-scrollbar-purple">
+        <div className="flex-1 space-y-4 px-6 pb-6 custom-scrollbar-purple overflow-y-auto">
           {upcomingPrograms && upcomingPrograms.length > 0 ? (
             upcomingPrograms.map((program, index) => (
               <div key={index} className="py-2">

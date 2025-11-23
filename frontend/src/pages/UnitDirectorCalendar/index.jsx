@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import UnitDirectorService from '@/services/unitDirectorService';
 import NotificationDropdown from '@/components/NotificationDropdown';
 import InboxDropdown from '@/components/InboxDropdown';
+import CalendarSkeleton from '@/components/CalendarSkeleton';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -187,9 +188,7 @@ export default function UnitDirectorCalendar() {
               {/* FullCalendar */}
               <div className="flex-1 overflow-hidden calendar-container">
                 {isLoading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-[#5B6FED] text-sm">Loading calendar...</div>
-                  </div>
+                  <CalendarSkeleton />
                 ) : error ? (
                   <div className="flex flex-col items-center justify-center h-full">
                     <div className="text-red-500 text-sm mb-1">Error loading calendar</div>
