@@ -80,6 +80,7 @@ export default function ProgramsManagement() {
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
                   Program Management
+
                 </h1>
                 <p className="text-gray-500 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
                   Manage programs for each office
@@ -226,7 +227,7 @@ export default function ProgramsManagement() {
                 <div className="text-xs font-semibold uppercase">
                   Program Name
                 </div>
-                <div className="text-xs font-semibold uppercase text-right">
+                <div className="text-xs font-semibold uppercase text-right mr-5">
                   Action
                 </div>
               </div>

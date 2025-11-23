@@ -459,7 +459,7 @@ export default function ReportDetailModal({ report, activity, onClose }) {
             {/* Column 3: Sex */}
             <div className="sm:border-l-2 border-t-2 sm:border-t-0 border-[#040195] pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
               <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
-                SEX
+                SEX COUNT
               </h3>
               <div className="text-[#040195] text-xs leading-relaxed space-y-1">
                 <div className="flex items-center">
