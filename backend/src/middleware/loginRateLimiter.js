@@ -8,7 +8,7 @@
  * - Successful login → reset attempts
  */
 
-const loginAttempts = new Map(); // Store: email -> { attempts, lockedUntil, lastRequestTime }
+const loginAttempts = new Map(); // Store: username -> { attempts, lockedUntil, lastRequestTime }
 
 const MAX_ATTEMPTS = 10; // Increased from 5
 const LOCKOUT_DURATION = 1 * 60 * 1000; // 1 minute
@@ -18,17 +18,17 @@ const REQUEST_DELAY = 500; // 0.5 seconds between requests (reduced from 1s)
  * Middleware to check login rate limit
  */
 const checkLoginRateLimit = (req, res, next) => {
-  const { email } = req.body;
+  const { username } = req.body;
 
-  if (!email) {
+  if (!username) {
     return next();
   }
 
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedUsername = username.trim().toLowerCase();
   const now = Date.now();
   
   // Get or create record
-  let record = loginAttempts.get(normalizedEmail);
+  let record = loginAttempts.get(normalizedUsername);
   let isNewUser = false;
   
   if (!record) {
@@ -38,13 +38,13 @@ const checkLoginRateLimit = (req, res, next) => {
       lockedUntil: null,
       lastRequestTime: now
     };
-    loginAttempts.set(normalizedEmail, record);
+    loginAttempts.set(normalizedUsername, record);
   }
   
   // 1. FIRST Check if account is locked out (highest priority)
   if (record.lockedUntil && now < record.lockedUntil) {
     const remainingSeconds = Math.ceil((record.lockedUntil - now) / 1000);
-    console.log(`Account locked: ${normalizedEmail} - ${remainingSeconds}s remaining`);
+    console.log(`Account locked: ${normalizedUsername} - ${remainingSeconds}s remaining`);
     return res.status(429).json({
       success: false,
       message: `Account locked. Please try again in ${remainingSeconds} seconds.`,
@@ -57,7 +57,7 @@ const checkLoginRateLimit = (req, res, next) => {
   if (record.lockedUntil && now >= record.lockedUntil) {
     record.attempts = 0;
     record.lockedUntil = null;
-    loginAttempts.set(normalizedEmail, record);
+    loginAttempts.set(normalizedUsername, record);
   }
   
   // 2. THEN Check throttling - only if not locked out AND not a new user
@@ -65,7 +65,7 @@ const checkLoginRateLimit = (req, res, next) => {
     const timeSinceLastRequest = now - record.lastRequestTime;
     if (timeSinceLastRequest < REQUEST_DELAY) {
       const waitSeconds = Math.ceil((REQUEST_DELAY - timeSinceLastRequest) / 1000);
-      console.log(`Too fast! ${normalizedEmail} needs to wait ${waitSeconds}s`);
+      console.log(`Too fast! ${normalizedUsername} needs to wait ${waitSeconds}s`);
       return res.status(429).json({
         success: false,
         message: `Too fast! Please wait ${waitSeconds} second${waitSeconds > 1 ? 's' : ''} before trying again.`,
@@ -77,7 +77,7 @@ const checkLoginRateLimit = (req, res, next) => {
   
   // Update last request time
   record.lastRequestTime = now;
-  loginAttempts.set(normalizedEmail, record);
+  loginAttempts.set(normalizedUsername, record);
 
   // Attach helper functions for auth controller
   req.loginRateLimiter = {
@@ -86,10 +86,10 @@ const checkLoginRateLimit = (req, res, next) => {
       
       if (record.attempts >= MAX_ATTEMPTS) {
         record.lockedUntil = now + LOCKOUT_DURATION;
-        console.log(`Locked out: ${normalizedEmail} (${record.attempts} attempts)`);
+        console.log(`Locked out: ${normalizedUsername} (${record.attempts} attempts)`);
       }
       
-      loginAttempts.set(normalizedEmail, record);
+      loginAttempts.set(normalizedUsername, record);
       
       return {
         attempts: record.attempts,
@@ -99,8 +99,8 @@ const checkLoginRateLimit = (req, res, next) => {
     },
     
     resetAttempts: () => {
-      loginAttempts.delete(normalizedEmail);
-      console.log(`Attempts reset: ${normalizedEmail}`);
+      loginAttempts.delete(normalizedUsername);
+      console.log(`Attempts reset: ${normalizedUsername}`);
     }
   };
 

@@ -14,17 +14,17 @@ class AuthController {
   // ========================================
   static async loginOffice(req, res) {
     try {
-      const { email, password } = req.body;
+      const { username, password } = req.body;
 
       // Validation
-      if (!email || !password) {
+      if (!username || !password) {
         return res.status(400).json({
           success: false,
-          message: "Email and password are required",
+          message: "Username and password are required",
         });
       }
 
-      console.log(`Login attempt: ${email}`);
+      console.log(`Login attempt: ${username}`);
 
       // Get user from unified office_credentials table
       // Note: offices join is LEFT JOIN (office_id can be NULL for unit_director)
@@ -39,7 +39,7 @@ class AuthController {
             description
           )
         `)
-        .eq("email", email.trim().toLowerCase())
+        .eq("username", username.trim().toLowerCase())
         .eq("is_active", true)
         .limit(1);
 
@@ -54,7 +54,7 @@ class AuthController {
       }
 
       if (!users || users.length === 0) {
-        console.log(`User not found: ${email}`);
+        console.log(`User not found: ${username}`);
         
         // Record failed attempt
         if (req.loginRateLimiter) {
@@ -81,7 +81,7 @@ class AuthController {
       console.log(`Password verification: ${isValidPassword}`);
 
       if (!isValidPassword) {
-        console.log(`Invalid password for: ${email}`);
+        console.log(`Invalid password for: ${username}`);
         
         // Record failed attempt
         if (req.loginRateLimiter) {
@@ -124,7 +124,7 @@ class AuthController {
       // Build JWT token payload
       const tokenPayload = {
         userId: user.id,
-        email: user.email,
+        username: user.username,
         userType: user.user_type,
         name: user.name,
       };
@@ -143,7 +143,7 @@ class AuthController {
       const accessToken = jwtService.generateAccessToken(tokenPayload);
       const refreshToken = jwtService.generateRefreshToken(user.id);
 
-      console.log(`Login successful: ${user.email} (${user.user_type})`);
+      console.log(`Login successful: ${user.username} (${user.user_type})`);
 
       // Set refresh token as httpOnly cookie
       res.cookie("refreshToken", refreshToken, {
@@ -157,7 +157,7 @@ class AuthController {
       // Build response user object
       const responseUser = {
         id: user.id,
-        email: user.email,
+        username: user.username,
         name: user.name,
         userType: user.user_type,
       };
@@ -255,7 +255,7 @@ class AuthController {
       // Build token payload
       const tokenPayload = {
         userId: user.id,
-        email: user.email,
+        username: user.username,
         userType: user.user_type,
         name: user.name,
       };
@@ -278,7 +278,7 @@ class AuthController {
       // Prepare user data to send back (same structure as login)
       const userData = {
         id: user.id,
-        email: user.email,
+        username: user.username,
         name: user.name,
         userType: user.user_type,
       };

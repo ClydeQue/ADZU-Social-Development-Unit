@@ -25,7 +25,7 @@ class JWTService {
     return jwt.sign(
       {
         userId: payload.userId,
-        email: payload.email,
+        username: payload.username,
         userType: payload.userType,
         name: payload.name,
         office_id: payload.office_id || null,

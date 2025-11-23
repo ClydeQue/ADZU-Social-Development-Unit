@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import WhiteContainer from '@/components/WhiteContainer';
 import Sidebar from '@/components/Sidebar';
+import SettingsNavbar from './SettingsNavbar';
+import api from '@/services/api';
 
 /**
  * Users Management Page
@@ -11,7 +13,6 @@ import Sidebar from '@/components/Sidebar';
 export default function UsersManagement() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('users'); // 'users' or 'reset-requests'
   
   // Mock data - TODO: Replace with actual API calls
@@ -42,17 +43,8 @@ export default function UsersManagement() {
     { id: 3, username: 'apc_director', office: 'APC', requestDate: '2025-11-23', status: 'pending' },
   ];
 
-  // Filter users by search
-  const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return mockUsers;
-    
-    const query = searchQuery.toLowerCase();
-    return mockUsers.filter(user => 
-      user.username.toLowerCase().includes(query) ||
-      user.office.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query)
-    );
-  }, [searchQuery, mockUsers]);
+  // Show all users
+  const filteredUsers = mockUsers;
 
   // Approve reset request mutation
   const approveResetMutation = useMutation({
@@ -77,28 +69,28 @@ export default function UsersManagement() {
       <WhiteContainer>
         <Sidebar />
         
-        <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-y-auto">
-          <div className="max-w-7xl w-full mx-auto px-4">
-            {/* Header with Back Button */}
-            <div className="mb-6">
+        <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-hidden">
+          <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
+            {/* Navbar */}
+            <SettingsNavbar title="User Management" showSearch={false} />
+
+            <div className="bg-[#F4F4F4] rounded-[15px] p-8 mx-4 flex-1 overflow-y-auto">
+              {/* Back Button */}
               <button
                 onClick={() => navigate('/unit-director/settings/main')}
-                className="flex items-center  gap-2 text-[#4D49FC] hover:underline mb-4"
+                className="flex items-center gap-2 text-[#4D49FC] hover:underline mb-4"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 Back to Settings
               </button>
-              
-              <h1 className="text-3xl font-bold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                USER MANAGEMENT
-              </h1>
-            </div>
 
-            {/* Tabs */}
-            <div className="bg-white rounded-xl cursor-pointer shadow-md p-2 mb-6">
+
+
+              {/* Tabs */}
+              <div className="bg-white rounded-xl cursor-pointer shadow-md p-2 mb-6">
               <div className="flex gap-2">
                 <button
                   onClick={() => setActiveTab('users')}
@@ -135,28 +127,9 @@ export default function UsersManagement() {
               </div>
             </div>
 
-            {/* Search Bar */}
-            {activeTab === 'users' && (
-              <div className="bg-white rounded-xl shadow-md p-4 mb-6">
-                <div className="relative">
-                  <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Search users by username, office, or email..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Users List */}
-            {activeTab === 'users' && (
-              <div className="h-full flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
+              {/* Users List */}
+              {activeTab === 'users' && (
+                <div className="h-full flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
                 <style>{`
                   .users-scroll-container::-webkit-scrollbar {
                     width: 5px;
@@ -231,9 +204,9 @@ export default function UsersManagement() {
               </div>
             )}
 
-            {/* Reset Requests List */}
-            {activeTab === 'reset-requests' && (
-              <div className="space-y-4 ">
+              {/* Reset Requests List */}
+              {activeTab === 'reset-requests' && (
+                <div className="space-y-4">
                 {mockResetRequests.filter(r => r.status === 'pending').length === 0 ? (
                   <div className="bg-white rounded-xl shadow-md p-12 text-center">
                     <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,8 +283,9 @@ export default function UsersManagement() {
                       </div>
                     ))
                 )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </WhiteContainer>

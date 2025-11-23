@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
+import SettingsNavbar from "./SettingsNavbar";
 import UnitDirectorService from "@/services/unitDirectorService";
 import TableSkeleton from "@/components/TableSkeleton";
 
@@ -52,166 +53,131 @@ export default function ProgramsManagement() {
       <WhiteContainer>
         <Sidebar />
 
-        <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-y-auto">
-          <div className="max-w-7xl w-full mx-auto px-4">
-            {/* Header with Back Button */}
-            <div className="mb-6">
+        <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-hidden">
+          <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
+            {/* Navbar */}
+            <SettingsNavbar showSearch={false} />
+
+            <div className="bg-[#F4F4F4] rounded-[15px] p-8 mx-4 flex-1 overflow-y-auto">
+              {/* Back Button */}
               <button
                 onClick={() => navigate("/unit-director/settings/main")}
-                className="flex items-center  cursor-pointer gap-2 text-[#4D49FC] hover:underline mb-4"
+                className="flex items-center gap-2 text-[#4D49FC] hover:underline mb-4"
                 style={{ fontFamily: "Inter, sans-serif" }}
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 Back to Settings
               </button>
 
-              <h1
-                className="text-3xl font-bold text-[#040195] mb-2"
-                style={{ fontFamily: "Inter, sans-serif" }}
-              >
-                PROGRAMS
-              </h1>
-            </div>
+              {/* Header */}
+              <div className="mb-6">
+                <h1
+                  className="text-4xl font-bold text-[#040195] mb-2"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Programs
+                </h1>
+                <p className="text-gray-500 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+                  Manage programs for each office
+                </p>
+              </div>
 
-            {/* Program Name and Office Selector */}
-            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Program Name and Office Selector */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 {/* Program Name Input */}
                 <div>
-                  <label
-                    className="block text-sm font-bold text-[#040195] mb-2 uppercase"
-                    style={{ fontFamily: "Inter, sans-serif" }}
-                  >
-                    Program Name
-                  </label>
                   <input
                     type="text"
-                    placeholder="Project Name"
+                    placeholder="Program Name"
                     value={newProgramName}
                     onChange={(e) => setNewProgramName(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
                     style={{ fontFamily: "Inter, sans-serif" }}
                   />
                 </div>
 
                 {/* Office Dropdown */}
-                <div>
-                  <label
-                    className="block text-sm font-bold text-[#040195] mb-2 uppercase"
+                <div className="relative">
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full px-3 py-2 text-sm border-2 border-[#4D49FC] cursor-pointer rounded-lg focus:border-[#4D49FC] focus:outline-none text-left flex items-center justify-between bg-white hover:bg-[#F8F8FF] transition-colors"
                     style={{ fontFamily: "Inter, sans-serif" }}
                   >
-                    Office
-                  </label>
-                  <div className="relative">
-                    <button
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="w-full px-4 py-3 border-2 border-[#4D49FC] cursor-pointer rounded-full focus:border-[#4D49FC] focus:outline-none text-left flex items-center justify-between bg-white hover:bg-[#F8F8FF] transition-colors"
-                      style={{ fontFamily: "Inter, sans-serif" }}
+                    <span
+                      className={
+                        selectedOfficeId
+                          ? "text-[#4D49FC] font-semibold"
+                          : "text-gray-400"
+                      }
                     >
-                      <span
-                        className={
-                          selectedOfficeId
-                            ? "text-[#4D49FC] font-semibold "
-                            : "text-gray-400"
-                        }
-                      >
-                        {selectedOffice
-                          ? selectedOffice.acronym
-                          : "SELECT AN OFFICE"}
-                      </span>
-                      <div className="flex items-center justify-center w-8 h-8 bg-[#4D49FC]  rounded-full">
-                        <svg
-                          className={`w-4 h-4 text-white transition-transform ${
-                            isDropdownOpen ? "rotate-180" : ""
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </div>
-                    </button>
+                      {selectedOffice
+                        ? selectedOffice.acronym
+                        : "SELECT OFFICE"}
+                    </span>
+                    <svg
+                      className={`w-4 h-4 text-[#4D49FC] transition-transform ${
+                        isDropdownOpen ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
 
-                    {/* Dropdown Menu */}
-                    {isDropdownOpen && (
-                      <div className="absolute z-10 w-full mt-2 bg-white border-2 border-[#E5E5FF] rounded-2xl shadow-xl max-h-80 overflow-y-auto">
-                        <div className="p-3 border-b-2 border-[#E5E5FF] bg-[#F8F8FF]">
-                          <p
-                            className="text-xs font-bold text-[#4D49FC] uppercase px-2"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            SELECT AN OFFICE
-                          </p>
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <div className="absolute z-10 w-full mt-2 bg-white border-2 border-[#E5E5FF] rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                      {isLoading ? (
+                        <div
+                          className="p-4 text-center text-gray-500 text-sm"
+                          style={{ fontFamily: "Inter, sans-serif" }}
+                        >
+                          Loading offices...
                         </div>
-                        {isLoading ? (
-                          <div
-                            className="p-4 text-center text-gray-500"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            Loading offices...
-                          </div>
-                        ) : (
-                          <div className="p-2">
-                            {offices.map((office) => (
-                              <button
-                                key={office.id}
-                                onClick={() => {
-                                  setSelectedOfficeId(office.id);
-                                  setIsDropdownOpen(false);
-                                }}
-                                className="w-full px-4 py-3 cursor-pointer hover:bg-[#F0F0FF] rounded-xl flex items-center gap-3 transition-colors text-left mb-1"
+                      ) : (
+                        <div className="p-1">
+                          {offices.map((office) => (
+                            <button
+                              key={office.id}
+                              onClick={() => {
+                                setSelectedOfficeId(office.id);
+                                setIsDropdownOpen(false);
+                              }}
+                              className="w-full px-3 py-2 cursor-pointer hover:bg-[#F0F0FF] rounded-lg flex items-center gap-2 transition-colors text-left"
+                            >
+                              {getOfficeLogo(office.acronym) && (
+                                <img
+                                  src={getOfficeLogo(office.acronym)}
+                                  alt={office.acronym}
+                                  className="w-5 h-5 object-contain"
+                                />
+                              )}
+                              <span
+                                className="font-semibold text-[#040195] text-xs"
+                                style={{ fontFamily: "Inter, sans-serif" }}
                               >
-                                {getOfficeLogo(office.acronym) && (
-                                  <img
-                                    src={getOfficeLogo(office.acronym)}
-                                    alt={office.acronym}
-                                    className="w-8 h-8 object-contain"
-                                  />
-                                )}
-                                <div className="flex flex-col">
-                                  <span
-                                    className="font-bold text-[#040195] text-sm"
-                                    style={{ fontFamily: "Inter, sans-serif" }}
-                                  >
-                                    {office.acronym}
-                                  </span>
-                                  <span
-                                    className="text-xs text-gray-600"
-                                    style={{ fontFamily: "Inter, sans-serif" }}
-                                  >
-                                    {office.name}
-                                  </span>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                                {office.acronym}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* ADD Button */}
-              <div className="flex justify-end">
+              <div className="flex justify-end mb-4">
                 <button
                   onClick={() => {
                     if (newProgramName.trim() && selectedOfficeId) {
@@ -226,19 +192,16 @@ export default function ProgramsManagement() {
                     }
                   }}
                   disabled={!newProgramName.trim() || !selectedOfficeId}
-                  className="px-8 py-2.5 bg-[#4D49FC] text-white font-bold rounded-lg cursor-pointer hover:bg-[#3D39EC] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors uppercase text-sm"
+                  className="px-6 py-2 bg-[#4D49FC] text-white font-bold rounded-lg cursor-pointer hover:bg-[#3D39EC] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  Add
+                  ADD
                 </button>
-              </div>
-            </div>
-
-            {/* Programs Table */}
-            <div
-              className="h-full flex flex-col"
-              style={{ fontFamily: "Inter, sans-serif" }}
-            >
+              </div>              {/* Programs Table */}
+              <div
+                className="h-full flex flex-col"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
               <style>{`
                 .programs-scroll-container::-webkit-scrollbar {
                   width: 5px;
@@ -348,6 +311,7 @@ export default function ProgramsManagement() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </main>
