@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import { Eye, EyeOff, RefreshCw } from "lucide-react";
 import settingsService from "@/services/settingsService";
 import Alert from "@/components/Alert";
+import SuccessModal from "@/components/SuccessModal";
 
 /**
  * Main Settings Page for Unit Director
@@ -16,6 +17,10 @@ export default function MainSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: "", message: "" });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successAction, setSuccessAction] = useState({
+    action: "updated",
+    itemName: "Password",
+  });
 
   // Password change state
   const [passwordForm, setPasswordForm] = useState({
@@ -91,6 +96,7 @@ export default function MainSettings() {
           usernameConfirm: false,
         });
         // Show success modal
+        setSuccessAction({ action: "updated", itemName: "Password" });
         setShowSuccessModal(true);
       } else {
         // Unexpected response format
@@ -115,15 +121,67 @@ export default function MainSettings() {
     }
   };
 
-  // Handle username change (TODO: integrate with API)
-  const handleUsernameChange = (e) => {
+  // Handle username change
+  const handleUsernameChange = async (e) => {
     e.preventDefault();
-    console.log("Username change submitted:", usernameForm);
-    // TODO: Call API to update username
-    showAlert(
-      "info",
-      "Username change functionality will be implemented with API"
-    );
+
+    // Validation
+    if (!usernameForm.newUsername) {
+      showAlert("error", "New username is required");
+      return;
+    }
+
+    if (usernameForm.newUsername.length < 3) {
+      showAlert("error", "Username must be at least 3 characters");
+      return;
+    }
+
+    if (!usernameForm.currentPassword) {
+      showAlert("error", "Current password is required for verification");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await settingsService.changeUnitDirectorUsername(
+        usernameForm.newUsername,
+        usernameForm.currentPassword
+      );
+
+      if (response && response.success) {
+        // Reset form
+        setUsernameForm({
+          newUsername: "",
+          currentPassword: "",
+        });
+        setShowPasswords({
+          current: false,
+          new: false,
+          confirm: false,
+          usernameConfirm: false,
+        });
+        // Show success modal
+        setSuccessAction({ action: "updated", itemName: "Username" });
+        setShowSuccessModal(true);
+      } else {
+        showAlert("error", "Unexpected response from server");
+      }
+    } catch (error) {
+      console.error("Username change error:", error);
+      let errorMessage = "Failed to change username";
+
+      if (error.message === "Session expired. Please login again.") {
+        errorMessage = error.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showAlert("error", errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -960,7 +1018,7 @@ export default function MainSettings() {
                         <RefreshCw size={18} />
                       </button>
                     </div>
-                    </form>
+                  </form>
                 </div>
               )}
             </div>
@@ -969,60 +1027,15 @@ export default function MainSettings() {
       </WhiteContainer>
 
       {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in duration-300">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-t-2xl p-6">
-              <div className="flex items-center justify-center">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-10 h-10 text-green-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-8 text-center">
-              <h3
-                className="text-2xl font-bold text-gray-800 mb-3"
-                style={{ fontFamily: "Inter, sans-serif" }}
-              >
-                Success!
-              </h3>
-              <p
-                className="text-gray-600 text-base mb-6"
-                style={{ fontFamily: "Inter, sans-serif" }}
-              >
-                Your password has been updated successfully. You can now use
-                your new password to log in.
-              </p>
-
-              <button
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  setActiveForm(null);
-                }}
-                className="w-full bg-[#040195] hover:bg-[#3d39cc] text-white font-bold py-3 px-6 rounded-full transition-all shadow-md hover:shadow-lg"
-                style={{ fontFamily: "Inter, sans-serif" }}
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SuccessModal
+        show={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          setActiveForm(null);
+        }}
+        action={successAction.action}
+        itemName={successAction.itemName}
+      />
     </div>
   );
 }

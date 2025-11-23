@@ -30,7 +30,8 @@ class AuthController {
       // Note: offices join is LEFT JOIN (office_id can be NULL for unit_director)
       const { data: users, error } = await supabase
         .from("office_credentials")
-        .select(`
+        .select(
+          `
           *,
           offices (
             id,
@@ -38,7 +39,8 @@ class AuthController {
             acronym,
             description
           )
-        `)
+        `
+        )
         .eq("username", username.trim().toLowerCase())
         .eq("is_active", true)
         .limit(1);
@@ -49,13 +51,14 @@ class AuthController {
         return res.status(500).json({
           success: false,
           message: "Database error",
-          error: process.env.NODE_ENV === "development" ? error.message : undefined,
+          error:
+            process.env.NODE_ENV === "development" ? error.message : undefined,
         });
       }
 
       if (!users || users.length === 0) {
         console.log(`User not found: ${username}`);
-        
+
         // Record failed attempt
         if (req.loginRateLimiter) {
           const attemptInfo = req.loginRateLimiter.recordFailedAttempt();
@@ -63,10 +66,10 @@ class AuthController {
             success: false,
             message: "Invalid credentials",
             remainingAttempts: attemptInfo.remainingAttempts,
-            attemptsUsed: attemptInfo.attempts
+            attemptsUsed: attemptInfo.attempts,
           });
         }
-        
+
         return res.status(401).json({
           success: false,
           message: "Invalid credentials",
@@ -82,28 +85,29 @@ class AuthController {
 
       if (!isValidPassword) {
         console.log(`Invalid password for: ${username}`);
-        
+
         // Record failed attempt
         if (req.loginRateLimiter) {
           const attemptInfo = req.loginRateLimiter.recordFailedAttempt();
-          
+
           if (attemptInfo.isLocked) {
             return res.status(429).json({
               success: false,
-              message: "Too many failed login attempts. Please try again in 1 minute.",
+              message:
+                "Too many failed login attempts. Please try again in 1 minute.",
               locked: true,
-              remainingAttempts: 0
+              remainingAttempts: 0,
             });
           }
-          
+
           return res.status(401).json({
             success: false,
             message: "Invalid credentials",
             remainingAttempts: attemptInfo.remainingAttempts,
-            attemptsUsed: attemptInfo.attempts
+            attemptsUsed: attemptInfo.attempts,
           });
         }
-        
+
         return res.status(401).json({
           success: false,
           message: "Invalid credentials",
@@ -151,7 +155,8 @@ class AuthController {
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // "none" for cross-site in production
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, // Allow subdomain access
+        domain:
+          process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, // Allow subdomain access
       });
 
       // Build response user object
@@ -231,14 +236,16 @@ class AuthController {
       // Get user from unified office_credentials table
       const { data: users, error } = await supabase
         .from("office_credentials")
-        .select(`
+        .select(
+          `
           *,
           offices (
             id,
             name,
             acronym
           )
-        `)
+        `
+        )
         .eq("id", userId)
         .eq("is_active", true)
         .limit(1);
@@ -334,6 +341,125 @@ class AuthController {
       res.status(500).json({
         success: false,
         message: "Logout failed",
+      });
+    }
+  }
+
+  // ========================================
+  // CHANGE PASSWORD - For both office users and unit director
+  // Requires authentication via JWT token
+  // ========================================
+  static async changePassword(req, res) {
+    try {
+      // Extract token from Authorization header
+      const authHeader = req.headers.authorization;
+      console.log("Authorization header:", authHeader ? "Present" : "Missing");
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        console.log("No valid authorization header");
+        return res.status(401).json({
+          success: false,
+          error: "Authentication required",
+        });
+      }
+
+      const token = authHeader.substring(7);
+      console.log("Token extracted, length:", token.length);
+
+      const verification = jwtService.verifyAccessToken(token);
+      console.log(
+        "Token verification result:",
+        verification.valid,
+        verification.error
+      );
+
+      if (!verification.valid) {
+        console.log("Token verification failed:", verification.error);
+        return res.status(401).json({
+          success: false,
+          error: "Invalid or expired token",
+          details: verification.error,
+        });
+      }
+
+      const userId = verification.payload.userId;
+      const { currentPassword, newPassword } = req.body;
+
+      console.log("Change password request for user:", userId);
+
+      // Validation
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          error: "Current password and new password are required",
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          error: "New password must be at least 6 characters",
+        });
+      }
+
+      // Get current user credentials
+      const { data: user, error: fetchError } = await supabase
+        .from("office_credentials")
+        .select("id, username, password, user_type")
+        .eq("id", userId)
+        .single();
+
+      if (fetchError || !user) {
+        console.error("Error fetching user:", fetchError);
+        return res.status(404).json({
+          success: false,
+          error: "User not found",
+        });
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+
+      if (!isValidPassword) {
+        console.log("Invalid current password for:", user.username);
+        return res.status(401).json({
+          success: false,
+          error: "Current password is incorrect",
+        });
+      }
+
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(newPassword, salt);
+
+      console.log("Updating password for:", user.username);
+
+      // Update password
+      const { error: updateError } = await supabase
+        .from("office_credentials")
+        .update({ password: passwordHash })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
+
+      console.log("Password updated successfully for:", user.username);
+
+      res.json({
+        success: true,
+        message: "Password updated successfully",
+      });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error changing password",
+        details: error.message,
       });
     }
   }
