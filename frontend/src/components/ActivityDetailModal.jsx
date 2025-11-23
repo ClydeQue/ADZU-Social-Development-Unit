@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { pdf } from '@react-pdf/renderer';
 import { getOfficeLogo } from '@/utils/officeLogos';
 import { getSDGIcons } from '@/utils/sdgData';
+import ActivityPDF from '@/components/ActivityPDF';
 
 
 /**
@@ -47,6 +49,21 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
         await onDelete(activity.id);
         onClose();
       }
+    }
+  };
+
+  const handlePrint = async () => {
+    try {
+      const blob = await pdf(<ActivityPDF activity={activity} report={null} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${activity?.title || activity?.activity_name || 'Activity'}_Details.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
     }
   };
 
@@ -417,7 +434,7 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           <div className="flex justify-end gap-3 mt-4">
             {/* Print Button */}
             <button
-              onClick={() => window.print()}
+              onClick={handlePrint}
               className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity bg-[#4D49FC] text-white text-sm font-bold"
               title="Print Activity"
             >

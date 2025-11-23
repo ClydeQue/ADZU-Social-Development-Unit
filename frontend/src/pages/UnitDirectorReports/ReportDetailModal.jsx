@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { pdf } from '@react-pdf/renderer';
 import UnitDirectorService from "@/services/unitDirectorService";
 import { getOfficeLogo } from "@/utils/officeLogos";
 import { getSDGIcons } from "@/utils/sdgData";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
+import ActivityPDF from "@/components/ActivityPDF";
 
 /**
  * Report Detail Modal Component
@@ -67,6 +69,22 @@ export default function ReportDetailModal({ report, activity, onClose }) {
     if (confirm(`Change activity status to "${newStatus}"?`)) {
       setSelectedStatus(newStatus);
       updateStatusMutation.mutate(newStatus);
+    }
+  };
+
+  // Handle Print PDF
+  const handlePrint = async () => {
+    try {
+      const blob = await pdf(<ActivityPDF activity={activity} report={report} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${activity?.title || 'Activity'}_Report.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
     }
   };
 
@@ -193,7 +211,7 @@ export default function ReportDetailModal({ report, activity, onClose }) {
         <div className="flex items-center justify-end gap-2 mb-2">
           {/* Print Button */}
           <button
-            onClick={() => window.print()}
+            onClick={handlePrint}
             className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
             bg-[#4D49FC] text-white text-sm font-bold"
             title="Print Report"
