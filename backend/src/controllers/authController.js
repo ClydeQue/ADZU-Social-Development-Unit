@@ -41,8 +41,7 @@ class AuthController {
           )
         `
         )
-        .eq("username", username.trim().toLowerCase())
-        .eq("is_active", true)
+        .ilike("username", username)
         .limit(1);
 
       if (error) {
@@ -119,10 +118,13 @@ class AuthController {
         req.loginRateLimiter.resetAttempts();
       }
 
-      // Update last_login timestamp
+      // Update last_login timestamp and set user as active
       await supabase
         .from("office_credentials")
-        .update({ last_login: new Date().toISOString() })
+        .update({
+          last_login: new Date().toISOString(),
+          is_active: true,
+        })
         .eq("id", user.id);
 
       // Build JWT token payload
@@ -247,7 +249,6 @@ class AuthController {
         `
         )
         .eq("id", userId)
-        .eq("is_active", true)
         .limit(1);
 
       if (error || !users || users.length === 0) {
@@ -325,6 +326,21 @@ class AuthController {
         // Revoke refresh token
         jwtService.revokeRefreshToken(refreshToken);
         console.log("Refresh token revoked");
+      }
+
+      // Get user ID from token if available
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.substring(7);
+        const verification = jwtService.verifyAccessToken(token);
+        if (verification.valid && verification.payload.userId) {
+          // Set user as inactive
+          await supabase
+            .from("office_credentials")
+            .update({ is_active: false })
+            .eq("id", verification.payload.userId);
+          console.log("User set to inactive:", verification.payload.userId);
+        }
       }
 
       // Clear cookie
@@ -459,6 +475,129 @@ class AuthController {
       res.status(500).json({
         success: false,
         error: "Error changing password",
+        details: error.message,
+      });
+    }
+  }
+
+  // ========================================
+  // CHANGE USERNAME - For both office users and unit director
+  // Requires authentication via JWT token
+  // ========================================
+  static async changeUsername(req, res) {
+    try {
+      // Extract token from Authorization header
+      const authHeader = req.headers.authorization;
+      console.log("Authorization header:", authHeader ? "Present" : "Missing");
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        console.log("No valid authorization header");
+        return res.status(401).json({
+          success: false,
+          error: "Authentication required",
+        });
+      }
+
+      const token = authHeader.substring(7);
+      const verification = jwtService.verifyAccessToken(token);
+
+      if (!verification.valid) {
+        console.log("Token verification failed:", verification.error);
+        return res.status(401).json({
+          success: false,
+          error: "Invalid or expired token",
+          details: verification.error,
+        });
+      }
+
+      const userId = verification.payload.userId;
+      const { newUsername, currentPassword } = req.body;
+
+      console.log("Change username request for user:", userId);
+
+      // Validation
+      if (!newUsername || !currentPassword) {
+        return res.status(400).json({
+          success: false,
+          error: "New username and current password are required",
+        });
+      }
+
+      if (newUsername.length < 3) {
+        return res.status(400).json({
+          success: false,
+          error: "Username must be at least 3 characters",
+        });
+      }
+
+      // Get current user credentials
+      const { data: user, error: fetchError } = await supabase
+        .from("office_credentials")
+        .select("id, username, password, user_type")
+        .eq("id", userId)
+        .single();
+
+      if (fetchError || !user) {
+        console.error("Error fetching user:", fetchError);
+        return res.status(404).json({
+          success: false,
+          error: "User not found",
+        });
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+
+      if (!isValidPassword) {
+        console.log("Invalid current password for:", user.username);
+        return res.status(401).json({
+          success: false,
+          error: "Current password is incorrect",
+        });
+      }
+
+      // Check if new username already exists
+      const { data: existingUser } = await supabase
+        .from("office_credentials")
+        .select("id")
+        .eq("username", newUsername.trim().toLowerCase())
+        .neq("id", userId)
+        .single();
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          error: "Username already exists",
+        });
+      }
+
+      console.log("Updating username for:", user.username, "->", newUsername);
+
+      // Update username
+      const { error: updateError } = await supabase
+        .from("office_credentials")
+        .update({ username: newUsername.trim().toLowerCase() })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
+
+      console.log("Username updated successfully");
+
+      res.json({
+        success: true,
+        message: "Username updated successfully",
+      });
+    } catch (error) {
+      console.error("Change username error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error changing username",
         details: error.message,
       });
     }
