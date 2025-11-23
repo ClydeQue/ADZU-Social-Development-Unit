@@ -1,27 +1,87 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import PropTypes from 'prop-types';
+
+// Register fonts
+Font.register({
+  family: 'Times New Roman',
+  src: 'https://fonts.gstatic.com/s/timesnewroman/v1/3Gg8L-Q7ShZJmGqTfepd4gNPxVXBH_Y.ttf',
+});
+
+Font.register({
+  family: 'Inter',
+  fonts: [
+    { src: 'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2' },
+    { src: 'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiA.woff2', fontWeight: 'bold' },
+  ]
+});
 
 // Create styles for PDF
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 11,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter',
     backgroundColor: '#FFFFFF',
   },
-  header: {
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 20,
+    paddingBottom: 15,
     borderBottom: '2 solid #040195',
-    paddingBottom: 10,
   },
-  title: {
-    fontSize: 20,
+  headerLeft: {
+    flex: 1,
+  },
+  headerCenter: {
+    flex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    objectFit: 'contain',
+  },
+  universityName: {
+    fontSize: 18,
+    fontFamily: 'Times New Roman',
     fontWeight: 'bold',
     color: '#040195',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  universitySubtitle: {
+    fontSize: 9,
+    fontFamily: 'Times New Roman',
+    fontStyle: 'italic',
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 3,
+  },
+  unitName: {
+    fontSize: 11,
+    fontFamily: 'Times New Roman',
+    fontWeight: 'bold',
+    color: '#040195',
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'Inter',
+    color: '#040195',
     marginBottom: 5,
+    marginTop: 10,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 10,
+    fontFamily: 'Inter',
     color: '#666666',
     marginBottom: 3,
   },
@@ -31,6 +91,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: 'bold',
+    fontFamily: 'Inter',
     color: '#040195',
     marginBottom: 8,
     borderBottom: '1 solid #E5E7EB',
@@ -43,10 +104,12 @@ const styles = StyleSheet.create({
   label: {
     width: '30%',
     fontWeight: 'bold',
+    fontFamily: 'Inter',
     color: '#374151',
   },
   value: {
     width: '70%',
+    fontFamily: 'Inter',
     color: '#1F2937',
   },
   badge: {
@@ -55,6 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     fontSize: 9,
     fontWeight: 'bold',
+    fontFamily: 'Inter',
     marginRight: 4,
     marginBottom: 4,
   },
@@ -65,6 +129,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     fontSize: 10,
     fontWeight: 'bold',
+    fontFamily: 'Inter',
     textTransform: 'uppercase',
   },
   sdgContainer: {
@@ -77,6 +142,7 @@ const styles = StyleSheet.create({
     padding: '4 8',
     borderRadius: 4,
     fontSize: 9,
+    fontFamily: 'Inter',
     color: '#040195',
     marginRight: 6,
     marginBottom: 4,
@@ -88,12 +154,14 @@ const styles = StyleSheet.create({
     right: 40,
     textAlign: 'center',
     fontSize: 9,
+    fontFamily: 'Inter',
     color: '#9CA3AF',
     borderTop: '1 solid #E5E7EB',
     paddingTop: 10,
   },
   textBlock: {
     marginBottom: 4,
+    fontFamily: 'Inter',
     color: '#1F2937',
     lineHeight: 1.4,
   },
@@ -138,22 +206,48 @@ const ActivityPDF = ({ activity, report }) => {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{activity?.title || 'Activity Report'}</Text>
-          <Text style={styles.subtitle}>
-            {activity?.programs?.offices?.name || 'Office'} - Activity Report
-          </Text>
-          <Text style={styles.subtitle}>
-            Generated on: {new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </Text>
+        {/* Header with Logos */}
+        <View style={styles.headerContainer}>
+          {/* Left Logo */}
+          <View style={styles.headerLeft}>
+            <Image
+              src="/logos/pdflogo/adzu_logo_print.webp"
+              style={styles.logo}
+            />
+          </View>
+
+          {/* Center Text */}
+          <View style={styles.headerCenter}>
+            <Text style={styles.universityName}>Ateneo de Zamboanga University</Text>
+            <Text style={styles.universitySubtitle}>
+              The Jesuit University in Western Mindanao, Philippines
+            </Text>
+            <Text style={styles.unitName}>SOCIAL DEVELOPMENT UNIT</Text>
+          </View>
+
+          {/* Right Logo */}
+          <View style={styles.headerRight}>
+            <Image
+              src="/logos/pdflogo/sdu_logo_pdf.webp"
+              style={styles.logo}
+            />
+          </View>
         </View>
+
+        {/* Activity Title */}
+        <Text style={styles.title}>{activity?.title || 'Activity Report'}</Text>
+        <Text style={styles.subtitle}>
+          {activity?.programs?.offices?.name || 'Office'} - Activity Report
+        </Text>
+        <Text style={styles.subtitle}>
+          Generated on: {new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </Text>
 
         {/* Activity Information */}
         <View style={styles.section}>
