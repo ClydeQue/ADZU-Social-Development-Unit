@@ -34,6 +34,17 @@ export default function UsersManagement() {
 
   const users = usersData?.users || [];
 
+  // Fetch password reset requests
+  const { data: resetRequestsData, isLoading: resetRequestsLoading } = useQuery({
+    queryKey: ["password-reset-requests"],
+    queryFn: async () => {
+      const response = await settingsService.getPasswordResetRequests();
+      return response;
+    },
+  });
+
+  const resetRequests = resetRequestsData?.requests || [];
+
   const getOfficeLogo = (acronym) => {
     const logos = {
       ACCA: "/logos/officeLogo/acca_logo_big.webp",
@@ -45,30 +56,6 @@ export default function UsersManagement() {
     };
     return logos[acronym] || null;
   };
-
-  const mockResetRequests = [
-    {
-      id: 1,
-      username: "acca_director",
-      office: "ACCA",
-      requestDate: "2025-11-20",
-      status: "pending",
-    },
-    {
-      id: 2,
-      username: "aces_director",
-      office: "ACES",
-      requestDate: "2025-11-22",
-      status: "pending",
-    },
-    {
-      id: 3,
-      username: "apc_director",
-      office: "APC",
-      requestDate: "2025-11-23",
-      status: "pending",
-    },
-  ];
 
   // Filter users by search
   const filteredUsers = useMemo(() => {
@@ -84,9 +71,8 @@ export default function UsersManagement() {
 
   // Approve reset request mutation
   const approveResetMutation = useMutation({
-    mutationFn: () => {
-      // TODO: Implement actual API call
-      return new Promise((resolve) => setTimeout(resolve, 500));
+    mutationFn: async (requestId) => {
+      return await settingsService.approvePasswordReset(requestId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["password-reset-requests"]);
@@ -94,9 +80,25 @@ export default function UsersManagement() {
     },
   });
 
+  // Reject reset request mutation
+  const rejectResetMutation = useMutation({
+    mutationFn: async (requestId) => {
+      return await settingsService.rejectPasswordReset(requestId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["password-reset-requests"]);
+    },
+  });
+
   const handleApproveReset = (request) => {
-    if (confirm(`Approve password reset for ${request.username}?`)) {
+    if (confirm(`Approve password reset for ${request.username}? Password will be reset to password123`)) {
       approveResetMutation.mutate(request.id);
+    }
+  };
+
+  const handleRejectReset = (request) => {
+    if (confirm(`Reject password reset request for ${request.username}?`)) {
+      rejectResetMutation.mutate(request.id);
     }
   };
 
@@ -325,8 +327,12 @@ export default function UsersManagement() {
               {/* Reset Requests List */}
               {activeTab === "reset-requests" && (
                 <div className="space-y-4">
-                  {mockResetRequests.filter((r) => r.status === "pending")
-                    .length === 0 ? (
+                  {resetRequestsLoading ? (
+                    <div className="bg-white rounded-xl shadow-md p-12 text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4D49FC] mx-auto"></div>
+                      <p className="text-gray-500 mt-4">Loading reset requests...</p>
+                    </div>
+                  ) : resetRequests.filter((r) => r.status === "pending").length === 0 ? (
                     <div className="bg-white rounded-xl shadow-md p-12 text-center">
                       <svg
                         className="w-16 h-16 text-gray-300 mx-auto mb-4"
@@ -349,7 +355,7 @@ export default function UsersManagement() {
                       </p>
                     </div>
                   ) : (
-                    mockResetRequests
+                    resetRequests
                       .filter((request) => request.status === "pending")
                       .map((request) => (
                         <div
@@ -435,7 +441,9 @@ export default function UsersManagement() {
                                 Approve
                               </button>
                               <button
-                                className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                                onClick={() => handleRejectReset(request)}
+                                disabled={rejectResetMutation.isPending}
+                                className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 style={{ fontFamily: "Inter, sans-serif" }}
                               >
                                 <svg

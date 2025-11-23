@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom/client';
 import { getOfficeLogo } from '@/utils/officeLogos';
 import { getSDGIcons } from '@/utils/sdgData';
 import ActivityPrintView from '@/components/ActivityPrintView';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 
 /**
@@ -14,6 +15,7 @@ import ActivityPrintView from '@/components/ActivityPrintView';
  */
 export default function ActivityDetailModal({ activity, onClose, onDelete, basePath }) {
   const navigate = useNavigate();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Listen for escape key
   useEffect(() => {
@@ -43,12 +45,15 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
     navigate(`${basePath}/edit-activity/${activity.id}`);
   };
 
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
   const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete "${activity.activity_name}"?`)) {
-      if (onDelete) {
-        await onDelete(activity.id);
-        onClose();
-      }
+    if (onDelete) {
+      await onDelete(activity.id);
+      setShowDeleteConfirm(false);
+      onClose();
     }
   };
 
@@ -144,7 +149,7 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
         <div className="flex  items-center justify-end gap-2  ">
           {/* Delete Button */}
           <button
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl
              hover:bg-[#bc3d2c] active:bg-[#9b2c1a] hover:cursor-pointer transition-colors bg-[#4D49FC]"
 
@@ -488,6 +493,13 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={showDeleteConfirm}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

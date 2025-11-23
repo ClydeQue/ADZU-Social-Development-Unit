@@ -27,4 +27,7 @@ router.post("/change-password", AuthController.changePassword);
 // Change username (for office users and unit director)
 router.post("/change-username", AuthController.changeUsername);
 
+// Forgot password - submit reset request
+router.post("/forgot-password", AuthController.forgotPassword);
+
 module.exports = router;

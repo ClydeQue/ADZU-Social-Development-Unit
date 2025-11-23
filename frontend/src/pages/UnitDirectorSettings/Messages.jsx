@@ -341,7 +341,7 @@ export default function MessagesManagement() {
                     <button
                       onClick={handleDeleteOfficeMessages}
                       disabled={deleteOfficeMessagesMutation.isPending}
-                      className="px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                      className="px-4 py-2 bg-red-600 text-white cursor-pointer text-sm font-bold rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                       style={{ fontFamily: "Inter, sans-serif" }}
                     >
                       <svg

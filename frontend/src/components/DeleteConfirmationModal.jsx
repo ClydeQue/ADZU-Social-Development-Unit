@@ -1,141 +1,61 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-} from "@mui/material";
-import { Delete } from "@mui/icons-material";
 
 const DeleteConfirmationModal = ({
   open,
-  title = "Confirm Delete",
-  message = "Are you sure you want to delete this item?",
+  title = "Are you sure you want to delete this reports?",
+  message = "This action cannot be undone.",
   itemName = "",
   onConfirm,
   onCancel,
   isLoading = false,
-  confirmButtonColor = "error",
-  confirmButtonText = "Delete",
-  cancelButtonText = "Cancel",
+  confirmButtonText = "DELETE",
+  cancelButtonText = "CANCEL",
 }) => {
+  if (!open) return null;
+
   return (
-    <Dialog
-      open={open}
-      onClose={onCancel}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: "12px",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-        },
-      }}
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onCancel}
     >
-      <DialogTitle
-        sx={{
-          fontSize: "1.5rem",
-          fontWeight: "bold",
-          color: "#040195",
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          fontFamily: "Inter, sans-serif",
-        }}
+      <div
+        className="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in duration-300"
+        onClick={(e) => e.stopPropagation()}
       >
-        <Delete sx={{ color: "#FF4D4D" }} />
-        {title}
-      </DialogTitle>
+        {/* Warning Icon */}
+        <div className="flex items-center justify-center pt-12 pb-6">
+          <img
+            src="/icons/warning.svg"
+            alt="Warning"
+            className="w-24 h-24"
+          />
+        </div>
 
-      <DialogContent>
-        <DialogContentText
-          sx={{
-            color: "#555",
-            fontSize: "1rem",
-            marginBottom: "0.5rem",
-            fontFamily: "Inter, sans-serif",
-          }}
-        >
-          {message}
-        </DialogContentText>
-        {itemName && (
-          <DialogContentText
-            sx={{
-              color: "#4D49FC",
-              fontSize: "0.95rem",
-              fontWeight: "600",
-              marginTop: "0.75rem",
-              padding: "0.75rem",
-              backgroundColor: "#F0F0FF",
-              borderRadius: "8px",
-              borderLeft: "3px solid #4D49FC",
-              fontFamily: "Inter, sans-serif",
-            }}
-          >
-            Item: <strong>{itemName}</strong>
-          </DialogContentText>
-        )}
-      </DialogContent>
-
-      <DialogActions
-        sx={{
-          padding: "1.5rem",
-          gap: 1,
-          justifyContent: "flex-end",
-        }}
-      >
-        <Button
-          onClick={onCancel}
-          disabled={isLoading}
-          variant="outlined"
-          sx={{
-            color: "#666",
-            borderColor: "#ccc",
-            textTransform: "none",
-            fontSize: "0.9rem",
-            fontWeight: "600",
-            padding: "0.6rem 1.5rem",
-            borderRadius: "8px",
-            "&:hover": {
-              backgroundColor: "#f5f5f5",
-              borderColor: "#999",
-            },
-            fontFamily: "Inter, sans-serif",
-          }}
-        >
-          {cancelButtonText}
-        </Button>
-        <Button
-          onClick={onConfirm}
-          disabled={isLoading}
-          variant="contained"
-          color={confirmButtonColor}
-          sx={{
-            textTransform: "none",
-            fontSize: "0.9rem",
-            fontWeight: "600",
-            padding: "0.6rem 1.5rem",
-            borderRadius: "8px",
-            backgroundColor:
-              confirmButtonColor === "error" ? "#FF4D4D" : undefined,
-            "&:hover": {
-              backgroundColor:
-                confirmButtonColor === "error" ? "#E63939" : undefined,
-            },
-            "&:disabled": {
-              backgroundColor: "#ccc",
-              color: "#999",
-            },
-            fontFamily: "Inter, sans-serif",
-          }}
-        >
-          {isLoading ? `${confirmButtonText}...` : confirmButtonText}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        {/* Modal Body */}
+        <div className="px-8 pb-8 text-center">
+          {/* Action Buttons */}
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={onCancel}
+              disabled={isLoading}
+              className="px-12 py-3 border-4 border-[#4D49FC] text-[#4D49FC] font-bold text-lg rounded-full hover:bg-[#4D49FC] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ fontFamily: "Inter, sans-serif" }}
+            >
+              CANCEL
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={isLoading}
+              className="px-12 py-3 bg-[#DC3545] text-white font-bold text-lg rounded-full hover:bg-[#C82333] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              style={{ fontFamily: "Inter, sans-serif" }}
+            >
+              {isLoading ? "DELETING..." : "DELETE"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

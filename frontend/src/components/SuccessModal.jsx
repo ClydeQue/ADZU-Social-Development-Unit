@@ -82,40 +82,28 @@ const SuccessModal = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in duration-300"
+        className="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-t-2xl p-6">
-          <div className="flex items-center justify-center">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-              <svg
-                className="w-10 h-10 text-green-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={3}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-          </div>
+        {/* Warning Icon */}
+        <div className="flex items-center justify-center pt-12 pb-6">
+          <img
+            src="/icons/warning.svg"
+            alt="Warning"
+            className="w-24 h-24"
+          />
         </div>
 
         {/* Modal Body */}
-        <div className="p-8 text-center">
+        <div className="px-8 pb-8 text-center">
           <h3
-            className="text-2xl font-bold text-gray-800 mb-3"
+            className="text-2xl font-bold text-[#040195] mb-3 leading-tight"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             {displayTitle}
           </h3>
           <p
-            className="text-gray-600 text-base mb-6"
+            className="text-[#040195] text-base mb-8 font-medium"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             {displayMessage}
@@ -123,7 +111,7 @@ const SuccessModal = ({
 
           <button
             onClick={onClose}
-            className="w-full bg-[#040195] hover:bg-[#3d39cc] text-white font-bold py-3 px-6 rounded-full transition-all shadow-md hover:shadow-lg"
+            className="px-12 py-3 bg-[#4D49FC] text-white font-bold text-lg rounded-full hover:bg-[#040195] transition-all shadow-lg"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             {buttonText}

@@ -402,14 +402,28 @@ export default function OfficeReports({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 px-4">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              No Activities Found
-            </h3>
-            <p className="text-red-600 text-sm text-center max-w-md">
-              If you think this is an error, please contact your system
-              administrator.
-            </p>
+          <div className="flex gap-4 h-full">
+            <div className="flex-1 flex flex-col items-center justify-center py-20 px-4">
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                No Activities Found
+              </h3>
+              <p className="text-red-600 text-sm text-center max-w-md">
+                If you think this is an error, please contact your system
+                administrator.
+              </p>
+            </div>
+
+            {/* Vertical Action Buttons - Right Side */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => navigate(`${basePath}/add-activity`)}
+                className="p-3 text-white font-bold hover:cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity shadow-lg flex items-center justify-center"
+                style={{ backgroundColor: "#4D49FC", borderRadius: "10px" }}
+                title="Create New Project"
+              >
+                <img src="/icons/add.svg" alt="Add" className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         )}
       </div>

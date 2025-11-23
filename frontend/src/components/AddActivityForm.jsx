@@ -165,6 +165,13 @@ export default function AddActivityForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate that a program is selected
+    if (!formData.programId) {
+      setErrorMessage("Please select a program before submitting. If no programs are available, create one in Settings first.");
+      setShowErrorModal(true);
+      return;
+    }
+
     try {
       // Prepare activity data for backend
       const activityData = {
@@ -317,6 +324,12 @@ export default function AddActivityForm({
                 {programsLoading ? (
                   <div className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-xs text-gray-400">
                     Loading...
+                  </div>
+                ) : programs.length === 0 ? (
+                  <div className="flex-1">
+                    <div className="px-2 py-2 border border-red-300 bg-red-50 rounded-[11px] text-xs text-red-600">
+                      No programs available. Please create a program first in Settings.
+                    </div>
                   </div>
                 ) : (
                   <div className="relative flex-1" ref={dropdownRef}>

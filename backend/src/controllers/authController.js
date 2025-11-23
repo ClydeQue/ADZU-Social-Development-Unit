@@ -628,6 +628,91 @@ class AuthController {
       });
     }
   }
+
+  // ========================================
+  // FORGOT PASSWORD - Submit password reset request
+  // No authentication required (this is for users who can't log in)
+  // ========================================
+  static async forgotPassword(req, res) {
+    try {
+      const { username } = req.body;
+
+      console.log("Forgot password request for username:", username);
+
+      // Validation
+      if (!username || username.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Username is required",
+        });
+      }
+
+      // Check if username exists in office_credentials (only office_user, not unit_director)
+      const { data: user, error: fetchError } = await supabase
+        .from("office_credentials")
+        .select("id, username, office_id, user_type")
+        .eq("username", username.trim().toLowerCase())
+        .eq("user_type", "office_user")
+        .single();
+
+      if (fetchError || !user) {
+        console.log("User not found:", username);
+        // Return generic message for security (don't reveal if username exists)
+        return res.status(404).json({
+          success: false,
+          error: "Username not found",
+        });
+      }
+
+      console.log("User found:", user.username, "Office ID:", user.office_id);
+
+      // Check if there's already a pending request for this user
+      const { data: existingRequest, error: checkError } = await supabase
+        .from("password_reset_requests")
+        .select("id, status")
+        .eq("username", user.username)
+        .eq("status", "pending")
+        .single();
+
+      if (existingRequest) {
+        console.log("Pending request already exists for:", user.username);
+        return res.status(400).json({
+          success: false,
+          error: "A password reset request is already pending for this account",
+        });
+      }
+
+      // Create password reset request
+      const { data: resetRequest, error: createError } = await supabase
+        .from("password_reset_requests")
+        .insert({
+          username: user.username,
+          office_id: user.office_id,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error("Error creating reset request:", createError);
+        throw createError;
+      }
+
+      console.log("Password reset request created:", resetRequest.id);
+
+      res.json({
+        success: true,
+        message: "Password reset request submitted successfully",
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error submitting password reset request",
+        details: error.message,
+      });
+    }
+  }
 }
 
 module.exports = AuthController;

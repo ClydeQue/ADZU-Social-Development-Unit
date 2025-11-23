@@ -32,6 +32,10 @@ const WelcomePage = () => {
   const [error, setError] = useState('');
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordUsername, setForgotPasswordUsername] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -140,6 +144,56 @@ const WelcomePage = () => {
         setError(err.message || 'Invalid credentials');
       }
     }
+  };
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setForgotPasswordError('');
+    
+    if (!forgotPasswordUsername.trim()) {
+      setForgotPasswordError('Please enter your username');
+      return;
+    }
+
+    try {
+      // Get API base URL (same logic as api.js)
+      const getAPIBaseURL = () => {
+        if (import.meta.env.VITE_API_URL) {
+          return import.meta.env.VITE_API_URL;
+        }
+        if (import.meta.env.PROD) {
+          return "https://adzu-sdu-backend-delta.vercel.app";
+        }
+        return "http://localhost:5001";
+      };
+
+      const apiUrl = `${getAPIBaseURL()}/api/auth/forgot-password`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: forgotPasswordUsername })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setForgotPasswordSuccess(true);
+        setForgotPasswordUsername('');
+      } else {
+        setForgotPasswordError(data.error || 'Failed to submit reset request');
+      }
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      setForgotPasswordError('Network error. Please try again.');
+    }
+  };
+
+  const resetForgotPassword = () => {
+    setShowForgotPassword(false);
+    setForgotPasswordUsername('');
+    setForgotPasswordError('');
+    setForgotPasswordSuccess(false);
   };
 
   return (
@@ -308,6 +362,15 @@ const WelcomePage = () => {
                             />
                           </button>
                         </div>
+                        {/* Forgot Password Link */}
+                        <button
+                          type="button"
+                          onClick={() => setShowForgotPassword(true)}
+                          className="text-xs lg:text-sm text-[#4D49FC] hover:text-[#3d39dc] cursor-pointer font-semibold mt-2 hover:underline transition-colors"
+                          style={{ fontFamily: "Inter, sans-serif" }}
+                        >
+                          Forgot Password?
+                        </button>
                       </div>
 
                       {/* Login Button with Google Icon */}
@@ -478,6 +541,15 @@ const WelcomePage = () => {
                               />
                             </button>
                           </div>
+                          {/* Forgot Password Link Mobile */}
+                          <button
+                            type="button"
+                            onClick={() => setShowForgotPassword(true)}
+                            className="text-[0.65rem] sm:text-xs text-[#4D49FC] cursor-pointer hover:text-[#3d39dc] font-semibold mt-1 hover:underline transition-colors"
+                            style={{ fontFamily: "Inter, sans-serif" }}
+                          >
+                            Forgot Password?
+                          </button>
                         </div>
 
                         {/* Login Button */}
@@ -537,6 +609,108 @@ const WelcomePage = () => {
             
             <div data-layer="Gradient_Blue" className="GradientBlue z-[100] w-full fixed bottom-0 left-0 right-0 h-[12vh] sm:h-[15vh] bg-gradient-to-t from-[#020052] via-[#020052]/60 to-transparent pointer-events-none" />
           </div>
+
+          {/* Forgot Password Modal */}
+          {showForgotPassword && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
+              <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in duration-300">
+                {/* Warning Icon */}
+                <div className="flex items-center justify-center pt-12 pb-6">
+                  <img
+                    src="/icons/warning.svg"
+                    alt="Warning"
+                    className="w-24 h-24"
+                  />
+                </div>
+
+                {/* Modal Body */}
+                <div className="px-8 pb-8 text-center">
+                  {!forgotPasswordSuccess ? (
+                    <>
+                      <h3
+                        className="text-2xl font-bold text-[#040195] mb-3 leading-tight"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        Forgot Password?
+                      </h3>
+                      <p
+                        className="text-[#040195] text-base mb-6 font-medium"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        Enter your username to request a password reset
+                      </p>
+
+                      <form onSubmit={handleForgotPasswordSubmit}>
+                        <div className="mb-6">
+                          <div className="relative">
+                            <img
+                              src="/icons/person.svg"
+                              alt="person"
+                              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 z-10"
+                            />
+                            <input
+                              type="text"
+                              value={forgotPasswordUsername}
+                              onChange={(e) => setForgotPasswordUsername(e.target.value)}
+                              className="w-full border-2 font-poppins border-[#040195] rounded-full px-12 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4D49FC] placeholder-gray-400"
+                              placeholder="Enter your username"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {forgotPasswordError && (
+                          <div className="mb-4 text-red-600 text-sm">
+                            {forgotPasswordError}
+                          </div>
+                        )}
+
+                        <div className="flex gap-4 justify-center">
+                          <button
+                            type="button"
+                            onClick={resetForgotPassword}
+                            className="px-12 py-3 border-4 border-[#4D49FC] text-[#4D49FC] font-bold text-lg rounded-full hover:bg-[#4D49FC] hover:text-white transition-all"
+                            style={{ fontFamily: "Inter, sans-serif" }}
+                          >
+                            CANCEL
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-12 py-3 bg-[#4D49FC] text-white font-bold text-lg rounded-full hover:bg-[#3d39dc] transition-all shadow-lg"
+                            style={{ fontFamily: "Inter, sans-serif" }}
+                          >
+                            SUBMIT
+                          </button>
+                        </div>
+                      </form>
+                    </>
+                  ) : (
+                    <>
+                      <h3
+                        className="text-2xl font-bold text-[#040195] mb-3 leading-tight"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        Request Submitted!
+                      </h3>
+                      <p
+                        className="text-[#040195] text-base mb-8 font-medium"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        Your password reset request has been sent to the Unit Director for approval. You&apos;ll be notified once approved.
+                      </p>
+                      <button
+                        onClick={resetForgotPassword}
+                        className="px-12 py-3 bg-[#4D49FC] text-white font-bold text-lg rounded-full hover:bg-[#3d39dc] transition-all shadow-lg"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        OK
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </Suspense>
     </LazyMotion>

@@ -76,6 +76,50 @@ const settingsService = {
       throw error;
     }
   },
+
+  /**
+   * Get password reset requests
+   * @returns {Promise} Response with reset requests data
+   */
+  getPasswordResetRequests: async () => {
+    try {
+      const response = await api.get("api/unit-director/password-reset-requests");
+      return response;
+    } catch (error) {
+      console.error("Get password reset requests error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Approve password reset request
+   * @param {number} requestId - Reset request ID
+   * @returns {Promise} Response with success status
+   */
+  approvePasswordReset: async (requestId) => {
+    try {
+      const response = await api.post(`api/unit-director/password-reset-requests/${requestId}/approve`);
+      return response;
+    } catch (error) {
+      console.error("Approve password reset error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Reject password reset request
+   * @param {number} requestId - Reset request ID
+   * @returns {Promise} Response with success status
+   */
+  rejectPasswordReset: async (requestId) => {
+    try {
+      const response = await api.post(`api/unit-director/password-reset-requests/${requestId}/reject`);
+      return response;
+    } catch (error) {
+      console.error("Reject password reset error:", error);
+      throw error;
+    }
+  },
 };
 
 export default settingsService;

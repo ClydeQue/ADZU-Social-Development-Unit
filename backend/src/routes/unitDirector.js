@@ -722,4 +722,216 @@ router.put(
   }
 );
 
+// ========================================
+// PASSWORD RESET REQUEST MANAGEMENT
+// ========================================
+
+// Get all password reset requests (pending)
+router.get(
+  "/password-reset-requests",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      console.log("Fetching password reset requests");
+
+      // Query all pending password reset requests with office information
+      const { data: requests, error } = await supabase
+        .from("password_reset_requests")
+        .select(
+          `
+          id,
+          username,
+          office_id,
+          status,
+          created_at,
+          updated_at,
+          offices(
+            id,
+            name,
+            acronym
+          )
+        `
+        )
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching reset requests:", error);
+        throw error;
+      }
+
+      // Transform data to match frontend expectations
+      const formattedRequests = requests.map((request) => ({
+        id: request.id,
+        username: request.username,
+        office: request.offices?.acronym || "N/A",
+        officeName: request.offices?.name || "Unknown Office",
+        requestDate: request.created_at,
+        status: request.status,
+      }));
+
+      console.log(`Found ${formattedRequests.length} pending reset requests`);
+
+      res.json({
+        success: true,
+        requests: formattedRequests,
+      });
+    } catch (error) {
+      console.error("Get password reset requests error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error fetching password reset requests",
+        details: error.message,
+      });
+    }
+  }
+);
+
+// Approve password reset request (reset password to "password123")
+router.post(
+  "/password-reset-requests/:id/approve",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      console.log("Approving password reset request:", id);
+
+      // Get the reset request
+      const { data: request, error: fetchError } = await supabase
+        .from("password_reset_requests")
+        .select("id, username, status")
+        .eq("id", id)
+        .single();
+
+      if (fetchError || !request) {
+        console.error("Reset request not found:", id);
+        return res.status(404).json({
+          success: false,
+          error: "Reset request not found",
+        });
+      }
+
+      if (request.status !== "pending") {
+        return res.status(400).json({
+          success: false,
+          error: "Reset request is not pending",
+        });
+      }
+
+      // Hash the default password "password123"
+      const bcrypt = require("bcryptjs");
+      const salt = await bcrypt.genSalt(12);
+      const passwordHash = await bcrypt.hash("password123", salt);
+
+      console.log("Resetting password for user:", request.username);
+
+      // Update the user's password in office_credentials
+      const { error: updatePasswordError } = await supabase
+        .from("office_credentials")
+        .update({ password: passwordHash })
+        .eq("username", request.username);
+
+      if (updatePasswordError) {
+        console.error("Error updating password:", updatePasswordError);
+        throw updatePasswordError;
+      }
+
+      // Update the reset request status to "approved"
+      const { error: updateRequestError } = await supabase
+        .from("password_reset_requests")
+        .update({
+          status: "approved",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (updateRequestError) {
+        console.error("Error updating request status:", updateRequestError);
+        throw updateRequestError;
+      }
+
+      console.log("Password reset approved for:", request.username);
+
+      res.json({
+        success: true,
+        message: "Password reset approved. Password has been reset to password123",
+      });
+    } catch (error) {
+      console.error("Approve password reset error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error approving password reset",
+        details: error.message,
+      });
+    }
+  }
+);
+
+// Reject password reset request
+router.post(
+  "/password-reset-requests/:id/reject",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      console.log("Rejecting password reset request:", id);
+
+      // Get the reset request
+      const { data: request, error: fetchError } = await supabase
+        .from("password_reset_requests")
+        .select("id, username, status")
+        .eq("id", id)
+        .single();
+
+      if (fetchError || !request) {
+        console.error("Reset request not found:", id);
+        return res.status(404).json({
+          success: false,
+          error: "Reset request not found",
+        });
+      }
+
+      if (request.status !== "pending") {
+        return res.status(400).json({
+          success: false,
+          error: "Reset request is not pending",
+        });
+      }
+
+      // Update the reset request status to "rejected"
+      const { error: updateError } = await supabase
+        .from("password_reset_requests")
+        .update({
+          status: "rejected",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (updateError) {
+        console.error("Error updating request status:", updateError);
+        throw updateError;
+      }
+
+      console.log("Password reset rejected for:", request.username);
+
+      res.json({
+        success: true,
+        message: "Password reset request rejected",
+      });
+    } catch (error) {
+      console.error("Reject password reset error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error rejecting password reset",
+        details: error.message,
+      });
+    }
+  }
+);
+
 module.exports = router;
