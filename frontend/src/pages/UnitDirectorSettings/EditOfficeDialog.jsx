@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import unitDirectorSettings from "@/services/unitDirectorSettings";
 import UnitDirectorService from "@/services/unitDirectorService";
+import SuccessModal from "@/components/SuccessModal";
+import ErrorModal from "@/components/alerts/ErrorModal";
 
 export default function EditOfficeDialog({ office, onClose }) {
   const [activeSection, setActiveSection] = useState("program"); // 'program' or 'password'
@@ -26,6 +28,10 @@ export default function EditOfficeDialog({ office, onClose }) {
     new: false,
     confirm: false,
   });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -83,10 +89,14 @@ export default function EditOfficeDialog({ office, onClose }) {
       unitDirectorSettings.changeOfficePassword(office.id, newPassword),
     onSuccess: () => {
       setPasswordData({ newPassword: "", confirmPassword: "" });
-      alert("Password changed successfully!");
+      setSuccessMessage("Password changed successfully!");
+      setShowSuccessModal(true);
     },
     onError: (error) => {
-      alert(`Failed to change password: ${error.message || "Unknown error"}`);
+      setErrorMessage(
+        `Failed to change password: ${error.message || "Unknown error"}`
+      );
+      setShowErrorModal(true);
     },
   });
 
@@ -133,11 +143,13 @@ export default function EditOfficeDialog({ office, onClose }) {
   const handleChangePassword = () => {
     // Validation
     if (!passwordData.newPassword || passwordData.newPassword.length < 6) {
-      alert("Password must be at least 6 characters");
+      setErrorMessage("Password must be at least 6 characters");
+      setShowErrorModal(true);
       return;
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Passwords do not match");
+      setErrorMessage("Passwords do not match");
+      setShowErrorModal(true);
       return;
     }
     setShowPasswordConfirm(true);
@@ -850,6 +862,20 @@ export default function EditOfficeDialog({ office, onClose }) {
           </div>
         </div>
       )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        show={showSuccessModal}
+        message={successMessage}
+        onClose={() => setShowSuccessModal(false)}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        show={showErrorModal}
+        message={errorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </div>
   );
 }

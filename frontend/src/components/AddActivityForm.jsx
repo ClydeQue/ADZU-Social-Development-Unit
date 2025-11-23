@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OfficeService from "@/services/officeService";
 import PropTypes from "prop-types";
 import { SDG_GOALS, getSDGIcon } from "@/utils/sdgData";
+import SuccessModal from "@/components/SuccessModal";
+import ErrorModal from "@/components/alerts/ErrorModal";
 
 /**
  * Reusable Add Activity Form Component
@@ -17,6 +19,9 @@ export default function AddActivityForm({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const dropdownRef = useRef(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch programs for this office
   const { data: programs = [], isLoading: programsLoading } = useQuery({
@@ -148,12 +153,12 @@ export default function AddActivityForm({
     onSuccess: () => {
       queryClient.invalidateQueries(["office-projects", officeId]);
       queryClient.invalidateQueries(["office-activities", officeId]);
-      alert("Activity created successfully!");
-      navigate(`${basePath}/projects`);
+      setShowSuccessModal(true);
     },
     onError: (error) => {
       console.error("Create error:", error);
-      alert(`Error: ${error.message || "Failed to create activity"}`);
+      setErrorMessage(error.message || "Failed to create activity");
+      setShowErrorModal(true);
     },
   });
 
@@ -179,16 +184,34 @@ export default function AddActivityForm({
         description: formData.description || null,
         objectives: formData.objectives || null,
         // Map partners array to backend format
-        partner_name: formData.partners.map(p => p.name).filter(Boolean).join(', ') || null,
-        partner_type: formData.partners.map(p => p.type).filter(Boolean).join(', ') || null,
-        partner_nature: formData.partners.map(p => p.nature).filter(Boolean).join(', ') || null,
+        partner_name:
+          formData.partners
+            .map((p) => p.name)
+            .filter(Boolean)
+            .join(", ") || null,
+        partner_type:
+          formData.partners
+            .map((p) => p.type)
+            .filter(Boolean)
+            .join(", ") || null,
+        partner_nature:
+          formData.partners
+            .map((p) => p.nature)
+            .filter(Boolean)
+            .join(", ") || null,
         // Map all budgets array to backend format (send as JSON string or separate amounts)
-        budgets: JSON.stringify(formData.budgets.filter(b => b.amount).map(b => ({
-          amount: parseFloat(b.amount),
-          type: b.type
-        }))),
+        budgets: JSON.stringify(
+          formData.budgets
+            .filter((b) => b.amount)
+            .map((b) => ({
+              amount: parseFloat(b.amount),
+              type: b.type,
+            }))
+        ),
         // Also include first budget for backward compatibility if backend expects it
-        budget_amount: formData.budgets[0]?.amount ? parseFloat(formData.budgets[0].amount) : null,
+        budget_amount: formData.budgets[0]?.amount
+          ? parseFloat(formData.budgets[0].amount)
+          : null,
         budget_type: formData.budgets[0]?.type || null,
         // Submit SDG numbers as array of integers
         sdg_numbers: formData.sdgs.map((id) => parseInt(id)),
@@ -201,7 +224,8 @@ export default function AddActivityForm({
       createMutation.mutate(activityData);
     } catch (error) {
       console.error("Error preparing submission:", error);
-      alert(`Error: ${error.message}`);
+      setErrorMessage(error.message);
+      setShowErrorModal(true);
     }
   };
 
@@ -990,6 +1014,24 @@ export default function AddActivityForm({
           </div>
         </div>
       </form>
+
+      {/* Success Modal */}
+      <SuccessModal
+        show={showSuccessModal}
+        action="created"
+        itemName="Activity"
+        onClose={() => {
+          setShowSuccessModal(false);
+          navigate(`${basePath}/projects`);
+        }}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        show={showErrorModal}
+        message={errorMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </div>
   );
 }

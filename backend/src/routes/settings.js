@@ -148,4 +148,95 @@ router.put(
   }
 );
 
+// Change Unit Director password
+router.put(
+  "/unit-director/change-password",
+  authenticateToken,
+  requireRole(["unit_director"]),
+  async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user.userId; // From JWT token
+
+      console.log("Change password request for Unit Director:", userId);
+
+      // Validation
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          error: "Current password and new password are required",
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          error: "New password must be at least 6 characters",
+        });
+      }
+
+      // Get current user credentials
+      const { data: user, error: fetchError } = await supabase
+        .from("office_credentials")
+        .select("id, email, password, user_type")
+        .eq("id", userId)
+        .eq("user_type", "unit_director")
+        .single();
+
+      if (fetchError || !user) {
+        console.error("Error fetching user:", fetchError);
+        return res.status(404).json({
+          success: false,
+          error: "User not found",
+        });
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+
+      if (!isValidPassword) {
+        console.log("Invalid current password for:", user.email);
+        return res.status(401).json({
+          success: false,
+          error: "Current password is incorrect",
+        });
+      }
+
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(newPassword, salt);
+
+      console.log("Updating password for Unit Director:", user.email);
+
+      // Update password
+      const { error: updateError } = await supabase
+        .from("office_credentials")
+        .update({ password: passwordHash })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
+
+      console.log("Password updated successfully for:", user.email);
+
+      res.json({
+        success: true,
+        message: "Password updated successfully",
+      });
+    } catch (error) {
+      console.error("Change Unit Director password error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error changing password",
+        details: error.message,
+      });
+    }
+  }
+);
+
 module.exports = router;
