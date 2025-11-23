@@ -65,6 +65,7 @@ const ReportsTable = ({ reports }) => {
           background-color: #030174;
         }
       `}</style>
+      
       {/* Header Row */}
       <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[180px_1.2fr_1.2fr_180px_160px] gap-3 items-center flex-shrink-0 flex-grow-0">
         <div className="text-xs font-semibold">Office</div>

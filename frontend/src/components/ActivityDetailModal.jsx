@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { pdf } from '@react-pdf/renderer';
+import ReactDOM from 'react-dom/client';
 import { getOfficeLogo } from '@/utils/officeLogos';
 import { getSDGIcons } from '@/utils/sdgData';
-import ActivityPDF from '@/components/ActivityPDF';
+import ActivityPrintView from '@/components/ActivityPrintView';
 
 
 /**
@@ -52,24 +52,22 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
     }
   };
 
-  const handlePrint = async () => {
-    try {
-      const blob = await pdf(<ActivityPDF activity={activity} report={null} />).toBlob();
-      const url = URL.createObjectURL(blob);
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write('<!DOCTYPE html><html><head><title>Print Activity</title>');
+      printWindow.document.write('<link rel="stylesheet" href="/src/components/ActivityPrintView.css">');
+      printWindow.document.write('</head><body><div id="print-root"></div></body></html>');
+      printWindow.document.close();
       
-      // Open in new window for print preview
-      const printWindow = window.open(url, '_blank');
-      if (printWindow) {
-        printWindow.onload = () => {
+      setTimeout(() => {
+        const root = ReactDOM.createRoot(printWindow.document.getElementById('print-root'));
+        root.render(<ActivityPrintView activity={activity} />);
+        
+        setTimeout(() => {
           printWindow.print();
-        };
-      }
-      
-      // Clean up after a delay
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+        }, 500);
+      }, 100);
     }
   };
 

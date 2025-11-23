@@ -1,5 +1,11 @@
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import PropTypes from 'prop-types';
+
+// Register Matura font
+Font.register({
+  family: 'Matura',
+  src: '/fonts/MATURASC_1.TTF'
+});
 
 // Create styles for PDF
 const styles = StyleSheet.create({
@@ -35,7 +41,7 @@ const styles = StyleSheet.create({
   },
   universityName: {
     fontSize: 18,
-    fontFamily: 'Times-Roman',
+    fontFamily: 'Matura',
     fontWeight: 'bold',
     color: '#040195',
     textAlign: 'center',
@@ -285,6 +291,30 @@ const ActivityPDF = ({ activity, report }) => {
   // Get office acronym
   const officeAcronym = activity?.programs?.offices?.acronym || 'OFFICE';
 
+  // Get SDG name
+  const getSdgName = (sdgNum) => {
+    const sdgNames = {
+      1: 'No Poverty',
+      2: 'Zero Hunger',
+      3: 'Good Health and Well-being',
+      4: 'Quality Education',
+      5: 'Gender Equality',
+      6: 'Clean Water and Sanitation',
+      7: 'Affordable and Clean Energy',
+      8: 'Decent Work and Economic Growth',
+      9: 'Industry, Innovation and Infrastructure',
+      10: 'Reduced Inequalities',
+      11: 'Sustainable Cities and Communities',
+      12: 'Responsible Consumption and Production',
+      13: 'Climate Action',
+      14: 'Life Below Water',
+      15: 'Life on Land',
+      16: 'Peace, Justice and Strong Institutions',
+      17: 'Partnerships for the Goals'
+    };
+    return sdgNames[parseInt(sdgNum)] || '';
+  };
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -362,11 +392,13 @@ const ActivityPDF = ({ activity, report }) => {
         {/* SUSTAINABLE DEVELOPMENT GOALS */}
         <Text style={styles.sectionTitle}>SUSTAINABLE DEVELOPMENT GOALS</Text>
         {sdgNumbers.length > 0 ? (
-          <View style={styles.sdgList}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {sdgNumbers.map((sdg, index) => (
-              <Text key={index} style={styles.sdgItem}>
-                {index + 1}. SDG {sdg}
-              </Text>
+              <View key={index} style={{ width: '50%', marginBottom: 5 }}>
+                <Text style={styles.sdgItem}>
+                  {index + 1}.  SDG {sdg}: {getSdgName(sdg)}
+                </Text>
+              </View>
             ))}
           </View>
         ) : (
@@ -420,20 +452,37 @@ const ActivityPDF = ({ activity, report }) => {
 
         {/* PARTNERS */}
         <Text style={styles.sectionTitle}>PARTNERS</Text>
-        {partnersData.length > 0 ? (
-          <View style={styles.partnersList}>
-            {partnersData.map((partner, index) => (
-              <View key={index} style={{ marginRight: 15, marginBottom: 8 }}>
-                <Text style={styles.partnerBadge}>{partner}</Text>
-                <Text style={styles.partnerType}>
-                  {index % 3 === 0 ? 'Government' : index % 3 === 1 ? 'Non-Government' : 'Institutional'}
-                </Text>
-              </View>
-            ))}
+        <View style={{ flexDirection: 'row', marginTop: 5 }}>
+          {/* Government Column */}
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <Text style={styles.partnerBadge}>Commission on Elections</Text>
+            <Text style={styles.partnerType}>Government</Text>
           </View>
-        ) : (
-          <Text style={styles.sectionContent}>{activity?.partners || 'No partners specified.'}</Text>
-        )}
+          {/* Non-Government Column */}
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <Text style={styles.partnerBadge}>WeHope Foundation</Text>
+            <Text style={styles.partnerType}>Non-Government</Text>
+          </View>
+          {/* Institutional Column */}
+          <View style={{ flex: 1 }}>
+            <Text style={styles.partnerBadge}>Beacon Publications</Text>
+            <Text style={styles.partnerType}>Institutional</Text>
+          </View>
+        </View>
+        <View style={{ flexDirection: 'row', marginTop: 8 }}>
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <Text style={styles.partnerBadge}></Text>
+            <Text style={styles.partnerType}>Resource-Sharing</Text>
+          </View>
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <Text style={styles.partnerBadge}></Text>
+            <Text style={styles.partnerType}>Sponsorship</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.partnerBadge}></Text>
+            <Text style={styles.partnerType}>Media Partner</Text>
+          </View>
+        </View>
 
         {/* Divider */}
         <View style={styles.divider} />
