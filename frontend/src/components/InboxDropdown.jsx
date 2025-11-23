@@ -102,14 +102,17 @@ function InboxDropdown({ onMessageClick }) {
           <div className="px-4 py-3 border-b border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-bold text-[#040195]">Inbox</h3>
+
               <button
+                place
                 onClick={() => {
                   setShowCompose(true);
                   setShowInbox(false);
                 }}
-                className="p-1.5 bg-[#4D49FC] text-white rounded-full hover:bg-[#3D39EC] transition-colors"
+                className="p-1.5 bg-[#4D49FC]  flex flex-row-reverse text-white rounded-full px-3 py-1 hover:bg-[#3D39EC] transition-colors"
                 title="Compose message"
               >
+                Compose
                 <EditIcon sx={{ fontSize: 16 }} />
               </button>
             </div>

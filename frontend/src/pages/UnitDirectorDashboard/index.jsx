@@ -18,7 +18,6 @@ export default function UnitDirectorDashboard() {
 
   // State
   const [, setTimeUpdate] = useState(0); // Force re-render for time updates
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Query client for mutations
   const queryClient = useQueryClient(); // Handle marking notification as read
@@ -76,10 +75,7 @@ export default function UnitDirectorDashboard() {
             <div className="bg-[#F4F4F4] rounded-[15px] p-2 mb-2 xl:mb-3 mx-2 sm:mx-3 xl:mx-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 flex-shrink-0">
               {/* Search */}
               <div className="relative ml-0 sm:ml-2 xl:ml-3 w-full sm:w-[400px] xl:w-[450px]">
-                <UnitDirectorSearchBar
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
+                <UnitDirectorSearchBar basePath="/unit-director" />
               </div>
 
               {/* Icons */}

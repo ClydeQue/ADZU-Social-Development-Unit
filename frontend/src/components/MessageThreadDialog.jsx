@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import {
-  Close as CloseIcon,
-  Send as SendIcon,
-  Delete as DeleteIcon,
-} from "@mui/icons-material";
+import { Close as CloseIcon, Send as SendIcon } from "@mui/icons-material";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MessageService from "@/services/messageService";
 import { useAuth } from "@/context/AuthContext";
@@ -61,18 +57,6 @@ export default function MessageThreadDialog({ contact, onClose }) {
     },
   });
 
-  // Delete message mutation
-  const deleteMessageMutation = useMutation({
-    mutationFn: (messageId) => MessageService.deleteMessage(messageId),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["allMessages"]);
-      queryClient.invalidateQueries(["messages"]);
-    },
-    onError: (error) => {
-      alert(`Failed to delete message: ${error.message || "Unknown error"}`);
-    },
-  });
-
   const handleSend = () => {
     if (!messageText.trim()) {
       alert("Please enter a message");
@@ -94,12 +78,6 @@ export default function MessageThreadDialog({ contact, onClose }) {
       message: messageText.trim(),
       clientTimestamp: clientTimestamp,
     });
-  };
-
-  const handleDelete = (messageId) => {
-    if (confirm("Delete this message?")) {
-      deleteMessageMutation.mutate(messageId);
-    }
   };
 
   const handleKeyPress = (e) => {
@@ -161,7 +139,7 @@ export default function MessageThreadDialog({ contact, onClose }) {
                           : "bg-white text-gray-900"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3 mb-1">
+                      <div className="mb-1">
                         <p
                           className={`text-xs font-bold ${
                             isSent
@@ -172,15 +150,6 @@ export default function MessageThreadDialog({ contact, onClose }) {
                         >
                           {isSent ? "You" : message.sender}
                         </p>
-                        {isSent && (
-                          <button
-                            onClick={() => handleDelete(message.id)}
-                            className="text-white text-opacity-70 hover:text-opacity-100 transition-opacity"
-                            title="Delete message"
-                          >
-                            <DeleteIcon sx={{ fontSize: 14 }} />
-                          </button>
-                        )}
                       </div>
                       {message.subject && (
                         <div className="mb-2">
