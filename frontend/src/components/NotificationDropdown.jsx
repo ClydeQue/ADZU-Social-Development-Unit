@@ -274,14 +274,7 @@ function NotificationDropdown({ onNotificationClick }) {
             </div>
           )}
 
-          {/* Footer - View All button if many notifications */}
-          {notifications.length > 5 && (
-            <div className="px-4 py-2 border-t border-gray-100">
-              <button className="w-full text-center text-xs text-[#040195] hover:text-[#4D49FC] transition-colors font-semibold">
-                View all notifications
-              </button>
-            </div>
-          )}
+          
         </div>
       )}
     </div>

@@ -1,10 +1,8 @@
-import { 
-  Search as SearchIcon,
-} from '@mui/icons-material';
-import { useAuth } from '@/context/AuthContext';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import InboxDropdown from '@/components/InboxDropdown';
-import PropTypes from 'prop-types';
+import { Search as SearchIcon } from "@mui/icons-material";
+import { useAuth } from "@/context/AuthContext";
+import NotificationDropdown from "@/components/NotificationDropdown";
+import InboxDropdown from "@/components/InboxDropdown";
+import PropTypes from "prop-types";
 
 export default function ReportsNavbar({ searchQuery, onSearchChange }) {
   const { user } = useAuth();
@@ -37,16 +35,20 @@ export default function ReportsNavbar({ searchQuery, onSearchChange }) {
 
         {/* Avatar and User Info */}
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-white text-[#5B6FED] flex items-center justify-center font-medium">
-            {user?.name?.charAt(0) || 'U'}
-          </div>
+          <img
+            src="/logos/sdu-logo-colored.webp"
+            alt="Unit Director"
+            className="w-10 h-10 object-contain"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/images/default_logo.webp";
+            }}
+          />
           <div>
             <div className="text-sm font-semibold text-[rgba(0,0,0,0.87)]">
-              {user?.name || 'Unit Director'}
+              {user?.name || "Unit Director"}
             </div>
-            <div className="text-xs text-[rgba(0,0,0,0.6)]">
-              {user?.email}
-            </div>
+            <div className="text-xs text-[rgba(0,0,0,0.6)]">{user?.email}</div>
           </div>
         </div>
       </div>
