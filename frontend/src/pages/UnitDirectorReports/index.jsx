@@ -1,20 +1,34 @@
-import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import WhiteContainer from '@/components/WhiteContainer';
-import Sidebar from '@/components/Sidebar';
-import ReportsTable from './ReportsTable';
-import ReportsNavbar from './ReportsNavbar';
-import api from '@/services/api';
+import { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import WhiteContainer from "@/components/WhiteContainer";
+import Sidebar from "@/components/Sidebar";
+import ReportsTable from "./ReportsTable";
+import ReportsNavbar from "./ReportsNavbar";
+import api from "@/services/api";
 
 export default function UnitDirectorReports() {
-  const [sortBy, setSortBy] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const [sortBy, setSortBy] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Get search query from URL params on mount
+  useEffect(() => {
+    const searchFromUrl = searchParams.get("search");
+    if (searchFromUrl) {
+      setSearchQuery(searchFromUrl);
+    }
+  }, [searchParams]);
 
   // Fetch reports data
-  const { data: reportsData, isLoading, error } = useQuery({
-    queryKey: ['unit-director-reports'],
+  const {
+    data: reportsData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["unit-director-reports"],
     queryFn: async () => {
-      const response = await api.get('unit-director/reports');
+      const response = await api.get("unit-director/reports");
       return response;
     },
     staleTime: 2 * 60 * 1000, // 2 minutes cache:D
@@ -23,54 +37,59 @@ export default function UnitDirectorReports() {
   // Map activities to reports format
   const reports = useMemo(() => {
     const logoMap = {
-      'acca': 'acca_logo_small.webp',
-      'aces': 'aces_logo_small.webp',
-      'aclg': 'aclg_logo_small.webp',
-      'altec': 'altec_logo_small.webp',
-      'apc': 'apc_logo_small.webp',
-      'apl': 'apl_logo_small.webp',
-      'cces': 'cces_logo_small.webp',
+      acca: "acca_logo_small.webp",
+      aces: "aces_logo_small.webp",
+      aclg: "aclg_logo_small.webp",
+      altec: "altec_logo_small.webp",
+      apc: "apc_logo_small.webp",
+      apl: "apl_logo_small.webp",
+      cces: "cces_logo_small.webp",
     };
 
-    let transformed = reportsData?.activities?.map((activity) => {
-      const acronym = (activity.office_acronym || 'CCES').toLowerCase();
-      const logoFile = logoMap[acronym] || 'cces_logo_small.webp';
+    let transformed =
+      reportsData?.activities?.map((activity) => {
+        const acronym = (activity.office_acronym || "CCES").toLowerCase();
+        const logoFile = logoMap[acronym] || "cces_logo_small.webp";
 
-      return {
-        id: activity.id,
-        office: activity.office_acronym || 'CCES',
-        program: activity.program_title || 'Untitled Program',
-        activity: activity.activity_name || 'Untitled Activity',
-        due: activity.end_date ? new Date(activity.end_date).toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric', 
-          year: 'numeric' 
-        }) : 'N/A',
-        submitted: activity.start_date ? new Date(activity.start_date).toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric', 
-          year: 'numeric' 
-        }) : 'N/A',
-        status: activity.status || 'planned',
-        participants: activity.participants_count || 0,
-        budget: activity.budget || 0,
-        isNew: false,
-        logo: `/images/${logoFile}`,
-        createdAt: new Date(activity.start_date || activity.created_at),
-      };
-    }) || [];
+        return {
+          id: activity.id,
+          office: activity.office_acronym || "CCES",
+          program: activity.program_title || "Untitled Program",
+          activity: activity.activity_name || "Untitled Activity",
+          due: activity.end_date
+            ? new Date(activity.end_date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "N/A",
+          submitted: activity.start_date
+            ? new Date(activity.start_date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "N/A",
+          status: activity.status || "planned",
+          participants: activity.participants_count || 0,
+          budget: activity.budget || 0,
+          isNew: false,
+          logo: `/images/${logoFile}`,
+          createdAt: new Date(activity.start_date || activity.created_at),
+        };
+      }) || [];
 
     // Apply sorting
     if (sortBy && transformed.length > 0) {
       transformed = [...transformed].sort((a, b) => {
         switch (sortBy) {
-          case 'recent':
+          case "recent":
             return b.createdAt - a.createdAt;
-          case 'oldest':
+          case "oldest":
             return a.createdAt - b.createdAt;
-          case 'office':
+          case "office":
             return a.office.localeCompare(b.office);
-          case 'program':
+          case "program":
             return a.program.localeCompare(b.program);
           default:
             return 0;
@@ -86,14 +105,15 @@ export default function UnitDirectorReports() {
     if (!searchQuery.trim()) {
       return reports;
     }
-    
+
     const query = searchQuery.toLowerCase();
-    return reports.filter((report) => 
-      report.office.toLowerCase().includes(query) ||
-      report.program.toLowerCase().includes(query) ||
-      report.activity.toLowerCase().includes(query) ||
-      report.due.toLowerCase().includes(query) ||
-      report.submitted.toLowerCase().includes(query)
+    return reports.filter(
+      (report) =>
+        report.office.toLowerCase().includes(query) ||
+        report.program.toLowerCase().includes(query) ||
+        report.activity.toLowerCase().includes(query) ||
+        report.due.toLowerCase().includes(query) ||
+        report.submitted.toLowerCase().includes(query)
     );
   }, [reports, searchQuery]);
 
@@ -106,21 +126,21 @@ export default function UnitDirectorReports() {
         <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-hidden">
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
             {/* Reports Navbar */}
-            <ReportsNavbar 
+            <ReportsNavbar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />
-            
+
             <div className="bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
               {/* Sort and Delete Controls */}
               <div className="flex gap-3 items-center mb-4">
                 {/* Sort by Dropdown */}
                 <div className="relative">
-                  <select 
+                  <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="appearance-none bg-white px-6 py-2.5 pr-10 rounded-full text-sm font-semibold text-[#040195] border-none shadow-md focus:outline-none focus:ring-2 focus:ring-[#4D49FC] cursor-pointer"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    style={{ fontFamily: "Inter, sans-serif" }}
                   >
                     <option value="">Sort by</option>
                     <option value="recent">Recent</option>
@@ -139,20 +159,26 @@ export default function UnitDirectorReports() {
                   className="bg-white p-1 rounded-full shadow-md hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#4D49FC]"
                   title="Delete selected"
                 >
-                  <img src="/icons/bxs_trash.svg" alt=""  width={25}/>
+                  <img src="/icons/bxs_trash.svg" alt="" width={25} />
                 </button>
               </div>
 
               {/* Reports Table */}
               {isLoading ? (
                 <div className="flex items-center justify-center flex-1">
-                  <div className="text-[#4D49FC] text-lg font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <div
+                    className="text-[#4D49FC] text-lg font-semibold"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     Loading reports...
                   </div>
                 </div>
               ) : error ? (
                 <div className="flex items-center justify-center flex-1">
-                  <div className="text-red-600 text-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <div
+                    className="text-red-600 text-lg"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     Error loading reports: {error.message}
                   </div>
                 </div>
