@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
 import SettingsNavbar from "./SettingsNavbar";
-import api from "@/services/api";
 import SuccessModal from "@/components/SuccessModal";
 import settingsService from "@/services/settingsService";
 
@@ -188,10 +187,7 @@ export default function UsersManagement() {
                         />
                       </svg>
                       Reset Requests (
-                      {
-                        mockResetRequests.filter((r) => r.status === "pending")
-                          .length
-                      }
+                      {resetRequests.length}
                       )
                     </div>
                   </button>
