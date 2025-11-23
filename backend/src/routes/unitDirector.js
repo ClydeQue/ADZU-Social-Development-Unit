@@ -51,6 +51,93 @@ router.get(
   }
 );
 
+// Get SDG distribution by office
+router.get(
+  "/sdg-analytics",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      // Get all activities with their SDG numbers and office info
+      const { data: activities, error } = await supabase
+        .from("activities")
+        .select(
+          `
+          id,
+          sdg_number,
+          programs(
+            id,
+            offices(id, name, acronym)
+          )
+        `
+        );
+
+      if (error) throw error;
+
+      // Initialize SDG data structure (SDG 1-17)
+      const sdgData = [];
+      for (let i = 1; i <= 17; i++) {
+        sdgData.push({
+          id: i,
+          value: 0,
+          offices: {
+            ACCA: 0,
+            ACES: 0,
+            ACLG: 0,
+            ALTEC: 0,
+            APC: 0,
+            CCES: 0,
+          },
+        });
+      }
+
+      // Process each activity
+      activities.forEach((activity) => {
+        if (activity.sdg_number && activity.programs?.offices?.acronym) {
+          const officeAcronym = activity.programs.offices.acronym;
+
+          try {
+            // Parse SDG numbers (stored as JSON array)
+            const sdgNumbers =
+              typeof activity.sdg_number === "string"
+                ? JSON.parse(activity.sdg_number)
+                : Array.isArray(activity.sdg_number)
+                ? activity.sdg_number
+                : [activity.sdg_number];
+
+            sdgNumbers.forEach((sdgNum) => {
+              const sdg = parseInt(sdgNum);
+              if (!isNaN(sdg) && sdg >= 1 && sdg <= 17) {
+                // Increment total count for this SDG
+                sdgData[sdg - 1].value++;
+                // Increment office-specific count for this SDG
+                if (sdgData[sdg - 1].offices[officeAcronym] !== undefined) {
+                  sdgData[sdg - 1].offices[officeAcronym]++;
+                }
+              }
+            });
+          } catch (e) {
+            console.error("Error parsing SDG numbers:", e);
+            // Fallback for single numeric value
+            const sdg = parseInt(activity.sdg_number);
+            if (!isNaN(sdg) && sdg >= 1 && sdg <= 17) {
+              sdgData[sdg - 1].value++;
+              if (sdgData[sdg - 1].offices[officeAcronym] !== undefined) {
+                sdgData[sdg - 1].offices[officeAcronym]++;
+              }
+            }
+          }
+        }
+      });
+
+      res.json({ sdgData });
+    } catch (error) {
+      console.error("Unit director SDG analytics error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 // Get upcoming activities (all pending activities sorted by due date)
 router.get(
   "/upcoming-activities",

@@ -31,15 +31,6 @@ export default function UnitDirectorDashboard() {
     }
   };
 
-  // Dashboard data - using hardcoded budget for now (will be updated later)
-  const [dashboardData] = useState({
-    budget: {
-      total: 1000000,
-      allocated: 750000,
-      remaining: 250000,
-    },
-  });
-
   // Update time display every minute without refetching
   useEffect(() => {
     const interval = setInterval(() => {
@@ -148,7 +139,7 @@ export default function UnitDirectorDashboard() {
 
                   {/* Budget */}
                   <div className="flex flex-col min-h-[200px] sm:min-h-[220px] lg:min-h-0 lg:flex-1">
-                    <BudgetCard budgetData={dashboardData.budget} />
+                    <BudgetCard />
                   </div>
                 </div>
 

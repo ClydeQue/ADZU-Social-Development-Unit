@@ -32,6 +32,13 @@ class UnitDirectorService {
   }
 
   /**
+   * Get SDG analytics by office
+   */
+  async getSDGAnalytics() {
+    return await api.get("api/unit-director/sdg-analytics");
+  }
+
+  /**
    * Get all offices with programs
    */
   async getAllOfficesWithPrograms() {

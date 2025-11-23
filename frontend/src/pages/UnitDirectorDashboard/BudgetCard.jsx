@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { getOfficeLogo } from '@/utils/officeLogos';
+import UnitDirectorService from '@/services/unitDirectorService';
 
-// eslint-disable-next-line react/prop-types
-const BudgetCard = ({ budgetData }) => {
+const BudgetCard = () => {
   const [visibleItems, setVisibleItems] = useState([1, 2, 3, 4, 5, 6, 7]);
   const [direction, setDirection] = useState(0);
   const [hoveredSDG, setHoveredSDG] = useState(null);
@@ -12,28 +13,24 @@ const BudgetCard = ({ budgetData }) => {
   // Office list
   const offices = ['ACCA', 'ACES', 'ACLG', 'ALTEC', 'APC', 'CCES'];
 
-  // sdgData is static for now with office breakdown
-  const sdgData = [
-    { id: 1, value: 75, offices: { ACCA: 15, ACES: 20, ACLG: 10, ALTEC: 12, APC: 8, CCES: 10 } },
-    { id: 2, value: 90, offices: { ACCA: 18, ACES: 22, ACLG: 15, ALTEC: 14, APC: 11, CCES: 10 } },
-    { id: 3, value: 45, offices: { ACCA: 8, ACES: 10, ACLG: 7, ALTEC: 6, APC: 7, CCES: 7 } },
-    { id: 4, value: 80, offices: { ACCA: 16, ACES: 18, ACLG: 12, ALTEC: 13, APC: 11, CCES: 10 } },
-    { id: 5, value: 60, offices: { ACCA: 12, ACES: 14, ACLG: 9, ALTEC: 10, APC: 8, CCES: 7 } },
-    { id: 6, value: 85, offices: { ACCA: 17, ACES: 19, ACLG: 13, ALTEC: 14, APC: 12, CCES: 10 } },
-    { id: 7, value: 95, offices: { ACCA: 19, ACES: 21, ACLG: 16, ALTEC: 15, APC: 13, CCES: 11 } },
-    { id: 8, value: 70, offices: { ACCA: 14, ACES: 16, ACLG: 11, ALTEC: 11, APC: 9, CCES: 9 } },
-    { id: 9, value: 88, offices: { ACCA: 18, ACES: 20, ACLG: 14, ALTEC: 14, APC: 12, CCES: 10 } },
-    { id: 10, value: 55, offices: { ACCA: 11, ACES: 13, ACLG: 8, ALTEC: 9, APC: 7, CCES: 7 } },
-    { id: 11, value: 92, offices: { ACCA: 18, ACES: 21, ACLG: 15, ALTEC: 15, APC: 12, CCES: 11 } },
-    { id: 12, value: 78, offices: { ACCA: 15, ACES: 18, ACLG: 12, ALTEC: 13, APC: 10, CCES: 10 } },
-    { id: 13, value: 65, offices: { ACCA: 13, ACES: 15, ACLG: 10, ALTEC: 10, APC: 9, CCES: 8 } },
-    { id: 14, value: 82, offices: { ACCA: 16, ACES: 19, ACLG: 13, ALTEC: 13, APC: 11, CCES: 10 } },
-    { id: 15, value: 73, offices: { ACCA: 14, ACES: 17, ACLG: 11, ALTEC: 12, APC: 10, CCES: 9 } },
-    { id: 16, value: 68, offices: { ACCA: 13, ACES: 16, ACLG: 10, ALTEC: 11, APC: 9, CCES: 9 } },
-    { id: 17, value: 91, offices: { ACCA: 18, ACES: 21, ACLG: 15, ALTEC: 14, APC: 12, CCES: 11 } },
-  ];
-// Queue algorithm for carousel effect
+  // Fetch SDG analytics from backend
+  const { data: sdgAnalytics, isLoading, error } = useQuery({
+    queryKey: ['sdg-analytics'],
+    queryFn: () => UnitDirectorService.getSDGAnalytics(),
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
+    retry: 2,
+  });
+
+  const sdgData = sdgAnalytics?.sdgData || [];
+  
+  console.log('BudgetCard - isLoading:', isLoading);
+  console.log('BudgetCard - error:', error);
+  console.log('BudgetCard - sdgData:', sdgData);
+  console.log('BudgetCard - sdgAnalytics:', sdgAnalytics);
+  
+  // Queue algorithm for carousel effect
   const handlePrev = () => {
+    if (sdgData.length === 0) return;
     setDirection(-1);
     setVisibleItems((prev) => {
       const firstVisible = prev[0];
@@ -45,6 +42,7 @@ const BudgetCard = ({ budgetData }) => {
   };
 
   const handleNext = () => {
+    if (sdgData.length === 0) return;
     setDirection(1);
     setVisibleItems((prev) => {
       const lastVisible = prev[prev.length - 1];
@@ -56,12 +54,11 @@ const BudgetCard = ({ budgetData }) => {
   };
 
   const getCurrentPageData = () => {
-    return visibleItems.map(id => sdgData.find(item => item.id === id));
+    if (sdgData.length === 0) return [];
+    return visibleItems.map(id => sdgData.find(item => item.id === id)).filter(Boolean);
   };
 
-  const maxValue = Math.max(...sdgData.map(item => item.value));
-  const currentIndex = visibleItems[0] - 1;
-  const totalSlides = sdgData.length;
+  const maxValue = sdgData.length > 0 ? Math.max(...sdgData.map(item => item.value), 1) : 1;
 
   return (
     <div className="border border-[#E5E7EB] rounded-xl flex-1 bg-white shadow-none overflow-hidden">
@@ -78,6 +75,7 @@ const BudgetCard = ({ budgetData }) => {
               onClick={handlePrev}
               className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-transparent hover:bg-[#E8EAFF] transition-all duration-200 cursor-pointer border-none outline-none active:scale-95"
               aria-label="Previous"
+              disabled={isLoading}
             >
               <img 
                 src="/icons/arrow_left_navy.svg" 
@@ -92,6 +90,7 @@ const BudgetCard = ({ budgetData }) => {
               onClick={handleNext}
               className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-transparent hover:bg-[#E8EAFF] transition-all duration-200 cursor-pointer border-none outline-none active:scale-95"
               aria-label="Next"
+              disabled={isLoading}
             >
               <img 
                 src="/icons/arrow_right_navy.svg" 
@@ -105,9 +104,22 @@ const BudgetCard = ({ budgetData }) => {
 
         {/* Bar Chart Container  */}
         <div className="flex-1 min-h-0 relative" style={{ maxHeight: '100%' }}>
-          <div className="flex items-end gap-1 sm:gap-2 px-1 sm:px-2 h-full">
-            <AnimatePresence initial={false} mode="popLayout">
-              {getCurrentPageData().map((item) => (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-[#8988CD] text-sm">Loading SDG data...</div>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-red-500 text-sm">Error loading SDG data</div>
+            </div>
+          ) : sdgData.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-[#8988CD] text-sm">No data available</div>
+            </div>
+          ) : (
+            <div className="flex items-end gap-1 sm:gap-2 px-1 sm:px-2 h-full">
+              <AnimatePresence initial={false} mode="popLayout">
+                {getCurrentPageData().map((item) => item && (
                 <motion.div 
                   key={item.id} 
                   className="flex items-end gap-0.5 sm:gap-1 flex-1 relative"
@@ -146,7 +158,7 @@ const BudgetCard = ({ budgetData }) => {
                       className="bg-[#4D49FC] rounded-full cursor-pointer hover:bg-[#3d39cc] transition-colors"
                       style={{
                         width: window.innerWidth < 640 ? '8px' : '10px',
-                        height: `${(item.value / maxValue) * 100}%`,
+                        height: item.value === 0 ? '6px' : `${Math.max((item.value / maxValue) * 100, 12)}%`,
                         minHeight: '6px'
                       }}
                     />
@@ -158,7 +170,8 @@ const BudgetCard = ({ budgetData }) => {
                 </motion.div>
               ))}
             </AnimatePresence>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
