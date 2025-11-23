@@ -346,4 +346,121 @@ router.put(
   }
 );
 
+// Add program to office
+router.post(
+  "/office/:officeId/program",
+  authenticateToken,
+  requireRole(["unit_director"]),
+  async (req, res) => {
+    try {
+      const { officeId } = req.params;
+      const { title, description } = req.body;
+
+      console.log("Add program request for office:", officeId);
+
+      // Validation
+      if (!title || title.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Program title is required",
+        });
+      }
+
+      // Insert program
+      const { data: newProgram, error: insertError } = await supabase
+        .from("programs")
+        .insert({
+          office_id: officeId,
+          title: title.trim(),
+          description: description?.trim() || null,
+          is_fixed: false,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error("Insert error:", insertError);
+        throw insertError;
+      }
+
+      console.log("Program added successfully:", newProgram);
+
+      res.json({
+        success: true,
+        message: "Program added successfully",
+        program: newProgram,
+      });
+    } catch (error) {
+      console.error("Add program error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error adding program",
+        details: error.message,
+      });
+    }
+  }
+);
+
+// Delete program
+router.delete(
+  "/program/:programId",
+  authenticateToken,
+  requireRole(["unit_director"]),
+  async (req, res) => {
+    try {
+      const { programId } = req.params;
+
+      console.log("Delete program request for program:", programId);
+
+      // Check if program exists and get its details
+      const { data: program, error: fetchError } = await supabase
+        .from("programs")
+        .select("id, is_fixed")
+        .eq("id", programId)
+        .single();
+
+      if (fetchError || !program) {
+        console.error("Program not found:", fetchError);
+        return res.status(404).json({
+          success: false,
+          error: "Program not found",
+        });
+      }
+
+      // Prevent deletion of fixed programs
+      if (program.is_fixed) {
+        return res.status(400).json({
+          success: false,
+          error: "Cannot delete fixed programs",
+        });
+      }
+
+      // Delete program
+      const { error: deleteError } = await supabase
+        .from("programs")
+        .delete()
+        .eq("id", programId);
+
+      if (deleteError) {
+        console.error("Delete error:", deleteError);
+        throw deleteError;
+      }
+
+      console.log("Program deleted successfully:", programId);
+
+      res.json({
+        success: true,
+        message: "Program deleted successfully",
+      });
+    } catch (error) {
+      console.error("Delete program error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error deleting program",
+        details: error.message,
+      });
+    }
+  }
+);
+
 module.exports = router;

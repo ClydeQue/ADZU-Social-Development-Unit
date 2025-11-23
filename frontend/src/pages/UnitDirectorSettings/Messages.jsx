@@ -4,11 +4,47 @@ import { useNavigate } from "react-router-dom";
 import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
 import SettingsNavbar from "./SettingsNavbar";
+import UnitDirectorService from "@/services/unitDirectorService";
 
 export default function MessagesManagement() {
   const navigate = useNavigate();
   const [selectedOffice, setSelectedOffice] = useState("");
   const queryClient = useQueryClient();
+
+  /**
+   * Function to count messages for a specific office
+   * @param {string} officeId - The ID of the office
+   * @returns {Promise<number>} - The count of messages for that office
+   */
+  const countMessagesForOffice = async (officeId) => {
+    try {
+      const response = await UnitDirectorService.getOfficeConversationCount(
+        officeId
+      );
+      return response?.data?.conversationCount || 0;
+    } catch (error) {
+      console.error(`Error counting messages for office ${officeId}:`, error);
+      return 0;
+    }
+  };
+
+  /**
+   * Function to count messages for all offices
+   * @param {Array} offices - Array of office objects
+   * @returns {Promise<Object>} - Object with officeId as key and message count as value
+   */
+  const countMessagesForAllOffices = async (offices) => {
+    const counts = {};
+
+    await Promise.all(
+      offices.map(async (office) => {
+        const count = await countMessagesForOffice(office.id);
+        counts[office.id] = count;
+      })
+    );
+
+    return counts;
+  };
 
   // Fetch message statistics
   const { data: messageStats, isLoading } = useQuery({
@@ -32,7 +68,9 @@ export default function MessagesManagement() {
       // Mock data for now
       return {
         totalMessages: 23,
-        officeAcronym: officesData?.offices?.find(o => o.id === selectedOffice)?.acronym,
+        officeAcronym: officesData?.offices?.find(
+          (o) => o.id === selectedOffice
+        )?.acronym,
       };
     },
     enabled: !!selectedOffice,
@@ -46,12 +84,32 @@ export default function MessagesManagement() {
       // TODO: Replace with actual API call
       return {
         offices: [
-          { id: "1", name: "AdZu Center for Culture and Arts", acronym: "ACCA" },
-          { id: "2", name: "AdZu Center for Engagement and Social Development", acronym: "ACES" },
-          { id: "3", name: "AdZu Center for Local Governance", acronym: "ACLG" },
-          { id: "4", name: "AdZu Language and Technology Center", acronym: "ALTEC" },
+          {
+            id: "1",
+            name: "AdZu Center for Culture and Arts",
+            acronym: "ACCA",
+          },
+          {
+            id: "2",
+            name: "AdZu Center for Engagement and Social Development",
+            acronym: "ACES",
+          },
+          {
+            id: "3",
+            name: "AdZu Center for Local Governance",
+            acronym: "ACLG",
+          },
+          {
+            id: "4",
+            name: "AdZu Language and Technology Center",
+            acronym: "ALTEC",
+          },
           { id: "5", name: "AdZu Peace Center", acronym: "APC" },
-          { id: "6", name: "Center for Community Engagement and Service", acronym: "CCES" },
+          {
+            id: "6",
+            name: "Center for Community Engagement and Service",
+            acronym: "CCES",
+          },
         ],
       };
     },
@@ -77,7 +135,9 @@ export default function MessagesManagement() {
 
   const handleDeleteOfficeMessages = () => {
     if (!selectedOffice) return;
-    const officeAcronym = officesData?.offices?.find(o => o.id === selectedOffice)?.acronym;
+    const officeAcronym = officesData?.offices?.find(
+      (o) => o.id === selectedOffice
+    )?.acronym;
     const confirmed = window.confirm(
       `Are you sure you want to delete all message conversations from ${officeAcronym}? This action cannot be undone.`
     );
@@ -115,15 +175,28 @@ export default function MessagesManagement() {
                 className="flex items-center gap-2 text-[#4D49FC] hover:underline mb-4"
                 style={{ fontFamily: "Inter, sans-serif" }}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
                 Back to Settings
               </button>
 
               {/* Header */}
               <div className="mb-4">
-                <h1 className="text-2xl font-bold text-[#040195] mb-1" style={{ fontFamily: "Inter, sans-serif" }}>
+                <h1
+                  className="text-2xl font-bold text-[#040195] mb-1"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   Message Management
                 </h1>
               </div>
@@ -158,7 +231,9 @@ export default function MessagesManagement() {
                             className="text-3xl font-bold"
                             style={{ fontFamily: "Inter, sans-serif" }}
                           >
-                            {isLoading ? "..." : messageStats?.unreadMessages || 0}
+                            {isLoading
+                              ? "..."
+                              : messageStats?.unreadMessages || 0}
                           </p>
                         </div>
                       </div>
@@ -255,7 +330,12 @@ export default function MessagesManagement() {
                         className="text-gray-500 text-xs"
                         style={{ fontFamily: "Inter, sans-serif" }}
                       >
-                        Total conversations: <span className="font-bold text-[#040195]">{isLoadingMessages ? "..." : officeMessages.totalMessages}</span>
+                        Total conversations:{" "}
+                        <span className="font-bold text-[#040195]">
+                          {isLoadingMessages
+                            ? "..."
+                            : officeMessages.totalMessages}
+                        </span>
                       </p>
                     </div>
                     <button
@@ -290,7 +370,8 @@ export default function MessagesManagement() {
                 className="text-gray-500 text-xs mt-4 text-center"
                 style={{ fontFamily: "Inter, sans-serif" }}
               >
-                Messages are automatically retained for 1 year. Messages older than this will be permanently deleted automatically.
+                Messages are automatically retained for 1 year. Messages older
+                than this will be permanently deleted automatically.
               </p>
             </div>
           </div>

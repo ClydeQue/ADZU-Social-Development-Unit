@@ -81,6 +81,39 @@ class UnitDirectorService {
   async getOfficePrograms(officeId) {
     return await api.get(`api/office/${officeId}/programs`);
   }
+
+  /**
+   * Add program to office
+   */
+  async addProgram(officeId, programData) {
+    return await api.post(
+      `api/settings/office/${officeId}/program`,
+      programData
+    );
+  }
+
+  /**
+   * Delete program
+   */
+  async deleteProgram(programId) {
+    return await api.delete(`api/settings/program/${programId}`);
+  }
+
+  /**
+   * Get conversation count for specific office
+   */
+  async getOfficeConversationCount(officeId) {
+    return await api.get(`api/messages/office/${officeId}/conversation-count`);
+  }
+
+  /**
+   * Delete conversations older than 1 year for specific office
+   */
+  async deleteOldConversations(officeId) {
+    return await api.delete(
+      `api/messages/delete-old-conversations?officeId=${officeId}`
+    );
+  }
 }
 
 export default new UnitDirectorService();
