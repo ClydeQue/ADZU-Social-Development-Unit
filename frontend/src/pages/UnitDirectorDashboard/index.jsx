@@ -1,13 +1,11 @@
 // Imports
 import { useState, useEffect } from "react";
-import {
-  Search as SearchIcon,
-} from "@mui/icons-material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import InboxDropdown from "@/components/InboxDropdown";
+import UnitDirectorSearchBar from "@/components/UnitDirectorSearchBar";
 import FlagshipUpdateCard from "./FlagshipUpdateCard";
 import UpcomingActivitiesCard from "./UpcomingActivitiesCard";
 import BudgetCard from "./BudgetCard";
@@ -17,13 +15,13 @@ import StatsCards from "./StatsCards";
 export default function UnitDirectorDashboard() {
   // Auth
   const { user } = useAuth();
+
   // State
   const [, setTimeUpdate] = useState(0); // Force re-render for time updates
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Query client for mutations
-  const queryClient = useQueryClient();
-
-  // Handle marking notification as read
+  const queryClient = useQueryClient(); // Handle marking notification as read
   const handleNotificationClick = async (notificationId) => {
     try {
       // Invalidate the notifications query to trigger a refetch in the dropdown
@@ -46,13 +44,11 @@ export default function UnitDirectorDashboard() {
   // Update time display every minute without refetching
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeUpdate(prev => prev + 1);
+      setTimeUpdate((prev) => prev + 1);
     }, 60000); // Update every minute
 
     return () => clearInterval(interval);
   }, []);
-
-
 
   // Date logic
   const currentDate = new Date();
@@ -80,19 +76,10 @@ export default function UnitDirectorDashboard() {
             <div className="bg-[#F4F4F4] rounded-[15px] p-2 mb-2 xl:mb-3 mx-2 sm:mx-3 xl:mx-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 flex-shrink-0">
               {/* Search */}
               <div className="relative ml-0 sm:ml-2 xl:ml-3 w-full sm:w-[400px] xl:w-[450px]">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="w-full h-8 xl:h-9 bg-white text-[#040195] rounded-full pl-9 sm:pl-12
-                   text-xs outline-none border 
-                   border-transparent focus:border-[#5B6FED] hover:border-[#5B6FED] transition-colors"
+                <UnitDirectorSearchBar
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
                 />
-                <div className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                  <SearchIcon
-                    className="text-[#040195]"
-                    sx={{ fontSize: { xs: 20, sm: 24, xl: 26 } }}
-                  />
-                </div>
               </div>
 
               {/* Icons */}
@@ -101,7 +88,9 @@ export default function UnitDirectorDashboard() {
                 <InboxDropdown />
 
                 {/* Notifications */}
-                <NotificationDropdown onNotificationClick={handleNotificationClick} />
+                <NotificationDropdown
+                  onNotificationClick={handleNotificationClick}
+                />
 
                 {/* Avatar */}
                 <div className="flex items-center gap-2">

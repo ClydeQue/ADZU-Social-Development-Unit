@@ -219,7 +219,11 @@ export default function MessageThreadDialog({ contact, onClose }) {
                         </p>
                         <p
                           className={`text-sm mb-1 whitespace-pre-wrap ${
-                            isSent ? "text-white" : "text-gray-700"
+                            message.isDeleted
+                              ? "italic opacity-60"
+                              : isSent
+                              ? "text-white"
+                              : "text-gray-700"
                           }`}
                           style={{ fontFamily: "Inter, sans-serif" }}
                         >

@@ -101,6 +101,34 @@ class MessageService {
       throw error;
     }
   }
+
+  /**
+   * Get message statistics (Unit Director only)
+   * Returns total messages, old messages, unread count, and retention info
+   */
+  async getMessageStats() {
+    try {
+      const response = await api.get("api/messages/stats");
+      return response;
+    } catch (error) {
+      console.error("Get message stats error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cleanup old messages (Unit Director only)
+   * Deletes messages older than 3 years
+   */
+  async cleanupOldMessages() {
+    try {
+      const response = await api.delete("api/messages/cleanup");
+      return response;
+    } catch (error) {
+      console.error("Cleanup messages error:", error);
+      throw error;
+    }
+  }
 }
 
 export default new MessageService();

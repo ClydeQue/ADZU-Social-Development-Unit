@@ -70,6 +70,9 @@ router.get("/all", authenticateToken, async (req, res) => {
       filteredMessages?.map((msg) => {
         const isSender = msg.sender_id === userId;
 
+        // Show "Message deleted" if the message is deleted and user is not the one who deleted it
+        const isDeletedByOther = msg.is_deleted && msg.deleted_by !== userId;
+
         return {
           id: msg.id,
           sender: userMap[msg.sender_id]?.name || "Unknown",
@@ -78,11 +81,15 @@ router.get("/all", authenticateToken, async (req, res) => {
           receiver: userMap[msg.receiver_id]?.name || "Unknown",
           receiverId: msg.receiver_id,
           receiverType: msg.receiver_type,
-          subject: msg.subject,
-          message: msg.message,
+          subject: isDeletedByOther ? "Message deleted" : msg.subject,
+          message: isDeletedByOther
+            ? "This message has been deleted"
+            : msg.message,
           createdAt: msg.created_at,
           isSent: isSender,
           isRead: msg.is_read,
+          isDeleted: msg.is_deleted || false,
+          deletedBy: msg.deleted_by || null,
         };
       }) || [];
 
@@ -176,6 +183,9 @@ router.get("/", authenticateToken, async (req, res) => {
         const otherPartyId = isSender ? msg.receiver_id : msg.sender_id;
         const otherParty = userMap[otherPartyId];
 
+        // Show "Message deleted" if the message is deleted and user is not the one who deleted it
+        const isDeletedByOther = msg.is_deleted && msg.deleted_by !== userId;
+
         return {
           id: msg.id,
           sender: otherParty?.name || "Unknown",
@@ -183,15 +193,21 @@ router.get("/", authenticateToken, async (req, res) => {
           senderType: msg.sender_type,
           receiverId: msg.receiver_id,
           receiverType: msg.receiver_type,
-          subject: msg.subject,
-          preview: msg.message?.substring(0, 100) || "",
-          message: msg.message,
+          subject: isDeletedByOther ? "Message deleted" : msg.subject,
+          preview: isDeletedByOther
+            ? "This message has been deleted"
+            : msg.message?.substring(0, 100) || "",
+          message: isDeletedByOther
+            ? "This message has been deleted"
+            : msg.message,
           time: getTimeAgo(msg.created_at),
           unread: !isSender && !msg.is_read,
           createdAt: msg.created_at,
           isSent: isSender,
           otherPartyId: otherPartyId,
           office: otherParty?.office,
+          isDeleted: msg.is_deleted || false,
+          deletedBy: msg.deleted_by || null,
         };
       }) || [];
 
@@ -414,13 +430,34 @@ router.delete("/:messageId", authenticateToken, async (req, res) => {
       });
     }
 
-    // Delete message
-    const { error } = await supabase
+    // Try soft delete first (if columns exist), otherwise hard delete
+    let deleteError = null;
+
+    // Try soft delete
+    const { error: softDeleteError } = await supabase
       .from("messages")
-      .delete()
+      .update({
+        is_deleted: true,
+        deleted_by: userId,
+        deleted_at: new Date().toISOString(),
+      })
       .eq("id", messageId);
 
-    if (error) throw error;
+    if (softDeleteError) {
+      // If soft delete fails (columns don't exist), do hard delete
+      console.log(
+        "Soft delete failed, performing hard delete:",
+        softDeleteError.message
+      );
+      const { error: hardDeleteError } = await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+
+      deleteError = hardDeleteError;
+    }
+
+    if (deleteError) throw deleteError;
 
     res.json({
       success: true,
@@ -481,6 +518,98 @@ router.get(
   }
 );
 
+// Cleanup old messages (older than 3 years) - Unit Director only
+router.delete(
+  "/cleanup",
+  authenticateToken,
+  requireRole(["unit_director"]),
+  async (req, res) => {
+    try {
+      console.log("Starting message cleanup...");
+
+      // Calculate date 3 years ago
+      const threeYearsAgo = new Date();
+      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+
+      // Delete old messages
+      const { data, error, count } = await supabase
+        .from("messages")
+        .delete({ count: "exact" })
+        .lt("created_at", threeYearsAgo.toISOString());
+
+      if (error) throw error;
+
+      console.log(`Cleaned up ${count || 0} messages older than 3 years`);
+
+      res.json({
+        success: true,
+        message: `Successfully cleaned up ${count || 0} old messages`,
+        deletedCount: count || 0,
+        cutoffDate: threeYearsAgo.toISOString(),
+      });
+    } catch (error) {
+      console.error("Cleanup messages error:", error);
+      res.status(500).json({
+        error: "Error cleaning up messages",
+        details: error.message,
+      });
+    }
+  }
+);
+
+// Get message statistics - Unit Director only
+router.get(
+  "/stats",
+  authenticateToken,
+  requireRole(["unit_director"]),
+  async (req, res) => {
+    try {
+      // Total messages
+      const { count: totalCount, error: totalError } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true });
+
+      if (totalError) throw totalError;
+
+      // Messages older than 3 years
+      const threeYearsAgo = new Date();
+      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+
+      const { count: oldCount, error: oldError } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .lt("created_at", threeYearsAgo.toISOString());
+
+      if (oldError) throw oldError;
+
+      // Unread messages
+      const { count: unreadCount, error: unreadError } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("is_read", false);
+
+      if (unreadError) throw unreadError;
+
+      res.json({
+        success: true,
+        stats: {
+          total: totalCount || 0,
+          oldMessages: oldCount || 0,
+          unread: unreadCount || 0,
+          retentionPeriod: "3 years",
+          cutoffDate: threeYearsAgo.toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error("Get message stats error:", error);
+      res.status(500).json({
+        error: "Error fetching message statistics",
+        details: error.message,
+      });
+    }
+  }
+);
+
 // Helper function to calculate time ago
 function getTimeAgo(dateString) {
   const date = new Date(dateString);
@@ -496,5 +625,29 @@ function getTimeAgo(dateString) {
   if (diffDays < 7) return `${diffDays}d`;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
+
+// Automatic cleanup check on server start (runs once)
+const performStartupCleanup = async () => {
+  try {
+    const threeYearsAgo = new Date();
+    threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+
+    const { count } = await supabase
+      .from("messages")
+      .delete({ count: "exact" })
+      .lt("created_at", threeYearsAgo.toISOString());
+
+    if (count && count > 0) {
+      console.log(
+        `✅ Startup cleanup: Removed ${count} messages older than 3 years`
+      );
+    }
+  } catch (error) {
+    console.error("❌ Startup cleanup failed:", error.message);
+  }
+};
+
+// Run cleanup on module load
+performStartupCleanup();
 
 module.exports = router;

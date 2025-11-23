@@ -26,31 +26,37 @@ import CCESDashboard from "@/pages/CCESDashboard";
 import CCESReports from "@/pages/CCESDashboard/Reports";
 import CCESAddActivity from "@/pages/CCESDashboard/AddActivity";
 import CCESEditActivity from "@/pages/CCESDashboard/EditActivity";
+import CCESSettings from "@/pages/CCESDashboard/Settings";
 
 import ACCADashboard from "@/pages/ACCADashboard";
 import ACCAReports from "@/pages/ACCADashboard/Reports";
 import ACCAAddActivity from "@/pages/ACCADashboard/AddActivity";
 import ACCAEditActivity from "@/pages/ACCADashboard/EditActivity";
+import ACCASettings from "@/pages/ACCADashboard/Settings";
 
 import ACESDashboard from "@/pages/ACESDashboard";
 import ACESReports from "@/pages/ACESDashboard/Reports";
 import ACESAddActivity from "@/pages/ACESDashboard/AddActivity";
 import ACESEditActivity from "@/pages/ACESDashboard/EditActivity";
+import ACESSettings from "@/pages/ACESDashboard/Settings";
 
 import ALTECDashboard from "@/pages/ALTECDashboard";
 import ALTECReports from "@/pages/ALTECDashboard/Reports";
 import ALTECAddActivity from "@/pages/ALTECDashboard/AddActivity";
 import ALTECEditActivity from "@/pages/ALTECDashboard/EditActivity";
+import ALTECSettings from "@/pages/ALTECDashboard/Settings";
 
 import APCDashboard from "@/pages/APCDashboard";
 import APCReports from "@/pages/APCDashboard/Reports";
 import APCAddActivity from "@/pages/APCDashboard/AddActivity";
 import APCEditActivity from "@/pages/APCDashboard/EditActivity";
+import APCSettings from "@/pages/APCDashboard/Settings";
 
 import ACLGDashboard from "@/pages/ACLGDashboard";
 import ACLGReports from "@/pages/ACLGDashboard/Reports";
 import ACLGAddActivity from "@/pages/ACLGDashboard/AddActivity";
 import ACLGEditActivity from "@/pages/ACLGDashboard/EditActivity";
+import ACLGSettings from "@/pages/ACLGDashboard/Settings";
 
 import "./App.css";
 
@@ -164,6 +170,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/office/cces/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <CCESSettings />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ACCA Routes */}
         <Route
@@ -195,6 +209,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCAEditActivity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/acca/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACCASettings />
             </ProtectedRoute>
           }
         />
@@ -232,6 +254,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/office/aces/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACESSettings />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ALTEC Routes */}
         <Route
@@ -263,6 +293,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <ALTECEditActivity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/altec/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ALTECSettings />
             </ProtectedRoute>
           }
         />
@@ -300,6 +338,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/office/apc/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <APCSettings />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ACLG Routes */}
         <Route
@@ -331,6 +377,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACLGEditActivity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/aclg/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACLGSettings />
             </ProtectedRoute>
           }
         />

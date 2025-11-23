@@ -23,8 +23,12 @@ export default function UnitDirectorReports() {
   }, [searchParams]);
 
   // Fetch reports data
-  const { data: reportsData, isLoading, error } = useQuery({
-    queryKey: ['unit-director-reports'],
+  const {
+    data: reportsData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["unit-director-reports"],
     queryFn: () => UnitDirectorService.getReports(),
     staleTime: 2 * 60 * 1000, // 2 minutes cache:D
   });
@@ -32,18 +36,19 @@ export default function UnitDirectorReports() {
   // Map activities to reports format
   const reports = useMemo(() => {
     const logoMap = {
-      'acca': 'acca_logo_small.webp',
-      'aces': 'aces_logo_small.webp',
-      'aclg': 'aclg_logo_small.webp',
-      'altec': 'altec_logo_small.webp',
-      'apc': 'apc_logo_small.webp',
-      'apl': 'apl_logo_small.webp',
-      'cces': 'cces_logo_small.webp',
+      acca: "acca_logo_small.webp",
+      aces: "aces_logo_small.webp",
+      aclg: "aclg_logo_small.webp",
+      altec: "altec_logo_small.webp",
+      apc: "apc_logo_small.webp",
+      apl: "apl_logo_small.webp",
+      cces: "cces_logo_small.webp",
     };
 
-    let transformed = reportsData?.activities?.map((activity) => {
-      const acronym = (activity.office_acronym || 'CCES').toLowerCase();
-      const logoFile = logoMap[acronym] || 'cces_logo_small.webp';
+    let transformed =
+      reportsData?.activities?.map((activity) => {
+        const acronym = (activity.office_acronym || "CCES").toLowerCase();
+        const logoFile = logoMap[acronym] || "cces_logo_small.webp";
 
       return {
         id: activity.id,
@@ -121,14 +126,15 @@ export default function UnitDirectorReports() {
     if (!searchQuery.trim()) {
       return reports;
     }
-    
+
     const query = searchQuery.toLowerCase();
-    return reports.filter((report) => 
-      report.office.toLowerCase().includes(query) ||
-      report.program.toLowerCase().includes(query) ||
-      report.activity.toLowerCase().includes(query) ||
-      report.due.toLowerCase().includes(query) ||
-      report.submitted.toLowerCase().includes(query)
+    return reports.filter(
+      (report) =>
+        report.office.toLowerCase().includes(query) ||
+        report.program.toLowerCase().includes(query) ||
+        report.activity.toLowerCase().includes(query) ||
+        report.due.toLowerCase().includes(query) ||
+        report.submitted.toLowerCase().includes(query)
     );
   }, [reports, searchQuery]);
 
@@ -141,11 +147,11 @@ export default function UnitDirectorReports() {
         <main className="flex-grow pt-6 pb-10 md:pb-6 p-2 flex flex-col overflow-hidden">
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
             {/* Reports Navbar */}
-            <ReportsNavbar 
+            <ReportsNavbar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />
-            
+
             <div className="bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
               {/* Sort Controls */}
               <div className="flex gap-3 items-center mb-4">
@@ -198,8 +204,6 @@ export default function UnitDirectorReports() {
                     </div>
                   )}
                 </div>
-
-              
               </div>
 
               {/* Reports Table */}
@@ -207,7 +211,10 @@ export default function UnitDirectorReports() {
                 <TableSkeleton rows={8} columns={6} />
               ) : error ? (
                 <div className="flex items-center justify-center flex-1">
-                  <div className="text-red-600 text-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <div
+                    className="text-red-600 text-lg"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     Error loading reports: {error.message}
                   </div>
                 </div>

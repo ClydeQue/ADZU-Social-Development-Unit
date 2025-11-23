@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useQuery } from "@tanstack/react-query";
-import { Search as SearchIcon } from "@mui/icons-material";
 import { useAuth } from "@/context/AuthContext";
 import OfficeService from "@/services/officeService";
 import OfficeSidebar from "@/components/OfficeSidebar";
 import UpcomingProgramsList from "@/components/UpcomingProgramsList";
 import InboxDropdown from "@/components/InboxDropdown";
 import NotificationDropdown from "@/components/NotificationDropdown";
+import OfficeSearchBar from "@/components/OfficeSearchBar";
 
 /**
  * Reusable Office Dashboard Layout
@@ -82,19 +82,10 @@ export default function OfficeDashboardLayout({
             <div className="bg-[#F4F4F4] rounded-[15px] p-2 mb-2 xl:mb-3 mx-2 sm:mx-3 xl:mx-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 flex-shrink-0">
               {/* Search */}
               <div className="relative ml-0 sm:ml-2 xl:ml-3 w-full sm:w-[400px] xl:w-[450px]">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="w-full h-8 xl:h-9 bg-white text-[#040195] rounded-full pl-9 sm:pl-12
-                   text-xs outline-none border 
-                   border-transparent focus:border-[#5B6FED] hover:border-[#5B6FED] transition-colors"
+                <OfficeSearchBar
+                  basePath={basePath}
+                  officeColor={officeColor}
                 />
-                <div className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                  <SearchIcon
-                    className="text-[#040195]"
-                    sx={{ fontSize: { xs: 20, sm: 24, xl: 26 } }}
-                  />
-                </div>
               </div>
 
               {/* Icons */}
