@@ -169,10 +169,23 @@ router.get("/", authenticateToken, async (req, res) => {
         u.user_type === "unit_director"
           ? "Unit Director"
           : u.offices?.name || u.name;
+
+      // Map office acronym to logo
+      const acronymLower = u.offices?.acronym?.toLowerCase();
+      const logoMap = {
+        acca: "/images/acca_logo_small.webp",
+        aces: "/images/aces_logo_small.webp",
+        aclg: "/images/aclg_logo_small.webp",
+        altec: "/images/altec_logo_small.webp",
+        apc: "/images/apc_logo_small.webp",
+        cces: "/images/cces_logo_small.webp",
+      };
+
       userMap[u.id] = {
         name: displayName,
         user_type: u.user_type,
         office: u.offices?.name,
+        officeLogo: logoMap[acronymLower] || "/images/default_logo.webp",
       };
     });
 
@@ -206,6 +219,7 @@ router.get("/", authenticateToken, async (req, res) => {
           isSent: isSender,
           otherPartyId: otherPartyId,
           office: otherParty?.office,
+          officeLogo: otherParty?.officeLogo,
           isDeleted: msg.is_deleted || false,
           deletedBy: msg.deleted_by || null,
         };

@@ -11,24 +11,18 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "@/context/AuthContext";
 import UnitDirectorService from "@/services/unitDirectorService";
-import MessageService from "@/services/messageService";
-import NotificationService from "@/services/notificationService";
 import ActivityDetailModal from "./ActivityDetailModal";
-import NotificationDropdown from "./NotificationDropdown";
 
 /**
  * Unit Director Search Bar Component
  * Search bar with dropdown results that opens modal on click
- * Also includes navigation pages, notifications, and messages
+ * Also includes navigation pages
  */
 export default function UnitDirectorSearchBar({ basePath }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState(null);
-  const [showNotificationDropdown, setShowNotificationDropdown] =
-    useState(false);
   const searchRef = useRef(null);
-  const notificationDropdownRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -47,21 +41,6 @@ export default function UnitDirectorSearchBar({ basePath }) {
     queryFn: UnitDirectorService.getAllActivities,
     staleTime: 5 * 60 * 1000,
   });
-
-  // Fetch messages data
-  const { data: messagesData, isLoading: isLoadingMessages } = useQuery({
-    queryKey: ["messages"],
-    queryFn: MessageService.getMessages,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Fetch notifications data
-  const { data: notificationsData, isLoading: isLoadingNotifications } =
-    useQuery({
-      queryKey: ["notifications"],
-      queryFn: NotificationService.getNotifications,
-      staleTime: 5 * 60 * 1000,
-    });
 
   // Fetch detailed activity data when an activity is selected
   const { data: selectedActivity, isLoading: isLoadingActivity } = useQuery({
@@ -84,31 +63,6 @@ export default function UnitDirectorSearchBar({ basePath }) {
       endDate: activity.end || activity.end_date,
     })) || [];
 
-  // Transform messages
-  const messages =
-    messagesData?.messages?.map((msg) => ({
-      id: msg.id,
-      type: "message",
-      name: msg.sender,
-      subject: msg.subject,
-      preview: msg.preview,
-      time: msg.time,
-      unread: msg.unread,
-    })) || [];
-
-  // Transform notifications
-  const notifications =
-    notificationsData?.items?.map((notif) => ({
-      id: notif.id,
-      type: "notification",
-      activity: notif.activity,
-      office: notif.office || notif.officeAcronym,
-      notifType: notif.type,
-      logo: notif.logo,
-      unread: notif.unread,
-      createdAt: notif.createdAt,
-    })) || [];
-
   // Filter all searchable items
   const query = searchQuery.toLowerCase().trim();
 
@@ -125,44 +79,15 @@ export default function UnitDirectorSearchBar({ basePath }) {
       )
     : [];
 
-  const filteredMessages = query
-    ? messages.filter(
-        (msg) =>
-          msg.name?.toLowerCase().includes(query) ||
-          msg.subject?.toLowerCase().includes(query) ||
-          msg.preview?.toLowerCase().includes(query)
-      )
-    : [];
+  const hasResults = filteredPages.length > 0 || filteredActivities.length > 0;
 
-  const filteredNotifications = query
-    ? notifications.filter(
-        (notif) =>
-          notif.activity?.toLowerCase().includes(query) ||
-          notif.office?.toLowerCase().includes(query) ||
-          notif.notifType?.toLowerCase().includes(query)
-      )
-    : [];
-
-  const hasResults =
-    filteredPages.length > 0 ||
-    filteredActivities.length > 0 ||
-    filteredMessages.length > 0 ||
-    filteredNotifications.length > 0;
-
-  const isLoading =
-    isLoadingActivities || isLoadingMessages || isLoadingNotifications;
+  const isLoading = isLoadingActivities;
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowDropdown(false);
-      }
-      if (
-        notificationDropdownRef.current &&
-        !notificationDropdownRef.current.contains(event.target)
-      ) {
-        setShowNotificationDropdown(false);
       }
     };
 
@@ -195,12 +120,6 @@ export default function UnitDirectorSearchBar({ basePath }) {
     setShowDropdown(false);
   };
 
-  const handleNotificationClick = () => {
-    setShowDropdown(false);
-    setSearchQuery("");
-    setShowNotificationDropdown(true);
-  };
-
   return (
     <>
       <div className="relative" ref={searchRef}>
@@ -209,7 +128,7 @@ export default function UnitDirectorSearchBar({ basePath }) {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search activities, pages, messages, notifications..."
+          placeholder="Search activities, pages..."
           className="w-full h-8 xl:h-9 bg-white text-[#040195] rounded-full pl-9 sm:pl-12 pr-8
            text-xs outline-none border 
            border-transparent focus:border-[#5B6FED] hover:border-[#5B6FED] transition-colors"
@@ -333,116 +252,13 @@ export default function UnitDirectorSearchBar({ basePath }) {
                     ))}
                   </div>
                 )}
-
-                {/* Notifications Section */}
-                {filteredNotifications.length > 0 && (
-                  <div>
-                    <div className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-gray-50">
-                      Notifications
-                    </div>
-                    {filteredNotifications.map((notif) => (
-                      <button
-                        key={notif.id}
-                        onClick={handleNotificationClick}
-                        className="w-full px-4 py-3 hover:bg-gray-50 text-left border-b transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 flex-shrink-0">
-                            <img
-                              src={
-                                notif.logo ||
-                                "/logos/officeLogoTransparent/default.png"
-                              }
-                              alt={notif.office}
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                e.target.src =
-                                  "/logos/officeLogoTransparent/default.png";
-                              }}
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <div className="font-semibold text-sm text-[#040195] truncate">
-                                {notif.activity}
-                              </div>
-                              {notif.unread && (
-                                <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
-                              )}
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">
-                              {notif.office}
-                            </div>
-                            {notif.notifType && (
-                              <div className="mt-1">
-                                <span
-                                  className={`text-xs px-2 py-0.5 rounded-full font-semibold text-white ${
-                                    notif.notifType === "Reminder"
-                                      ? "bg-red-500"
-                                      : notif.notifType === "Report"
-                                      ? "bg-green-500"
-                                      : notif.notifType === "Updated"
-                                      ? "bg-blue-500"
-                                      : "bg-gray-500"
-                                  }`}
-                                >
-                                  {notif.notifType}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Messages Section */}
-                {filteredMessages.length > 0 && (
-                  <div>
-                    <div className="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-gray-50">
-                      Messages
-                    </div>
-                    {filteredMessages.map((msg) => (
-                      <button
-                        key={msg.id}
-                        onClick={() => handleNavigate(`${basePath}/dashboard`)}
-                        className="w-full px-4 py-3 hover:bg-gray-50 text-left border-b last:border-b-0 transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-blue-600 font-semibold text-sm">
-                              {msg.name?.charAt(0) || "M"}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <div className="font-semibold text-sm text-[#040195] truncate">
-                                {msg.subject}
-                              </div>
-                              {msg.unread && (
-                                <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
-                              )}
-                            </div>
-                            <div className="text-xs text-gray-600 truncate">
-                              From: {msg.name}
-                            </div>
-                            <div className="text-xs text-gray-500 truncate mt-1">
-                              {msg.preview}
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             ) : (
               <div className="p-4 text-center text-gray-500 text-sm">
                 No results found for &quot;{searchQuery}&quot;
               </div>
             )}
-          </div>
+          </div>  
         )}
       </div>
 
@@ -454,16 +270,6 @@ export default function UnitDirectorSearchBar({ basePath }) {
           officeColor="#4D49FC"
           basePath={basePath}
         />
-      )}
-
-      {/* Notification Dropdown */}
-      {showNotificationDropdown && (
-        <div
-          ref={notificationDropdownRef}
-          className="fixed top-20 right-8 z-50"
-        >
-          <NotificationDropdown />
-        </div>
       )}
     </>
   );
