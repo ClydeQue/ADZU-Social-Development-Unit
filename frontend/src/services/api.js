@@ -114,9 +114,16 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError, null);
         isRefreshing = false;
 
-        // Clear auth data and redirect to login
-        const { default: AuthService } = await import("./authService.js");
-        AuthService.clearAuth();
+        // Call logout endpoint to set is_active = false in database
+        try {
+          const { default: AuthService } = await import("./authService.js");
+          await AuthService.logout(); // This will call the logout endpoint and clear local auth
+        } catch (logoutError) {
+          console.error("Failed to call logout endpoint:", logoutError);
+          // Clear auth data manually if logout fails
+          const { default: AuthService } = await import("./authService.js");
+          AuthService.clearAuth();
+        }
 
         // Only redirect if not already on login page
         if (window.location.pathname !== "/") {
