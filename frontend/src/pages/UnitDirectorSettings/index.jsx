@@ -5,12 +5,14 @@ import Sidebar from "@/components/Sidebar";
 import ReportsTable from "./OfficesTables";
 import ReportsNavbar from "./SettingsNavbar";
 import EditOfficeDialog from "./EditOfficeDialog";
+import MessageManagement from "@/components/MessageManagement";
 import UnitDirectorService from "@/services/unitDirectorService";
 
 export default function UnitDirectorSettings() {
   const [sortBy, setSortBy] = useState("office");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOffice, setSelectedOffice] = useState(null);
+  const [activeTab, setActiveTab] = useState("offices"); // 'offices' or 'messages'
 
   // Fetch offices data
   const {
@@ -85,42 +87,78 @@ export default function UnitDirectorSettings() {
             />
 
             <div className="bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
-              {/* Title */}
-              <div className="mb-4">
-                <h2
-                  className="text-2xl font-bold text-[#040195]"
+              {/* Tabs */}
+              <div className="flex gap-2 mb-6 border-b border-gray-300">
+                <button
+                  onClick={() => setActiveTab("offices")}
+                  className={`px-6 py-3 font-semibold transition-all ${
+                    activeTab === "offices"
+                      ? "text-[#4D49FC] border-b-2 border-[#4D49FC]"
+                      : "text-gray-600 hover:text-[#4D49FC]"
+                  }`}
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  OFFICES
-                </h2>
+                  Offices
+                </button>
+                <button
+                  onClick={() => setActiveTab("messages")}
+                  className={`px-6 py-3 font-semibold transition-all ${
+                    activeTab === "messages"
+                      ? "text-[#4D49FC] border-b-2 border-[#4D49FC]"
+                      : "text-gray-600 hover:text-[#4D49FC]"
+                  }`}
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Message Management
+                </button>
               </div>
 
-              {/* Reports Table */}
-              {isLoading ? (
-                <div className="flex items-center justify-center flex-1">
-                  <div
-                    className="text-[#4D49FC] text-lg font-semibold"
-                    style={{ fontFamily: "Inter, sans-serif" }}
-                  >
-                    Loading Offices...
+              {/* Tab Content */}
+              {activeTab === "offices" ? (
+                <>
+                  {/* Title */}
+                  <div className="mb-4">
+                    <h2
+                      className="text-2xl font-bold text-[#040195]"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      OFFICES
+                    </h2>
                   </div>
-                </div>
-              ) : error ? (
-                <div className="flex items-center justify-center flex-1">
-                  <div
-                    className="text-red-600 text-lg"
-                    style={{ fontFamily: "Inter, sans-serif" }}
-                  >
-                    Error loading Offices: {error.message}
-                  </div>
-                </div>
+
+                  {/* Reports Table */}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center flex-1">
+                      <div
+                        className="text-[#4D49FC] text-lg font-semibold"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        Loading Offices...
+                      </div>
+                    </div>
+                  ) : error ? (
+                    <div className="flex items-center justify-center flex-1">
+                      <div
+                        className="text-red-600 text-lg"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        Error loading Offices: {error.message}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-hidden">
+                      <ReportsTable
+                        offices={filteredReports}
+                        onEditOffice={setSelectedOffice}
+                      />
+                    </div>
+                  )}
+                </>
               ) : (
-                <div className="flex-1 overflow-hidden">
-                  <ReportsTable
-                    offices={filteredReports}
-                    onEditOffice={setSelectedOffice}
-                  />
-                </div>
+                <>
+                  {/* Message Management Tab */}
+                  <MessageManagement isUnitDirector={true} />
+                </>
               )}
             </div>
           </div>
