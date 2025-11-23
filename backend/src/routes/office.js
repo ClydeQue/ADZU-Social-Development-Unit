@@ -88,9 +88,33 @@ router.get("/:officeId/dashboard", authenticateToken, async (req, res) => {
 
     if (programsError) throw programsError;
 
-    // Calculate statistics
+    // Get all activities for this office's programs
+    const programIds = programs.map((p) => p.id);
+    let activities = [];
+
+    if (programIds.length > 0) {
+      const { data: activitiesData, error: activitiesError } = await supabase
+        .from("activities")
+        .select("id, program_id, status, phase")
+        .in("program_id", programIds);
+
+      if (activitiesError) throw activitiesError;
+      activities = activitiesData || [];
+    }
+
+    // Calculate statistics based on activities (similar to Unit Director dashboard)
     const statistics = {
       total_programs: programs.length,
+      completed: activities.filter((a) => a.status === "completed").length,
+      in_progress: activities.filter(
+        (a) =>
+          a.phase &&
+          (a.phase.toLowerCase() === "in progress" ||
+            a.phase.toLowerCase() === "implementation" ||
+            a.phase.toLowerCase() === "execution")
+      ).length,
+      pending: activities.filter((a) => a.status === "pending").length,
+      // Keep old program-based stats for backward compatibility
       ongoing_programs: programs.filter((p) => p.status === "ongoing").length,
       completed_programs: programs.filter((p) => p.status === "completed")
         .length,
@@ -193,6 +217,7 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
           budget_type,
           sdg_number,
           status,
+          phase,
           notes,
           created_at,
           updated_at,

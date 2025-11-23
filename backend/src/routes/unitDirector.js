@@ -11,25 +11,27 @@ router.get(
   requireRole("unit_director"),
   async (req, res) => {
     try {
-      // Get all activities with their status (set by offices)
+      // Get all activities with their status and phase
       const { data: activities, error: activitiesError } = await supabase
         .from("activities")
-        .select("id, status");
+        .select("id, status, phase");
 
       if (activitiesError) throw activitiesError;
 
-      // Calculate statistics based on activity status
-      // Status values: "completed", "in progress", "pending", etc.
+      // Calculate statistics
+      // - completed: based on status
+      // - in_progress: based on phase column (Implementation/Execution phase)
+      // - pending: based on status
       const statistics = {
         completed: activities.filter(
           (a) => a.status && a.status.toLowerCase() === "completed"
         ).length,
         in_progress: activities.filter(
           (a) =>
-            a.status &&
-            (a.status.toLowerCase() === "in progress" ||
-              a.status.toLowerCase() === "ongoing" ||
-              a.status.toLowerCase() === "in-progress")
+            a.phase &&
+            (a.phase.toLowerCase() === "in progress" ||
+              a.phase.toLowerCase() === "implementation" ||
+              a.phase.toLowerCase() === "execution")
         ).length,
         pending: activities.filter(
           (a) =>

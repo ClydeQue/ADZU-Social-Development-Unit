@@ -248,7 +248,6 @@ export default function ReportDetailModal({ report, activity, onClose }) {
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-10 overflow-hidden">
                   {[
                     { value: 'pending', label: 'Pending' },
-                    { value: 'in-progress', label: 'In Progress' },
                     { value: 'completed', label: 'Completed' },
                     { value: 'cancelled', label: 'Cancelled' }
                   ].map((status) => (

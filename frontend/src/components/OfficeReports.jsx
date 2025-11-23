@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import OfficeService from '@/services/officeService';
 import ActivityDetailModal from './ActivityDetailModal';
 import CardGridSkeleton from '@/components/CardGridSkeleton';
@@ -9,13 +9,25 @@ import CardGridSkeleton from '@/components/CardGridSkeleton';
 /**
  * Reusable Office Projects Component
  * Displays programs and activities in a grid card layout
+ * Supports filtering by status/phase via sort query parameter
  */
 export default function OfficeReports({ officeId, officeColor = '#4D49FC', basePath }) {
   const [deleteMode, setDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedActivityId, setSelectedActivityId] = useState(null);
+  const [sortBy, setSortBy] = useState('');
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
+  // Set initial sort from URL parameter
+  useEffect(() => {
+    const sortParam = searchParams.get('sort');
+    if (sortParam && ['pending', 'in-progress', 'completed'].includes(sortParam)) {
+      setSortBy(sortParam);
+    }
+  }, [searchParams]);
 
   // Fetch projects data (programs and activities)
   const { data: projectsData, isLoading } = useQuery({
@@ -96,21 +108,44 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
     }
   };
 
-  // Transform data into projects format
-  const projects = projectsData?.recent_activities?.map((activity) => {
-    const program = activity.programs;
-    
-    return {
-      id: activity.id,
-      programId: program?.id,
-      programTitle: program?.title || 'Program',
-      activityName: activity.activity_name || 'Activity',
-      image: activity.image_url || '/reports/default.webp',
-      status: activity.status,
-      startDate: activity.start_date,
-      endDate: activity.end_date,
-    };
-  }) || [];
+  // Transform and filter projects based on sort parameter
+  const projects = useMemo(() => {
+    const allProjects = projectsData?.recent_activities?.map((activity) => {
+      const program = activity.programs;
+      
+      return {
+        id: activity.id,
+        programId: program?.id,
+        programTitle: program?.title || 'Program',
+        activityName: activity.activity_name || 'Activity',
+        image: activity.image_url || '/reports/default.webp',
+        status: activity.status,
+        phase: activity.phase,
+        startDate: activity.start_date,
+        endDate: activity.end_date,
+      };
+    }) || [];
+
+    // Apply filter if sort parameter exists
+    if (!sortBy) return allProjects;
+
+    return allProjects.filter((project) => {
+      if (sortBy === 'completed') {
+        return project.status === 'completed';
+      } else if (sortBy === 'pending') {
+        return project.status === 'pending';
+      } else if (sortBy === 'in-progress') {
+        // Check if phase matches in-progress criteria
+        const phase = project.phase?.toLowerCase();
+        return (
+          phase === 'in progress' ||
+          phase === 'implementation' ||
+          phase === 'execution'
+        );
+      }
+      return true;
+    });
+  }, [projectsData, sortBy]);
 
   // Handle clicking on a project card
   const handleProjectClick = (projectId) => {
@@ -142,6 +177,61 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
       )}
 
       <div className="h-full flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
+        {/* Sort Dropdown */}
+        <div className="flex gap-3 items-center mb-3">
+          <div className="relative">
+            <button
+              onClick={() => setShowSortDropdown(!showSortDropdown)}
+              className={`bg-white px-6 py-2.5 pr-10 rounded-full ${showSortDropdown ? 'ring-2 ring-[#4D49FC]' : 'ring-0'} text-sm font-semibold text-[#040195] border-none shadow-md cursor-pointer flex items-center gap-2`}
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              <span>
+                {sortBy
+                  ? sortBy.charAt(0).toUpperCase() + sortBy.slice(1).replace('-', ' ')
+                  : 'Sort by'}
+              </span>
+              <svg
+                className={`transition-transform ${showSortDropdown ? 'rotate-180' : ''}`}
+                width="9"
+                height="8"
+                viewBox="0 0 9 8"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.3316 7.5C4.9467 8.16667 3.98445 8.16667 3.59955 7.5L0.135449 1.5C-0.249451 0.833334 0.231675 0 1.00148 0L7.92968 0C8.69948 0 9.1806 0.833333 8.7957 1.5L5.3316 7.5Z"
+                  fill="#040195"
+                />
+              </svg>
+            </button>
+
+            {showSortDropdown && (
+              <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-10 overflow-hidden min-w-[200px]">
+                {[
+                  { value: '', label: 'All Activities' },
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'in-progress', label: 'In Progress' },
+                  { value: 'completed', label: 'Completed' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSortBy(option.value);
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm font-semibold hover:cursor-pointer hover:bg-[#C7D2FE] transition-colors text-[#040195] ${
+                      sortBy === option.value ? 'bg-[#E0E7FF]' : ''
+                    }`}
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Projects Grid with Action Buttons on Right */}
       {projects.length > 0 ? (
         <div className="flex gap-4 h-full">

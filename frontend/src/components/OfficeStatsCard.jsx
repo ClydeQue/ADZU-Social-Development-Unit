@@ -5,6 +5,7 @@ import { TrendingUp as TrendingUpIcon } from '@mui/icons-material';
  * Office Stats Card Component
  * Displays statistics for office dashboard
  * Matches the design from Unit Director Dashboard
+ * Clickable to navigate to filtered reports
  */
 export default function OfficeStatsCard({ 
   title, 
@@ -13,7 +14,8 @@ export default function OfficeStatsCard({
   trend,
   variant = 'filled', // 'filled' or 'outlined'
   bgColor = '#1E22AA',
-  textColor = '#FFFFFF'
+  textColor = '#FFFFFF',
+  onClick
 }) {
   const isFilled = variant === 'filled';
 
@@ -22,11 +24,12 @@ export default function OfficeStatsCard({
       <div 
         className={`rounded-2xl sm:rounded-3xl flex-1 shadow-none overflow-hidden ${
           isFilled ? '' : 'border border-[#E5E7EB]'
-        }`}
+        } ${onClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
         style={{ 
           backgroundColor: isFilled ? bgColor : '#FFFFFF',
           color: isFilled ? textColor : '#1E22AA'
         }}
+        onClick={onClick}
       >
         <div className="p-3 sm:p-4 h-full flex flex-col justify-between">
           {/* Header */}
@@ -87,4 +90,5 @@ OfficeStatsCard.propTypes = {
   variant: PropTypes.oneOf(['filled', 'outlined']),
   bgColor: PropTypes.string,
   textColor: PropTypes.string,
+  onClick: PropTypes.func,
 };

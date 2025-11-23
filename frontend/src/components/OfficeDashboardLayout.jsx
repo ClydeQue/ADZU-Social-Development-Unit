@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import OfficeService from "@/services/officeService";
 import OfficeSidebar from "@/components/OfficeSidebar";
@@ -20,6 +21,7 @@ export default function OfficeDashboardLayout({
   children,
 }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationFilter, setNotificationFilter] = useState("all");
   const notificationRef = useRef(null);
@@ -31,6 +33,11 @@ export default function OfficeDashboardLayout({
     enabled: !!officeId,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
+
+  // Navigate to projects with filter
+  const handleNavigateToReports = (status) => {
+    navigate(`${basePath}/projects?sort=${status}`);
+  };
 
   // Dropdown close
   useEffect(() => {
@@ -156,7 +163,10 @@ export default function OfficeDashboardLayout({
                         {/* Top Row - Stats Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {/* Completed Card */}
-                          <div className="bg-[#1E0A7A] rounded-[20px] p-4 shadow-md flex flex-col relative overflow-hidden">
+                          <div 
+                            className="bg-[#1E0A7A] rounded-[20px] p-4 shadow-md flex flex-col relative overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => handleNavigateToReports("completed")}
+                          >
                             <div className="flex justify-between items-start mb-2">
                               <h3 className="text-white text-lg font-semibold">
                                 Completed
@@ -164,19 +174,21 @@ export default function OfficeDashboardLayout({
                             </div>
                             <div className="flex-1 flex items-center">
                               <h2 className="text-white text-5xl font-bold">
-                                {dashboardData?.statistics
-                                  ?.completed_programs || 10}
+                                {dashboardData?.statistics?.completed || 0}
                               </h2>
                             </div>
                             <div className="mt-2">
                               <span className="text-white/70 text-[0.65rem]">
-                                Increased from last month
+                                Activities completed
                               </span>
                             </div>
                           </div>
 
                           {/* In Progress Card */}
-                          <div className="bg-[#8B7AB8] rounded-[20px] p-4 shadow-md flex flex-col relative overflow-hidden">
+                          <div 
+                            className="bg-[#8B7AB8] rounded-[20px] p-4 shadow-md flex flex-col relative overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => handleNavigateToReports("in-progress")}
+                          >
                             <div className="flex justify-between items-start mb-2">
                               <h3 className="text-white text-lg font-semibold">
                                 In Progress
@@ -184,19 +196,21 @@ export default function OfficeDashboardLayout({
                             </div>
                             <div className="flex-1 flex items-center">
                               <h2 className="text-white text-5xl font-bold">
-                                {dashboardData?.statistics?.ongoing_programs ||
-                                  25}
+                                {dashboardData?.statistics?.in_progress || 0}
                               </h2>
                             </div>
                             <div className="mt-2">
                               <span className="text-white/70 text-[0.65rem]">
-                                Increased from last month
+                                Activities in progress
                               </span>
                             </div>
                           </div>
 
                           {/* Pending Card */}
-                          <div className="bg-white rounded-[20px] p-4 shadow-md border border-gray-200 flex flex-col relative overflow-hidden">
+                          <div 
+                            className="bg-white rounded-[20px] p-4 shadow-md border border-gray-200 flex flex-col relative overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => handleNavigateToReports("pending")}
+                          >
                             <div className="flex justify-between items-start mb-2">
                               <h3 className="text-[#1E0A7A] text-lg font-semibold">
                                 Pending
@@ -204,12 +218,11 @@ export default function OfficeDashboardLayout({
                             </div>
                             <div className="flex-1 flex items-center">
                               <h2 className="text-[#5B6FED] text-5xl font-bold">
-                                {dashboardData?.statistics?.pending_programs ||
-                                  3}
+                                {dashboardData?.statistics?.pending || 0}
                               </h2>
                             </div>
                             <p className="text-gray-500 text-xs mt-2">
-                              On Discuss
+                              Activities pending
                             </p>
                           </div>
                         </div>
