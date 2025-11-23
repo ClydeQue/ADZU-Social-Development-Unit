@@ -320,30 +320,45 @@ class AuthController {
   // Logout
   static async logout(req, res) {
     try {
+      console.log("=== LOGOUT REQUEST ===");
+
       // STEP 1: Update database FIRST - Set user as inactive
       const authHeader = req.headers.authorization;
+      console.log("Authorization header present:", !!authHeader);
+
       if (authHeader && authHeader.startsWith("Bearer ")) {
         const token = authHeader.substring(7);
         const verification = jwtService.verifyAccessToken(token);
+        console.log("Token verification valid:", verification.valid);
+
         if (verification.valid && verification.payload.userId) {
-          console.log("Setting user to inactive:", verification.payload.userId);
+          console.log(
+            "🔄 Setting user to inactive:",
+            verification.payload.userId
+          );
 
           // CRITICAL: Update database and WAIT for completion
-          const { error: updateError } = await supabase
+          const { data: updateData, error: updateError } = await supabase
             .from("office_credentials")
             .update({ is_active: false })
-            .eq("id", verification.payload.userId);
+            .eq("id", verification.payload.userId)
+            .select();
 
           if (updateError) {
-            console.error("Error updating is_active:", updateError);
+            console.error("❌ Error updating is_active:", updateError);
             // Continue with logout even if update fails
           } else {
             console.log(
               "✅ User set to inactive in database:",
               verification.payload.userId
             );
+            console.log("✅ Updated data:", updateData);
           }
+        } else {
+          console.log("⚠️ Token invalid or no userId in payload");
         }
+      } else {
+        console.log("⚠️ No Authorization header found in logout request");
       }
 
       // STEP 2: Revoke refresh token

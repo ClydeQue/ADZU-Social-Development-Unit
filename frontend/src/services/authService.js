@@ -10,11 +10,11 @@ const getAPIBaseURL = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  
+
   if (import.meta.env.PROD) {
     return "https://adzu-sdu-backend-delta.vercel.app";
   }
-  
+
   return "http://localhost:5001";
 };
 
@@ -59,9 +59,10 @@ class AuthService {
    * Login - Works for both office and unit director
    */
   async login({ username, password, userType }) {
-    const endpoint = userType === "unit_director" 
-      ? "/api/auth/login/unit-director"
-      : "/api/auth/login/office";
+    const endpoint =
+      userType === "unit_director"
+        ? "/api/auth/login/unit-director"
+        : "/api/auth/login/office";
 
     try {
       const response = await authAxios.post(endpoint, { username, password });
@@ -73,15 +74,17 @@ class AuthService {
       this.setAccessToken(response.data.data.accessToken);
       return response.data.data; // { accessToken, user }
     } catch (error) {
-      console.error('Login error details:', error);
-      
+      console.error("Login error details:", error);
+
       // Handle network errors (no response from server)
       if (!error.response) {
-        const networkError = new Error("Network error. Please check your connection and backend server.");
+        const networkError = new Error(
+          "Network error. Please check your connection and backend server."
+        );
         networkError.isNetworkError = true;
         throw networkError;
       }
-      
+
       // Handle rate limiting errors (429)
       if (error.response?.status === 429) {
         const data = error.response.data;
@@ -93,7 +96,7 @@ class AuthService {
         errorObj.remainingSeconds = data.remainingSeconds;
         throw errorObj;
       }
-      
+
       // Handle invalid credentials with attempt tracking (401)
       if (error.response?.status === 401) {
         const data = error.response.data;
@@ -102,14 +105,16 @@ class AuthService {
         errorObj.attemptsUsed = data.attemptsUsed;
         throw errorObj;
       }
-      
+
       // Handle other server errors
       if (error.response?.status >= 500) {
         throw new Error("Server error. Please try again later.");
       }
-      
+
       // Generic error
-      throw new Error(error.response?.data?.message || error.message || "Login failed");
+      throw new Error(
+        error.response?.data?.message || error.message || "Login failed"
+      );
     }
   }
 
@@ -129,9 +134,11 @@ class AuthService {
     } catch (error) {
       // Clear auth data on refresh failure
       this.clearAuth();
-      
+
       // Throw a specific error that won't trigger another refresh
-      const refreshError = new Error(error.response?.data?.message || "Session expired");
+      const refreshError = new Error(
+        error.response?.data?.message || "Session expired"
+      );
       refreshError.isAuthError = true;
       throw refreshError;
     }
@@ -142,7 +149,19 @@ class AuthService {
    */
   async logout() {
     try {
-      await authAxios.post("/api/auth/logout");
+      // CRITICAL: Send access token with logout request so backend can update is_active
+      const token = this.getAccessToken();
+      await authAxios.post(
+        "/api/auth/logout",
+        {},
+        {
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {},
+        }
+      );
     } catch (error) {
       // Ignore logout errors
       console.error("Logout error:", error);
