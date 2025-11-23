@@ -101,7 +101,24 @@ export default function ReportDetailModal({ report, activity, onClose }) {
     return `₱ ${parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const sdgs = getSDGIcons(activity.sdg_number);
+  // Parse SDG numbers from sdg_number column (stores JSON array)
+  let sdgNumbers = [];
+  try {
+    if (activity.sdg_number) {
+      // sdg_number now stores JSON array of SDG numbers
+      sdgNumbers = typeof activity.sdg_number === 'string' ? JSON.parse(activity.sdg_number) : 
+                   (Array.isArray(activity.sdg_number) ? activity.sdg_number : [activity.sdg_number]);
+    }
+  } catch (e) {
+    console.error('Error parsing SDG numbers:', e);
+    // Fallback if parsing fails
+    if (activity.sdg_number && !isNaN(activity.sdg_number)) {
+      sdgNumbers = [parseInt(activity.sdg_number)];
+    }
+  }
+  
+  // Get icons for all SDGs
+  const sdgs = sdgNumbers.flatMap(num => getSDGIcons(num));
 
   return (
     <div 
@@ -394,35 +411,46 @@ export default function ReportDetailModal({ report, activity, onClose }) {
           {/* Row 4: Budget Overview */}
           <div className="mb-4 sm:mb-6">
             <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">BUDGET OVERVIEW</h3>
-            {activity.budget_amount ? (
-              <div className="text-[#040195] text-xs leading-relaxed flex items-center">
-                <span className="flex-1 text-left">{formatBudget(activity.budget_amount)}</span>
-                <span className="italic flex-5 text-left">
-                  {activity.budget_type === 'external' ? 'External Fund' : 'Internal Fund'}
-                </span>
-              </div>
-            ) : (
-              <>
-                {(activity.allocated_budget > 0 || activity.liquidated_budget > 0) ? (
-                  <div className="text-[#040195] text-xs leading-relaxed w-80 space-y-1">
-                    {activity.allocated_budget > 0 && (
-                      <div className="flex items-center">
-                        <span className="flex-1 text-left">{formatBudget(activity.allocated_budget)}</span>
-                        <span className="italic flex-1 text-left">External Fund</span>
+            {(() => {
+              // Parse budgets from budget_amount and budget_type JSON arrays
+              let budgets = [];
+              try {
+                if (activity.budget_amount && activity.budget_type) {
+                  const amounts = typeof activity.budget_amount === 'string' ? JSON.parse(activity.budget_amount) : [activity.budget_amount];
+                  const types = typeof activity.budget_type === 'string' ? JSON.parse(activity.budget_type) : [activity.budget_type];
+                  budgets = amounts.map((amount, index) => ({
+                    amount: amount,
+                    type: types[index] || 'external'
+                  }));
+                } else if (activity.budget_amount) {
+                  // Single value fallback
+                  budgets = [{ amount: activity.budget_amount, type: activity.budget_type || 'external' }];
+                }
+              } catch (e) {
+                console.error('Error parsing budgets:', e);
+                // Fallback for non-JSON values
+                if (activity.budget_amount) {
+                  budgets = [{ amount: activity.budget_amount, type: activity.budget_type || 'external' }];
+                }
+              }
+
+              return budgets.length > 0 ? (
+                <div className="space-y-2">
+                  {budgets.map((budget, index) => (
+                    <div key={index} className="text-[#040195] text-xs leading-relaxed">
+                      <div className="flex items-center gap-4">
+                        <span className="font-semibold min-w-[100px]">{formatBudget(budget.amount)}</span>
+                        <span className="italic text-gray-600">
+                          {budget.type === 'external' ? 'External Fund' : 'Internal Fund'}
+                        </span>
                       </div>
-                    )}
-                    {activity.liquidated_budget > 0 && (
-                      <div className="flex items-center">
-                        <span className="flex-1 text-left">{formatBudget(activity.liquidated_budget)}</span>
-                        <span className="italic flex-1 text-left">Internal Fund</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-gray-400 text-xs">No budget information</div>
-                )}
-              </>
-            )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-gray-400 text-xs">No budget information</div>
+              );
+            })()}
           </div>
 
           {/* Notes - Optional Row */}
