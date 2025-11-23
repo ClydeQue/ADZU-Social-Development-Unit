@@ -14,9 +14,9 @@ const StatsCards = () => {
     refetchOnWindowFocus: true,
   });
 
-  const completed = statsData?.statistics?.completed || "-";
-  const inProgress = statsData?.statistics?.in_progress || "-";
-  const pending = statsData?.statistics?.pending || "-";
+  const completed = statsData?.statistics?.completed ?? "-";
+  const inProgress = statsData?.statistics?.in_progress ?? "-";
+  const pending = statsData?.statistics?.pending ?? "-";
 
   const handleNavigateToReports = (status) => {
     navigate(`/unit-director/reports?sort=${status}`);
@@ -115,7 +115,7 @@ const StatsCards = () => {
                 className="text-[#5B6FED]"
               />
               <span className="text-[0.6rem] sm:text-[0.7rem] text-[#5B6FED]">
-                Offices currently in this phase
+                Activities in progress phase
               </span>
             </div>
           </div>

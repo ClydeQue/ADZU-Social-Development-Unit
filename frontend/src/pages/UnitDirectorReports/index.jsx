@@ -96,6 +96,7 @@ export default function UnitDirectorReports() {
           return `${datePart} | ${timePart}`;
         })() : 'N/A',
         status: activity.status || 'planned',
+        phase: activity.phase,
         participants: activity.participants_count || 0,
         budget: (() => {
           try {
@@ -121,18 +122,22 @@ export default function UnitDirectorReports() {
         ["pending", "in-progress", "completed", "cancelled"].includes(sortBy)
       ) {
         transformed = transformed.filter((item) => {
-          const status = item.status.toLowerCase();
-
-          // Handle different status value formats
+          // Handle different filtering logic
           if (sortBy === "in-progress") {
+            // Check phase for in-progress
+            const phase = item.phase?.toLowerCase();
             return (
-              status === "in-progress" ||
-              status === "in progress" ||
-              status === "ongoing"
+              phase === "in progress" ||
+              phase === "implementation" ||
+              phase === "execution"
             );
           } else if (sortBy === "pending") {
+            // Check status for pending
+            const status = item.status.toLowerCase();
             return status === "pending" || status === "planned";
           } else {
+            // Check status for completed and cancelled
+            const status = item.status.toLowerCase();
             return status === sortBy;
           }
         });
