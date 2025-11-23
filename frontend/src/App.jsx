@@ -20,6 +20,7 @@ import UnitDirectorSettings from "@/pages/UnitDirectorSettings";
 import MainSettings from "@/pages/UnitDirectorSettings/MainSettings";
 import ProgramsManagement from "@/pages/UnitDirectorSettings/Programs";
 import UsersManagement from "@/pages/UnitDirectorSettings/Users";
+import MessagesManagement from "@/pages/UnitDirectorSettings/Messages";
 
 // Office Dashboards (6 offices)
 import CCESDashboard from "@/pages/CCESDashboard";
@@ -132,6 +133,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute requiredRole="unit_director">
               <UsersManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/unit-director/settings/messages"
+          element={
+            <ProtectedRoute requiredRole="unit_director">
+              <MessagesManagement />
             </ProtectedRoute>
           }
         />

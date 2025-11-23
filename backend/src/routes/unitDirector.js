@@ -429,4 +429,167 @@ router.put(
   }
 );
 
+// ========================================
+// USER MANAGEMENT ENDPOINTS
+// ========================================
+
+// Get all users (for User Management page)
+router.get(
+  "/users",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { data: users, error } = await supabase
+        .from("office_credentials")
+        .select(`
+          id,
+          username,
+          name,
+          user_type,
+          is_active,
+          last_login,
+          created_at,
+          office_id,
+          offices (
+            id,
+            name,
+            acronym
+          )
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Format response
+      const formattedUsers = users.map(user => ({
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        role: user.user_type === "unit_director" ? "Unit Director" : "Office Director",
+        office: user.offices ? user.offices.acronym : "N/A",
+        status: user.is_active ? "active" : "inactive",
+        lastLogin: user.last_login,
+        createdAt: user.created_at
+      }));
+
+      res.json({ users: formattedUsers });
+    } catch (error) {
+      console.error("Get users error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Change user username
+router.put(
+  "/users/:userId/username",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { newUsername } = req.body;
+
+      console.log("Change username request:", { userId, newUsername });
+
+      if (!newUsername || newUsername.trim().length < 3) {
+        return res.status(400).json({
+          error: "Username must be at least 3 characters",
+        });
+      }
+
+      // Check if username already exists
+      const { data: existing, error: checkError } = await supabase
+        .from("office_credentials")
+        .select("id")
+        .eq("username", newUsername.trim().toLowerCase())
+        .neq("id", userId)
+        .single();
+
+      if (existing) {
+        return res.status(400).json({
+          error: "Username already exists",
+        });
+      }
+
+      // Update username
+      const { data: updatedUser, error: updateError } = await supabase
+        .from("office_credentials")
+        .update({ username: newUsername.trim().toLowerCase() })
+        .eq("id", userId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      console.log("Username updated successfully:", updatedUser);
+
+      res.json({
+        success: true,
+        message: "Username updated successfully",
+        user: {
+          id: updatedUser.id,
+          username: updatedUser.username,
+        },
+      });
+    } catch (error) {
+      console.error("Change username error:", error);
+      res.status(500).json({
+        error: "Error changing username",
+        details: error.message,
+      });
+    }
+  }
+);
+
+// Change user password
+router.put(
+  "/users/:userId/password",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { newPassword } = req.body;
+
+      console.log("Change password request for user:", userId);
+
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({
+          error: "Password must be at least 6 characters",
+        });
+      }
+
+      // Hash the new password
+      const bcrypt = require("bcryptjs");
+      const salt = await bcrypt.genSalt(12);
+      const passwordHash = await bcrypt.hash(newPassword, salt);
+
+      // Update password
+      const { data: updatedUser, error: updateError } = await supabase
+        .from("office_credentials")
+        .update({ password: passwordHash })
+        .eq("id", userId)
+        .select("id, username")
+        .single();
+
+      if (updateError) throw updateError;
+
+      console.log("Password updated successfully for user:", updatedUser.username);
+
+      res.json({
+        success: true,
+        message: "Password updated successfully",
+      });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({
+        error: "Error changing password",
+        details: error.message,
+      });
+    }
+  }
+);
+
 module.exports = router;

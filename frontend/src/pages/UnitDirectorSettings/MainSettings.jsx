@@ -469,8 +469,38 @@ export default function MainSettings() {
                               />
                             </svg>
                           </div>
-                        </button>
-                      </div>
+                          <svg className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </div>
+                      </button>
+
+                      {/* Messages Management */}
+                      <button
+                        onClick={() => navigate('/unit-director/settings/messages')}
+                        className="w-full bg-[#040195] hover:bg-[#3d39cc] cursor-pointer text-white rounded-xl p-4 transition-all shadow-md hover:shadow-lg group"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <div className="text-left">
+                              <h3 className="font-bold text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
+                                Messages
+                              </h3>
+                              <p className="text-xs text-white/80" style={{ fontFamily: 'Inter, sans-serif' }}>
+                                Manage office messages
+                              </p>
+                            </div>
+                          </div>
+                          <svg className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </div>
+                      </button>
                     </div>
 
                     {/* Info Card */}

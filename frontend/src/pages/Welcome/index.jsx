@@ -28,7 +28,7 @@ const LazyImage = ({ src, alt, className, ...props }) => {
 const WelcomePage = () => {
   const navigate = useNavigate();
   const { login, loading, isAuthenticated, user, userType, setShowTransitionLoader } = useAuth();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
@@ -98,7 +98,7 @@ const WelcomePage = () => {
       
       try {
         result = await login({
-          email: formData.email,
+          username: formData.username,
           password: formData.password,
           userType: 'office'
         });
@@ -110,7 +110,7 @@ const WelcomePage = () => {
         
         try {
           result = await login({
-            email: formData.email,
+            username: formData.username,
             password: formData.password,
             userType: 'unit_director'
           });
@@ -250,10 +250,10 @@ const WelcomePage = () => {
                     </h2>
 
                     <form onSubmit={handleSubmit} className="w-full space-y-4 lg:space-y-5 relative z-10">
-                      {/* Email Field */}
+                      {/* Username Field */}
                       <div>
                         <label className="block text-xs lg:text-sm font-inter font-semibold text-[#040195] mb-2">
-                          AdZU Email
+                          Username
                         </label>
                         <div className="relative">
                           <img
@@ -262,10 +262,10 @@ const WelcomePage = () => {
                             className="absolute left-3 lg:left-4 top-1/2 transform -translate-y-1/2 w-3.5 lg:w-4 h-3.5 lg:h-4 z-10"
                           />
                           <input
-                            type="email"
-                            name="email"
-                            placeholder="Enter your email"
-                            value={formData.email}
+                            type="text"
+                            name="username"
+                            placeholder="Enter your username"
+                            value={formData.username}
                             onChange={handleChange}
                             required
                             disabled={loading || lockoutSeconds > 0}
@@ -420,10 +420,10 @@ const WelcomePage = () => {
                       </div>
 
                       <form onSubmit={handleSubmit} className="w-full space-y-2.5 sm:space-y-3 relative">
-                        {/* Email Field */}
+                        {/* Username Field */}
                         <div className="mb-2.5 sm:mb-3">
                           <label className="block text-[0.65rem] sm:text-xs font-inter font-semibold text-[#040195] mb-1 sm:mb-1.5">
-                            AdZU Email
+                            Username
                           </label>
                           <div className="relative">
                             <img
@@ -432,10 +432,10 @@ const WelcomePage = () => {
                               className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 z-10"
                             />
                             <input
-                              type="email"
-                              name="email"
-                              placeholder="Enter your email"
-                              value={formData.email}
+                              type="text"
+                              name="username"
+                              placeholder="Enter your username"
+                              value={formData.username}
                               onChange={handleChange}
                               required
                               disabled={loading || lockoutSeconds > 0}

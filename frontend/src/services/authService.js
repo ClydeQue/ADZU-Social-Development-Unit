@@ -58,13 +58,13 @@ class AuthService {
   /**
    * Login - Works for both office and unit director
    */
-  async login({ email, password, userType }) {
+  async login({ username, password, userType }) {
     const endpoint = userType === "unit_director" 
       ? "/api/auth/login/unit-director"
       : "/api/auth/login/office";
 
     try {
-      const response = await authAxios.post(endpoint, { email, password });
+      const response = await authAxios.post(endpoint, { username, password });
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Login failed");

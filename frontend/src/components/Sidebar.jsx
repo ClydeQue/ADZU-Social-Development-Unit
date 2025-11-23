@@ -251,6 +251,22 @@ export default function Sidebar() {
                           Programs
                         </span>
                       </button>
+
+                      <button
+                        onClick={() => handleNavigation('/unit-director/settings/messages')}
+                        className={`w-full rounded-lg py-2 px-4 flex items-center gap-2 transition-all duration-200 ${
+                          location.pathname === '/unit-director/settings/messages'
+                            ? 'bg-[#E8EAFF] text-[#4D49FC]'
+                            : 'text-[#6B7280] hover:bg-[#E8EAFF] hover:text-[#4D49FC]'
+                        }`}
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span className={`text-sm ${location.pathname === '/unit-director/settings/messages' ? 'font-semibold' : 'font-medium'}`}>
+                          Messages
+                        </span>
+                      </button>
                     </div>
                   )}
                 </div>
