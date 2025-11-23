@@ -27,9 +27,11 @@ const Navbar = () => {
   const { data: notificationsData } = useQuery({
     queryKey: ['navbar-notifications'],
     queryFn: NotificationService.getNotifications,
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
+    staleTime: 10 * 60 * 1000, // Consider fresh for 10 minutes
+    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
     refetchInterval: false, // Don't auto-refetch
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false, // Don't refetch on component mount if data exists
     enabled: !!user, // Only fetch if user is logged in
   });
 

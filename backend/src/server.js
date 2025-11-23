@@ -4,6 +4,8 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 
+
+
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const authRoutes = require("./routes/auth"); //JWT authentication
@@ -97,7 +99,6 @@ app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/office", officeRoutes);
 app.use("/api/programs", programsRoutes); // Programs & Activities API
 app.use("/api/notifications", notificationRoutes); // Notifications API
-app.use("/api/unit-director", unitDirectorRoutes);
 app.use("/api/settings", settingsRoutes); // settings API
 app.use("/api/messages", messagesRoutes); // Messages API
 

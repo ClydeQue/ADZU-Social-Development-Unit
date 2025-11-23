@@ -20,8 +20,8 @@ class ProgramService {
   /**
    * Get programs for current office user
    */
-  async getMyPrograms() {
-    const response = await api.get("programs");
+  async getPrograms() {
+    const response = await api.get("api/programs");
     return response.data;
   }
 
@@ -30,7 +30,7 @@ class ProgramService {
    * Useful for viewing specific office's programs
    */
   async getProgramsByOffice(officeId) {
-    const response = await api.get(`office/${officeId}/programs`);
+    const response = await api.get(`api/office/${officeId}/programs`);
     return response.programs;
   }
 
@@ -38,7 +38,7 @@ class ProgramService {
    * Get program by ID
    */
   async getProgramById(programId) {
-    const response = await api.get(`program/${programId}`);
+    const response = await api.get(`api/programs/${programId}`);
     return response.program;
   }
 
@@ -47,7 +47,7 @@ class ProgramService {
    * Note: In the future, programs may be fixed per office
    */
   async createProgram(programData) {
-    const response = await api.post("program", programData);
+    const response = await api.post("api/programs", programData);
     return response.program;
   }
 
@@ -55,7 +55,7 @@ class ProgramService {
    * Update program
    */
   async updateProgram(programId, programData) {
-    const response = await api.put(`program/${programId}`, programData);
+    const response = await api.put(`api/programs/${programId}`, programData);
     return response.program;
   }
 
@@ -63,14 +63,14 @@ class ProgramService {
    * Delete program
    */
   async deleteProgram(programId) {
-    return await api.delete(`program/${programId}`);
+    return await api.delete(`api/programs/${programId}`);
   }
 
   /**
    * Get program statistics
    */
   async getProgramStats(programId) {
-    const response = await api.get(`program/${programId}/stats`);
+    const response = await api.get(`api/programs/${programId}/stats`);
     return response.data;
   }
 }

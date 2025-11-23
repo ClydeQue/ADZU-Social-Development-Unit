@@ -77,6 +77,24 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
     }
   };
 
+  // Handle delete single activity from modal
+  const handleDeleteSingle = async (activityId) => {
+    try {
+      // Call API to delete single activity
+      await OfficeService.deleteActivities([activityId]);
+      
+      // Invalidate and refetch the projects data
+      queryClient.invalidateQueries(['office-projects', officeId]);
+      
+      // Show success message
+      alert('Successfully deleted activity!');
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      alert('Failed to delete activity. Please try again.');
+      throw error; // Re-throw to let modal handle it
+    }
+  };
+
   // Transform data into projects format
   const projects = projectsData?.recent_activities?.map((activity) => {
     const program = activity.programs;
@@ -126,6 +144,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
         <ActivityDetailModal
           activity={selectedActivity}
           onClose={closeModal}
+          onDelete={handleDeleteSingle}
           officeColor={officeColor}
           basePath={basePath}
         />
@@ -145,7 +164,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
                   key={project.id}
                   className="relative rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200 shadow-lg h-52"
                   style={{
-                    border: deleteMode ? '2px solid #EF5350' : '2px solid transparent',
+                    border: deleteMode ? '5px solid #FF0022' : '0px solid transparent',
                   }}
                   onClick={() => deleteMode ? toggleItemSelection(project.id) : handleProjectClick(project.id)}
                 >
@@ -153,10 +172,10 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
                   {deleteMode && (
                     <div className="absolute top-2 right-2 z-10">
                       <div 
-                        className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                        className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
                           isSelected 
-                            ? 'bg-red-500 border-red-500' 
-                            : 'bg-white border-white'
+                            ? 'bg-red-500 border-red-500 ' 
+                            : 'bg-white'
                         }`}
                       >
                         {isSelected && (
@@ -184,14 +203,14 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
                   <div className="relative h-full flex flex-col justify-end p-3">
                     {/* Program Type */}
                     <div className="mb-0.5">
-                      <span className="text-white text-[0.6rem] font-semibold tracking-wide uppercase truncate block">
+                      <span className="text-white text-[0.6rem]  font-bold tracking-wide uppercase truncate block">
                         {project.programTitle}
                       </span>
                     </div>
 
                     {/* Activity Name */}
                     <div>
-                      <h3 className="text-white text-base font-bold uppercase leading-tight truncate">
+                      <h3 className="text-white text-base font-black  uppercase leading-tight truncate">
                         {project.activityName}
                       </h3>
                     </div>
@@ -205,7 +224,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
           <div className="flex flex-col gap-2">
             <button 
               onClick={() => navigate(`${basePath}/add-activity`)}
-              className="p-3 text-white font-bold hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
+              className="p-3 text-white font-bold hover:cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity shadow-lg flex items-center justify-center"
               style={{ backgroundColor: '#4D49FC', borderRadius: '10px' }}
               title="Create New Project"
             >
@@ -213,7 +232,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
             </button>
             <button 
               onClick={toggleDeleteMode}
-              className="p-2 text-white hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
+              className="p-2 text-white  hover:cursor-pointer hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
               style={{ 
                 backgroundColor: deleteMode ? '#EF5350' : '#4D49FC', 
                 borderRadius: '10px' 
@@ -225,7 +244,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
             {deleteMode && selectedItems.length > 0 && (
               <button 
                 onClick={handleDelete}
-                className="p-2 text-white hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
+                className="p-2 text-white hover:cursor-pointer hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
                 style={{ backgroundColor: '#EF5350', borderRadius: '10px' }}
                 title={`Delete ${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''}`}
               >
@@ -235,7 +254,7 @@ export default function OfficeReports({ officeId, officeColor = '#4D49FC', baseP
               </button>
             )}
             <button 
-              className="p-2 text-white hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center"
+              className="p-2 text-white hover:opacity-90 hover:cursor-pointer transition-opacity shadow-lg flex items-center justify-center"
               style={{ backgroundColor: '#4D49FC', borderRadius: '10px' }}
               title="Refresh"
             >

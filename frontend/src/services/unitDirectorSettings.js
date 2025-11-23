@@ -5,7 +5,7 @@ class unitDirectorSettings {
    * Get all offices
    */
   async getAllOffices() {
-    const response = await api.get("office/all");
+    const response = await api.get("api/office/all");
     return response.offices;
   }
 
@@ -13,7 +13,7 @@ class unitDirectorSettings {
    * Get office by ID
    */
   async getOfficeById(officeId) {
-    const response = await api.get(`office/${officeId}`);
+    const response = await api.get(`api/office/${officeId}`);
     return response.office;
   }
 
@@ -21,7 +21,7 @@ class unitDirectorSettings {
    * Add a new program to an office
    */
   async addProgram(officeId, programData) {
-    const response = await api.post(`office/${officeId}/programs`, programData);
+    const response = await api.post(`api/office/${officeId}/programs`, programData);
     return response;
   }
 
@@ -29,7 +29,7 @@ class unitDirectorSettings {
    * Update a program
    */
   async updateProgram(programId, programData) {
-    const response = await api.put(`office/programs/${programId}`, programData);
+    const response = await api.put(`api/office/programs/${programId}`, programData);
     return response;
   }
 
@@ -37,7 +37,7 @@ class unitDirectorSettings {
    * Delete a program
    */
   async deleteProgram(programId) {
-    const response = await api.delete(`office/programs/${programId}`);
+    const response = await api.delete(`api/office/programs/${programId}`);
     return response;
   }
 
@@ -46,7 +46,7 @@ class unitDirectorSettings {
    */
   async changeOfficePassword(officeId, newPassword) {
     const response = await api.put(
-      `settings/office/${officeId}/change-password`,
+      `api/settings/office/${officeId}/change-password`,
       {
         newPassword,
       }

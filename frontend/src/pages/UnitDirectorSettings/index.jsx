@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import ReportsTable from "./OfficesTables";
 import ReportsNavbar from "./SettingsNavbar";
 import EditOfficeDialog from "./EditOfficeDialog";
-import api from "@/services/api";
+import UnitDirectorService from "@/services/unitDirectorService";
 
 export default function UnitDirectorSettings() {
   const [sortBy, setSortBy] = useState("office");
@@ -19,10 +19,7 @@ export default function UnitDirectorSettings() {
     error,
   } = useQuery({
     queryKey: ["unit-director-settings"],
-    queryFn: async () => {
-      const response = await api.get("settings");
-      return response;
-    },
+    queryFn: () => UnitDirectorService.getOffices(),
     staleTime: 2 * 60 * 1000,
   });
 

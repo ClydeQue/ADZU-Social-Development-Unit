@@ -31,7 +31,16 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
     }
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (!path) return false;
+    // For Projects menu, also match edit-activity and add-activity routes
+    if (path.endsWith('/projects')) {
+      return location.pathname === path || 
+             location.pathname.includes('/edit-activity') || 
+             location.pathname.includes('/add-activity');
+    }
+    return location.pathname === path;
+  };
 
   // Menu items - customized per office
   const menuItems = [

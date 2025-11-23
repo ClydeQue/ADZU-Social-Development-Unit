@@ -1,25 +1,12 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/services/api';
+import UnitDirectorService from '@/services/unitDirectorService';
 import ReportDetailModal from './ReportDetailModal';
  
 const ReportsTable = ({ reports }) => {
-  const [selectedRows, setSelectedRows] = useState([]);
   const [viewedReports, setViewedReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
-
-  const toggleRow = (id) => {
-    setSelectedRows(prev => 
-      prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
-    );
-  };
-
-  const toggleAll = () => {
-    setSelectedRows(prev => 
-      prev.length === reports.length ? [] : reports.map(r => r.id)
-    );
-  };
 
   const markAsViewed = (id) => {
     if (!viewedReports.includes(id)) {
@@ -33,7 +20,7 @@ const ReportsTable = ({ reports }) => {
     queryFn: async () => {
       if (!selectedReport) return null;
       console.log('Fetching activity:', selectedReport);
-      const response = await api.get(`unit-director/activities/${selectedReport}`);
+      const response = await UnitDirectorService.getActivityById(selectedReport);
       console.log('Activity response:', response);
       // Backend returns { activity: {...} }
       return response.activity || response;
@@ -78,13 +65,7 @@ const ReportsTable = ({ reports }) => {
         }
       `}</style>
       {/* Header Row */}
-      <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[35px_180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center flex-shrink-0 flex-grow-0">
-        <input 
-          type="checkbox" 
-          checked={selectedRows.length === reports.length}
-          onChange={toggleAll}
-          className="w-3 h-3 accent-[#4D49FC]"
-        />
+      <div className="bg-[#1E22AA] text-white rounded-xl px-3 py-2.5 mb-1 grid grid-cols-[180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center flex-shrink-0 flex-grow-0">
         <div className="text-xs font-semibold">Office</div>
         <div className="text-xs font-semibold">Program</div>
         <div className="text-xs font-semibold">Project / Activity</div>
@@ -104,17 +85,8 @@ const ReportsTable = ({ reports }) => {
               key={report.id}
               className={`${
                 isNew ? 'bg-[#C7D2FE]' : 'bg-white'
-              } hover:bg-[#D4D1FF] transition-colors rounded-lg px-3 py-1 grid grid-cols-[35px_180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center`}
+              } hover:bg-[#D4D1FF] transition-colors rounded-lg px-3 py-1 grid grid-cols-[180px_1.2fr_1.2fr_140px_180px_160px] gap-3 items-center`}
             >
-              <input 
-                type="checkbox"
-                checked={selectedRows.includes(report.id)}
-                onChange={() => {
-                  toggleRow(report.id);
-                  markAsViewed(report.id);
-                }}
-                className="w-3 h-3 accent-[#4D49FC]"
-              />
               <div className="flex items-center gap-1.5 overflow-hidden">
                 <img src={report.logo} alt={report.office} className="w-5 h-5 object-contain flex-shrink-0" />
                 <span className="text-[#4D49FC] font-semibold text-[0.7rem] whitespace-nowrap">{report.office}</span>
@@ -131,13 +103,13 @@ const ReportsTable = ({ reports }) => {
               <div className="flex justify-end gap-1.5">
                 <button 
                   onClick={() => handleViewReport(report.id)}
-                  className="px-3 py-0.5 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#3D39EC] transition-colors whitespace-nowrap"
+                  className="px-3 py-0.5 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#201f65] hover:cursor-pointer transition-colors duration-200 whitespace-nowrap"
                 >
                   View
                 </button>
                 <button 
                   onClick={() => markAsViewed(report.id)}
-                  className="px-3 py-0.5 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#3D39EC] transition-colors whitespace-nowrap"
+                  className="px-3 py-0.5 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#201f65] hover:cursor-pointer transition-colors whitespace-nowrap"
                 >
                   Print
                 </button>

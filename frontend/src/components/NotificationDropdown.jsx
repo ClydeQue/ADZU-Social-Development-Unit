@@ -24,9 +24,10 @@ function NotificationDropdown({ onNotificationClick }) {
     queryKey: ["notifications"],
     queryFn: NotificationService.getNotifications,
     select: (data) => data || { items: [], unread: 0 },
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-    refetchOnWindowFocus: true, // Refetch when user returns to window
+    staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes
+    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
+    refetchOnWindowFocus: false, // Don't refetch when user returns to window
+    refetchOnMount: false, // Don't refetch on component mount if data exists
     refetchInterval: false, // Disable automatic polling
     retry: 2,
   });

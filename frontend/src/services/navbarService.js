@@ -11,7 +11,7 @@ const NavbarService = {
    */
   async getUserProfile() {
     try {
-      const response = await api.get('/unit-director/profile');
+      const response = await api.get('api/unit-director/profile');
       return response;
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -25,7 +25,7 @@ const NavbarService = {
    */
   async getNotifications() {
     try {
-      const response = await api.get('/unit-director/notifications');
+      const response = await api.get('api/unit-director/notifications');
       return response;
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -39,7 +39,7 @@ const NavbarService = {
    */
   async getMessages() {
     try {
-      const response = await api.get('/unit-director/messages');
+      const response = await api.get('api/unit-director/messages');
       return response;
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -54,7 +54,7 @@ const NavbarService = {
    */
   async markNotificationAsRead(notificationId) {
     try {
-      const response = await api.put(`/unit-director/notifications/${notificationId}/read`);
+      const response = await api.put(`api/unit-director/notifications/${notificationId}/read`);
       return response;
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -69,7 +69,7 @@ const NavbarService = {
    */
   async markMessageAsRead(messageId) {
     try {
-      const response = await api.put(`/unit-director/messages/${messageId}/read`);
+      const response = await api.put(`api/unit-director/messages/${messageId}/read`);
       return response;
     } catch (error) {
       console.error('Error marking message as read:', error);

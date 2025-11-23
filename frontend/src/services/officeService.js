@@ -10,7 +10,7 @@ class OfficeService {
    * Get all offices
    */
   async getAllOffices() {
-    const response = await api.get("office/all");
+    const response = await api.get("api/office/all");
     return response.offices;
   }
 
@@ -18,7 +18,7 @@ class OfficeService {
    * Get office by ID
    */
   async getOfficeById(officeId) {
-    const response = await api.get(`office/${officeId}`);
+    const response = await api.get(`api/office/${officeId}`);
     return response.office;
   }
 
@@ -26,14 +26,14 @@ class OfficeService {
    * Get office dashboard data
    */
   async getOfficeDashboard(officeId) {
-    return await api.get(`office/${officeId}/dashboard`);
+    return await api.get(`api/office/${officeId}/dashboard`);
   }
 
   /**
    * Get office programs
    */
   async getOfficePrograms(officeId) {
-    const response = await api.get(`office/${officeId}/programs`);
+    const response = await api.get(`api/office/${officeId}/programs`);
     return response.programs;
   }
 
@@ -41,21 +41,21 @@ class OfficeService {
    * Get office reports data
    */
   async getOfficeReports(officeId) {
-    return await api.get(`office/${officeId}/reports`);
+    return await api.get(`api/office/${officeId}/reports`);
   }
 
   /**
    * Get office activities for calendar
    */
   async getOfficeActivities(officeId) {
-    return await api.get(`office/${officeId}/activities`);
+    return await api.get(`api/office/${officeId}/activities`);
   }
 
   /**
    * Delete activities by IDs
    */
   async deleteActivities(activityIds) {
-    return await api.delete('office/activities', { 
+    return await api.delete('api/office/activities', { 
       data: { activity_ids: activityIds } 
     });
   }
@@ -64,7 +64,7 @@ class OfficeService {
    * Get single activity by ID
    */
   async getActivity(activityId) {
-    const response = await api.get(`office/activities/${activityId}`);
+    const response = await api.get(`api/office/activities/${activityId}`);
     return response.activity;
   }
 
@@ -72,14 +72,14 @@ class OfficeService {
    * Update activity by ID
    */
   async updateActivity(activityId, activityData) {
-    return await api.put(`office/activities/${activityId}`, activityData);
+    return await api.put(`api/office/activities/${activityId}`, activityData);
   }
 
   /**
    * Create new activity
    */
   async createActivity(activityData) {
-    return await api.post('office/activities', activityData);
+    return await api.post('/api/office/activities', activityData);
   }
 }
 

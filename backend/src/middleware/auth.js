@@ -7,7 +7,10 @@ const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
+  console.log(`[AUTH] ${req.method} ${req.path} - Token present: ${!!token}`);
+
   if (!token) {
+    console.log("[AUTH] No token found in request");
     return res.status(401).json({
       error: "Access token required",
       message: "Please provide a valid access token",
@@ -19,6 +22,7 @@ const authenticateToken = (req, res, next) => {
 
   if (!verification || !verification.valid) {
     const errMsg = verification?.error || "Invalid token";
+    console.log(`[AUTH] Token verification failed: ${errMsg}`);
     if (errMsg === "jwt expired") {
       return res.status(401).json({
         error: "Token expired",

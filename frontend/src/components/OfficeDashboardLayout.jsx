@@ -115,20 +115,22 @@ export default function OfficeDashboardLayout({
 
             {/* Main Content */}
             <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-2 sm:mx-3 xl:mx-4 flex-1 md:overflow-hidden flex flex-col md:min-h-0">
-              {/* Date badges */}
-              <div className="flex justify-end items-center mb-2 xl:mb-3 flex-shrink-0">
-                <div className="flex gap-1.5 xl:gap-2 flex-wrap">
-                  <span className="inline-flex items-center justify-center h-5 xl:h-6 px-2 xl:px-2.5 text-[0.65rem] xl:text-[0.7rem] border border-[#040195] text-[#040195] rounded-full">
-                    {day}
-                  </span>
-                  <span className="inline-flex items-center justify-center h-5 xl:h-6 px-2 xl:px-2.5 text-[0.65rem] xl:text-[0.7rem] border border-[#040195] text-[#040195] rounded-full">
-                    {month}
-                  </span>
-                  <span className="inline-flex items-center justify-center h-5 xl:h-6 px-2 xl:px-2.5 text-[0.65rem] xl:text-[0.7rem] border border-[#040195] text-[#040195] rounded-full">
-                    {weekday}
-                  </span>
+              {/* Date badges - only show on dashboard */}
+              {!children && (
+                <div className="flex justify-end items-center mb-2 xl:mb-3 flex-shrink-0">
+                  <div className="flex gap-1.5 xl:gap-2 flex-wrap">
+                    <span className="inline-flex items-center justify-center h-5 xl:h-6 px-2 xl:px-2.5 text-[0.65rem] xl:text-[0.7rem] border border-[#040195] text-[#040195] rounded-full">
+                      {day}
+                    </span>
+                    <span className="inline-flex items-center justify-center h-5 xl:h-6 px-2 xl:px-2.5 text-[0.65rem] xl:text-[0.7rem] border border-[#040195] text-[#040195] rounded-full">
+                      {month}
+                    </span>
+                    <span className="inline-flex items-center justify-center h-5 xl:h-6 px-2 xl:px-2.5 text-[0.65rem] xl:text-[0.7rem] border border-[#040195] text-[#040195] rounded-full">
+                      {weekday}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Content Section */}
               {children || (

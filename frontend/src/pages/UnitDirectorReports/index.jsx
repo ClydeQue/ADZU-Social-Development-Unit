@@ -5,7 +5,7 @@ import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
 import ReportsTable from "./ReportsTable";
 import ReportsNavbar from "./ReportsNavbar";
-import api from "@/services/api";
+import UnitDirectorService from "@/services/unitDirectorService";
 
 export default function UnitDirectorReports() {
   const [searchParams] = useSearchParams();
@@ -27,10 +27,7 @@ export default function UnitDirectorReports() {
     error,
   } = useQuery({
     queryKey: ["unit-director-reports"],
-    queryFn: async () => {
-      const response = await api.get("unit-director/reports");
-      return response;
-    },
+    queryFn: () => UnitDirectorService.getReports(),
     staleTime: 2 * 60 * 1000, // 2 minutes cache:D
   });
 
@@ -132,7 +129,7 @@ export default function UnitDirectorReports() {
             />
 
             <div className="bg-[#F4F4F4] rounded-[15px] p-6 mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
-              {/* Sort and Delete Controls */}
+              {/* Sort Controls */}
               <div className="flex gap-3 items-center mb-4">
                 {/* Sort by Dropdown */}
                 <div className="relative">
@@ -153,14 +150,6 @@ export default function UnitDirectorReports() {
                     <img src="/icons/dropdown_arrow.svg" alt="" />
                   </div>
                 </div>
-
-                {/* Delete Button - bxs-trash */}
-                <button
-                  className="bg-white p-1 rounded-full shadow-md hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#4D49FC]"
-                  title="Delete selected"
-                >
-                  <img src="/icons/bxs_trash.svg" alt="" width={25} />
-                </button>
               </div>
 
               {/* Reports Table */}
