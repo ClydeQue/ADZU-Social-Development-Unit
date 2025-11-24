@@ -53,7 +53,7 @@ const checkLoginRateLimit = (req, res, next) => {
     });
   }
   
-  // Reset if lockout expired
+  // Reset if lockout expiredp
   if (record.lockedUntil && now >= record.lockedUntil) {
     record.attempts = 0;
     record.lockedUntil = null;

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getOfficeLogo } from '@/utils/officeLogos';
 import UnitDirectorService from '@/services/unitDirectorService';
 
-const BudgetCard = () => {
+const SDGCoverageCard = () => {
   const [visibleItems, setVisibleItems] = useState([1, 2, 3, 4, 5, 6, 7]);
   const [direction, setDirection] = useState(0);
   const [hoveredSDG, setHoveredSDG] = useState(null);
@@ -61,8 +61,8 @@ const BudgetCard = () => {
   const maxValue = sdgData.length > 0 ? Math.max(...sdgData.map(item => item.value), 1) : 1;
 
   return (
-    <div className="border border-[#E5E7EB] rounded-xl flex-1 bg-white shadow-none overflow-hidden">
-      <div className="p-3 sm:p-4 h-full flex flex-col">
+    <div className="border border-[#E5E7EB] rounded-xl h-full bg-white shadow-none overflow-hidden flex flex-col">
+      <div className="p-3 sm:p-4 flex-1 flex flex-col min-h-0">
         {/* Header */}
         <div className="flex justify-between items-center mb-2 sm:mb-3 flex-shrink-0">
           <h6 className="text-[#040195] font-bold text-base sm:text-lg md:text-xl leading-[1.6]">
@@ -145,7 +145,7 @@ const BudgetCard = () => {
                   layout
                   onMouseEnter={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
-                    setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top });
+                    setTooltipPosition({ x: rect.left + rect.width / 9, y: rect.top });
                     setHoveredSDG(item);
                   }}
                   onMouseLeave={() => {
@@ -153,13 +153,13 @@ const BudgetCard = () => {
                   }}
                 >
                   {/* Bar */}
-                  <div className="flex items-end justify-center" style={{ height: '50px' }}>
+                  <div className="flex items-end justify-center" style={{ height: '120px' }}>
                     <div
                       className="bg-[#4D49FC] rounded-full cursor-pointer hover:bg-[#3d39cc] transition-colors"
                       style={{
-                        width: window.innerWidth < 640 ? '8px' : '10px',
-                        height: item.value === 0 ? '6px' : `${Math.max((item.value / maxValue) * 100, 12)}%`,
-                        minHeight: '6px'
+                        width: window.innerWidth < 640 ? '12px' : '14px',
+                        height: item.value === 0 ? '8px' : `${Math.max((item.value / maxValue) * 100, 15)}%`,
+                        minHeight: '8px'
                       }}
                     />
                   </div>
@@ -187,8 +187,12 @@ const BudgetCard = () => {
         >
           <div className="bg-white rounded-xl shadow-2xl border-2 border-[#4D49FC] p-3 min-w-[200px]">
             {/* Header */}
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
-              <h4 className="text-[#040195] font-bold text-sm">SDG {hoveredSDG.id}</h4>
+            <div className="flex items-center justify-between gap-3 mb-3 pb-2 border-b border-gray-200">
+              <img
+                src={`/images/SDG-images/SDG-${hoveredSDG.id}.webp`}
+                alt={`SDG ${hoveredSDG.id}`}
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-[#4D49FC] font-bold text-lg">{hoveredSDG.value}</span>
             </div>
             
@@ -241,4 +245,4 @@ const BudgetCard = () => {
   );
 };
 
-export default BudgetCard;
+export default SDGCoverageCard;

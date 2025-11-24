@@ -23,12 +23,12 @@ const StatsCards = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 flex-1 min-h-0 lg:grid-rows-3">
+    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2 xl:gap-3 flex-1 min-h-0 lg:grid-rows-3 h-full">
       {/* Completed */}
-      <div className="flex flex-col min-h-[150px] sm:min-h-[180px] lg:min-h-0">
+      <div className="flex flex-col min-h-[150px] sm:min-h-[180px] lg:min-h-0 lg:h-full">
         <div
           onClick={() => handleNavigateToReports("completed")}
-          className="bg-[#1E22AA] text-white rounded-2xl sm:rounded-3xl flex-1 shadow-none overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+          className="bg-[#1E22AA] text-white rounded-2xl sm:rounded-3xl flex-1 shadow-none overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 h-full"
         >
           <div className="p-3 sm:p-4 h-full flex flex-col justify-between">
             <div className="flex justify-between items-center mb-1 flex-shrink-0">
@@ -74,10 +74,10 @@ const StatsCards = () => {
       </div>
 
       {/* In Progress */}
-      <div className="flex flex-col min-h-[150px] sm:min-h-[180px] lg:min-h-0">
+      <div className="flex flex-col min-h-[150px] sm:min-h-[180px] lg:min-h-0 lg:h-full">
         <div
           onClick={() => handleNavigateToReports("in-progress")}
-          className="bg-white text-[#1E22AA] rounded-2xl sm:rounded-3xl flex-1 shadow-none border border-[#E5E7EB] overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+          className="bg-white text-[#1E22AA] rounded-2xl sm:rounded-3xl flex-1 shadow-none border border-[#E5E7EB] overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 h-full"
         >
           <div className="p-3 sm:p-4 h-full flex flex-col justify-between">
             <div className="flex justify-between items-center mb-1 flex-shrink-0">
@@ -123,10 +123,10 @@ const StatsCards = () => {
       </div>
 
       {/* Pending */}
-      <div className="flex flex-col min-h-[150px] sm:min-h-[180px] lg:min-h-0">
+      <div className="flex flex-col min-h-[150px] sm:min-h-[180px] lg:min-h-0 lg:h-full">
         <div
           onClick={() => handleNavigateToReports("pending")}
-          className="bg-white text-[#1E22AA] rounded-2xl sm:rounded-3xl flex-1 shadow-none border border-[#E5E7EB] overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+          className="bg-white text-[#1E22AA] rounded-2xl sm:rounded-3xl flex-1 shadow-none border border-[#E5E7EB] overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 h-full"
         >
           <div className="p-3 sm:p-4 h-full flex flex-col justify-between">
             <div className="flex justify-between items-center mb-1 flex-shrink-0">

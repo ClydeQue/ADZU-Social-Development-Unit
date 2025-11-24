@@ -6,9 +6,9 @@ import Sidebar from "@/components/Sidebar";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import InboxDropdown from "@/components/InboxDropdown";
 import UnitDirectorSearchBar from "@/components/UnitDirectorSearchBar";
-import FlagshipUpdateCard from "./FlagshipUpdateCard";
+import ProjectsCard from "./ProjectsCard";
 import UpcomingActivitiesCard from "./UpcomingActivitiesCard";
-import BudgetCard from "./BudgetCard";
+import SDGCoverageCard from "./SDGCoverageCard";
 import StatsCards from "./StatsCards";
 
 // Dashboard
@@ -125,21 +125,24 @@ export default function UnitDirectorDashboard() {
 
               {/* Grid */}
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 xl:gap-3 md:min-h-0 md:overflow-hidden overflow-y-auto pb-2">
-                {/* Flagship */}
-                <div className="lg:col-span-5 flex flex-col min-h-[300px] sm:min-h-[350px] lg:min-h-0">
-                  <FlagshipUpdateCard />
-                </div>
+                {/* Left Column - Projects & Budget */}
+                <div className="lg:col-span-9 flex flex-col gap-2 xl:gap-3 h-full">
+                  {/* Projects & Upcoming Row */}
+                  <div className="flex flex-col lg:flex-row gap-2 xl:gap-3 lg:flex-[0_0_auto]">
+                    {/* Projects */}
+                    <div className="flex flex-col min-h-[250px] sm:min-h-[280px] lg:h-[280px] lg:flex-1">
+                      <ProjectsCard />
+                    </div>
 
-                {/* Upcoming */}
-                <div className="lg:col-span-4 flex flex-col min-h-0 gap-2 xl:gap-3">
-                  {/* Activities */}
-                  <div className="flex flex-col min-h-[250px] sm:min-h-[300px] lg:flex-1">
-                    <UpcomingActivitiesCard />
+                    {/* Upcoming Activities */}
+                    <div className="flex flex-col min-h-[200px] sm:min-h-[220px] lg:h-[280px] lg:flex-1">
+                      <UpcomingActivitiesCard />
+                    </div>
                   </div>
 
-                  {/* Budget */}
-                  <div className="flex flex-col min-h-[200px] sm:min-h-[220px] lg:min-h-0 lg:flex-1">
-                    <BudgetCard />
+                  {/* SDG Coverage - Full Width */}
+                  <div className="flex flex-col min-h-[200px] sm:min-h-[220px] lg:flex-1 lg:min-h-0">
+                    <SDGCoverageCard />
                   </div>
                 </div>
 

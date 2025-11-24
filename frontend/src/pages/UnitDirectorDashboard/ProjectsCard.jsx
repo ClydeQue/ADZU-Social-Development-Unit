@@ -3,7 +3,7 @@ import DashboardService from '@/services/dashboardService';
 import DonutChart from '@/ui/DonutChart';
 import ChartSkeleton from '@/components/ChartSkeleton';
 
-const FlagshipUpdateCard = () => {
+const ProjectsCard = () => {
   // Fetch live dashboard statistics
   const { data: statsData, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -26,12 +26,12 @@ const FlagshipUpdateCard = () => {
 
   return (
     <div className="flex-1 relative border border-[#E5E7EB] rounded-xl overflow-hidden bg-white shadow-none">
-      <div className="p-3 sm:p-4 h-full flex flex-col">
-        <div className="flex justify-between items-center mb-2 sm:mb-3 flex-shrink-0">
-          <h6 className="text-[#040195] text-base sm:text-lg md:text-xl font-semibold leading-[1.6]">
-            Flagship Update
+      <div className="p-2 sm:p-3 h-full flex flex-col">
+        <div className="flex justify-between items-center mb-1 sm:mb-2 flex-shrink-0">
+          <h6 className="text-[#040195] text-sm sm:text-base md:text-lg font-semibold leading-[1.6]">
+            Projects
           </h6>
-          <button className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded hover:bg-[rgba(0,0,0,0.04)] transition-colors">
+          <button className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded hover:bg-[rgba(0,0,0,0.04)] transition-colors">
 
           </button>
         </div>
@@ -42,31 +42,31 @@ const FlagshipUpdateCard = () => {
             <ChartSkeleton />
           ) : total === 0 ? (
             <div className="flex items-center justify-center">
-              <span className="text-sm text-gray-400">No activities yet</span>
+              <span className="text-xs text-gray-400">No activities yet</span>
             </div>
           ) : (
             <DonutChart 
               completed={completedPercent}
               inProgress={inProgressPercent}
               pending={pendingPercent}
-              size={window.innerWidth < 640 ? 180 : window.innerWidth < 1024 ? 220 : 250}
+              size={window.innerWidth < 640 ? 140 : window.innerWidth < 1024 ? 160 : 180}
             />
           )}
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mt-2 sm:mt-3 flex-shrink-0">
+        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mt-1 sm:mt-2 flex-shrink-0">
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#4D49FC]" />
-            <span className="text-[0.65rem] sm:text-[0.7rem]">Completed ({completedPercent}%)</span>
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#4D49FC]" />
+            <span className="text-[0.6rem] sm:text-[0.65rem]">Completed ({completedPercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#818CF8]" />
-            <span className="text-[0.65rem] sm:text-[0.7rem]">In Progress ({inProgressPercent}%)</span>
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#818CF8]" />
+            <span className="text-[0.6rem] sm:text-[0.65rem]">In Progress ({inProgressPercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#C7D2FE]" />
-            <span className="text-[0.65rem] sm:text-[0.7rem]">Pending ({pendingPercent}%)</span>
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#C7D2FE]" />
+            <span className="text-[0.6rem] sm:text-[0.65rem]">Pending ({pendingPercent}%)</span>
           </div>
         </div>
       </div>
@@ -74,4 +74,4 @@ const FlagshipUpdateCard = () => {
   );
 };
 
-export default FlagshipUpdateCard;
+export default ProjectsCard;
