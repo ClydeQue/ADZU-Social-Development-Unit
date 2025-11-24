@@ -85,11 +85,11 @@ const SuccessModal = ({
         className="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Warning Icon */}
+        {/* Success Icon */}
         <div className="flex items-center justify-center pt-12 pb-6">
           <img
-            src="/icons/warning.svg"
-            alt="Warning"
+            src="/icons/success.svg"
+            alt="Success"
             className="w-24 h-24"
           />
         </div>
