@@ -64,7 +64,9 @@ export default function UnitDirectorCalendar() {
   } = useQuery({
     queryKey: ["unit-director-activities"],
     queryFn: () => UnitDirectorService.getAllActivities(),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   // Fetch full activity details when an event is selected
@@ -75,7 +77,8 @@ export default function UnitDirectorCalendar() {
     queryKey: ["activity-details", selectedEventId],
     queryFn: () => UnitDirectorService.getActivityById(selectedEventId),
     enabled: !!selectedEventId,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true,
   });
 
   // Transform activities to FullCalendar events
@@ -197,18 +200,14 @@ export default function UnitDirectorCalendar() {
   };
 
   // Format month and year for display
-  const monthYear = currentDate
-    .toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-    })
-    .toUpperCase();
+  const year = currentDate.getFullYear();
+  const month = currentDate.toLocaleDateString("en-US", { month: "long" }).toUpperCase();
 
   return (
     <div className="flex bg-[#EAE9E9] min-h-screen max-h-screen p-2 sm:p-4 md:p-6 xl:p-[35px] overflow-hidden">
       <WhiteContainer>
         <Sidebar />
-        <main className="flex-grow p-1 sm:p-2 flex flex-col overflow-hidden">
+          <main className="flex-grow p-1 sm:p-2 flex flex-col overflow-hidden">
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
             {/* Single Container for Header and Calendar */}
             <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-1 sm:mx-2 xl:mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
@@ -216,13 +215,13 @@ export default function UnitDirectorCalendar() {
               <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 mb-2 xl:mb-3 flex-shrink-0">
                 {/* Month and Navigation */}
                 <div className="flex items-center gap-3">
-                  <h1 className="text-[#040195] text-lg sm:text-xl xl:text-2xl font-bold tracking-wide">
-                    {monthYear.split(" ")[0]}
+                  <h1 className="text-[#040195] text-lg sm:text-xl xl:text-2xl font-bold tracking-wide min-w-[280px] sm:min-w-[320px]">
+                    {year} {month}
                   </h1>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={handlePrevious}
-                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors"
+                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors flex-shrink-0"
                     >
                       <ChevronLeftIcon
                         className="text-[#040195]"
@@ -231,7 +230,7 @@ export default function UnitDirectorCalendar() {
                     </button>
                     <button
                       onClick={handleNext}
-                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors"
+                      className="w-7 h-7 flex items-center justify-center bg-white hover:bg-[#E8EAFF] rounded transition-colors flex-shrink-0"
                     >
                       <ChevronRightIcon
                         className="text-[#040195]"
@@ -312,11 +311,12 @@ export default function UnitDirectorCalendar() {
                     editable={false}
                     selectable={true}
                     selectMirror={true}
-                    dayMaxEvents={2}
+                    dayMaxEvents={3}
                     weekends={true}
                     fixedWeekCount={false}
                     showNonCurrentDates={true}
                     eventDisplay="block"
+                    eventOrder="start,-duration,allDay,title"
                     dayCellContent={(arg) => arg.dayNumberText}
                     eventContent={(eventInfo) => {
                       const event = eventInfo.event;
@@ -324,26 +324,26 @@ export default function UnitDirectorCalendar() {
                       const programTitle = event.extendedProps.program_title;
 
                       return (
-                        <div className="h-full w-full flex items-center gap-1.5 px-2 py-1 overflow-hidden cursor-pointer">
-                          {/* Office Logo - White filtered */}
+                        <div className="h-full w-full flex items-center gap-1.5 px-2 py-1.5 overflow-hidden cursor-pointer rounded-lg border border-white/20 shadow-sm hover:shadow-md transition-shadow">
+                          {/* Office Logo */}
                           {logo && (
                             <img
                               src={logo}
                               alt={event.extendedProps.office_acronym}
-                              className="w-4 h-4 flex-shrink-0 object-contain"
+                              className="w-5 h-5 flex-shrink-0 object-contain"
                               style={{ filter: "brightness(0) invert(1)" }}
                             />
                           )}
 
-                          {/* Two-line text layout */}
-                          <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            {/* Program name - super small text above */}
-                            <div className="text-[8px] text-white/80 truncate leading-tight uppercase">
-                              {programTitle || "Program"}
-                            </div>
-                            {/* Activity name - bigger bold text below */}
+                          {/* Text content */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                            {/* Activity name - primary text */}
                             <div className="font-bold text-[11px] text-white truncate leading-tight">
                               {event.title}
+                            </div>
+                            {/* Program name - secondary text */}
+                            <div className="text-[9px] text-white/70 truncate leading-tight">
+                              {event.extendedProps.office_acronym} • {programTitle || "Program"}
                             </div>
                           </div>
                         </div>
@@ -359,7 +359,17 @@ export default function UnitDirectorCalendar() {
 
       {/* Activity Details Modal - ReportDetailModal Style */}
       {selectedEventId && activityDetails && !isLoadingDetails && (() => {
-        const activity = activityDetails;
+        const activity = activityDetails.activity || activityDetails;
+        
+        // Add office info from nested programs if not at root
+        if (activity.programs && !activity.office_acronym) {
+          activity.office_acronym = activity.programs.offices?.acronym;
+          activity.office_name = activity.programs.offices?.name;
+          activity.office_id = activity.programs.offices?.id;
+        }
+        if (activity.programs && !activity.program_title) {
+          activity.program_title = activity.programs.title;
+        }
         
         // Parse venue from JSON string
         let venueData = { street: "", barangay: "", city: "", province: "" };
@@ -994,28 +1004,36 @@ export default function UnitDirectorCalendar() {
         }
 
         .calendar-container .fc-daygrid-day {
-          min-height: 80px;
+          min-height: 100px;
         }
 
         .calendar-container .fc-daygrid-day-frame {
-          min-height: 80px;
+          min-height: 100px;
+          padding: 4px;
         }
 
         .calendar-container .fc-daygrid-day-events {
-          margin: 0 !important;
+          margin: 2px 0 !important;
         }
 
         .calendar-container .fc-daygrid-event-harness {
-          margin: 1px 2px !important;
+          margin: 2px !important;
         }
 
         .calendar-container .fc-event {
-          border-radius: 9999px !important;
+          border-radius: 8px !important;
           border: none !important;
-          margin-bottom: 1px !important;
+          margin-bottom: 3px !important;
           padding: 0 !important;
           font-size: 10px !important;
-          min-height: 28px !important;
+          min-height: 32px !important;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+        }
+
+        .calendar-container .fc-event:hover {
+          box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+          transform: translateY(-1px);
+          transition: all 0.2s ease;
         }
 
         .calendar-container .fc-event-main {
@@ -1061,9 +1079,17 @@ export default function UnitDirectorCalendar() {
         }
 
         .calendar-container .fc-more-link {
-          font-size: 9px !important;
-          padding: 1px 3px !important;
-          margin: 1px 2px !important;
+          font-size: 10px !important;
+          padding: 2px 6px !important;
+          margin: 2px !important;
+          background-color: #040195 !important;
+          color: white !important;
+          border-radius: 6px !important;
+          font-weight: 600 !important;
+        }
+
+        .calendar-container .fc-more-link:hover {
+          background-color: #4D49FC !important;
         }
 
         /* Remove scrollbars from calendar */
