@@ -59,6 +59,8 @@ import ACLGAddActivity from "@/pages/ACLGDashboard/AddActivity";
 import ACLGEditActivity from "@/pages/ACLGDashboard/EditActivity";
 import ACLGSettings from "@/pages/ACLGDashboard/Settings";
 
+import OfficeHelp from "@/pages/OfficeHelp";
+
 import "./App.css";
 
 // Simple app content without navigation guard
@@ -187,7 +189,18 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/office/cces/help"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <OfficeHelp
+                basePath="/office/cces"
+                officeId="cces"
+                officeName="Center for Community Engagement and Service"
+              />
+            </ProtectedRoute>
+          }
+        />
         {/* ACCA Routes */}
         <Route
           path="/office/acca/dashboard"
@@ -229,7 +242,18 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/office/acca/help"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <OfficeHelp
+                basePath="/office/acca"
+                officeId="acca"
+                officeName="AdZu Center for Culture and Arts"
+              />
+            </ProtectedRoute>
+          }
+        />
         {/* ACES Routes */}
         <Route
           path="/office/aces/dashboard"
@@ -271,7 +295,18 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/office/aces/help"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <OfficeHelp
+                basePath="/office/aces"
+                officeId="aces"
+                officeName="AdZu Center for Engagement and Social Development"
+              />
+            </ProtectedRoute>
+          }
+        />
         {/* ALTEC Routes */}
         <Route
           path="/office/altec/dashboard"
@@ -313,7 +348,18 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/office/altec/help"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <OfficeHelp
+                basePath="/office/altec"
+                officeId="altec"
+                officeName="AdZu Language and Technology Center"
+              />
+            </ProtectedRoute>
+          }
+        />
         {/* APC Routes */}
         <Route
           path="/office/apc/dashboard"
@@ -355,7 +401,18 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/office/apc/help"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <OfficeHelp
+                basePath="/office/apc"
+                officeId="apc"
+                officeName="AdZu Peace Center"
+              />
+            </ProtectedRoute>
+          }
+        />
         {/* ACLG Routes */}
         <Route
           path="/office/aclg/dashboard"
@@ -397,7 +454,18 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/office/aclg/help"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <OfficeHelp
+                basePath="/office/aclg"
+                officeId="aclg"
+                officeName="AdZu Center for Local Governance"
+              />
+            </ProtectedRoute>
+          }
+        />
         {/* Catch all unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
