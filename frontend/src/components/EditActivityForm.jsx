@@ -336,7 +336,7 @@ export default function EditActivityForm({
   }
 
   return (
-    <div className="h-full flex flex-col p-6 overflow-auto bg-gray-100">
+    <div className="h-full flex flex-col p-2 sm:p-4 md:p-6 overflow-auto bg-gray-100">
       <style>{`
         /* Remove number input arrows */
         input[type=number]::-webkit-inner-spin-button,

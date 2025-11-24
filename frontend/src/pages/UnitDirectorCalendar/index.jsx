@@ -205,13 +205,13 @@ export default function UnitDirectorCalendar() {
     .toUpperCase();
 
   return (
-    <div className="flex bg-[#EAE9E9] min-h-screen max-h-screen p-[35px] overflow-hidden">
+    <div className="flex bg-[#EAE9E9] min-h-screen max-h-screen p-2 sm:p-4 md:p-6 xl:p-[35px] overflow-hidden">
       <WhiteContainer>
         <Sidebar />
-        <main className="flex-grow p-2 flex flex-col overflow-hidden">
+        <main className="flex-grow p-1 sm:p-2 flex flex-col overflow-hidden">
           <div className="h-full flex flex-col max-w-[1536px] w-full mx-auto">
             {/* Single Container for Header and Calendar */}
-            <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-2 sm:mx-3 xl:mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="bg-[#F4F4F4] rounded-[15px] p-2 sm:p-3 xl:p-4 mx-1 sm:mx-2 xl:mx-4 flex-1 overflow-hidden flex flex-col min-h-0">
               {/* Header */}
               <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 mb-2 xl:mb-3 flex-shrink-0">
                 {/* Month and Navigation */}
