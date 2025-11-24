@@ -3,14 +3,14 @@
  * Prevents brute force attacks by limiting login attempts
  * 
  * Rules:
- * - Max 1 request per 2 seconds (prevents spam)
+ * - Max 1 request per 0.5 seconds (prevents spam)
  * - 5 failed attempts → 1 minute lockout
  * - Successful login → reset attempts
  */
 
 const loginAttempts = new Map(); // Store: username -> { attempts, lockedUntil, lastRequestTime }
 
-const MAX_ATTEMPTS = 10; // Increased from 5
+const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 1 * 60 * 1000; // 1 minute
 const REQUEST_DELAY = 500; // 0.5 seconds between requests (reduced from 1s)
 

@@ -94,13 +94,17 @@ router.get("/all", authenticateToken, async (req, res) => {
 
         const otherPartyId = isSender ? msg.receiver_id : msg.sender_id;
         const otherParty = userMap[otherPartyId];
+        
+        // Get sender info
+        const senderInfo = userMap[msg.sender_id];
+        const senderLogo = senderInfo?.officeLogo || (msg.sender_type === "unit_director" ? "/logos/sdu-logo-colored.webp" : "/images/default_logo.webp");
 
         return {
           id: msg.id,
-          sender: userMap[msg.sender_id]?.name || "Unknown",
+          sender: userMap[msg.sender_id]?.name || (msg.sender_type === "unit_director" ? "SDU Admin" : "Unknown"),
           senderId: msg.sender_id,
           senderType: msg.sender_type,
-          receiver: userMap[msg.receiver_id]?.name || "Unknown",
+          receiver: userMap[msg.receiver_id]?.name || (msg.receiver_type === "unit_director" ? "SDU Admin" : "Unknown"),
           receiverId: msg.receiver_id,
           receiverType: msg.receiver_type,
           subject: isDeletedByOther ? "Message deleted" : msg.subject,
@@ -112,8 +116,8 @@ router.get("/all", authenticateToken, async (req, res) => {
           isRead: msg.is_read,
           isDeleted: msg.is_deleted || false,
           deletedBy: msg.deleted_by || null,
-          officeLogo: otherParty?.officeLogo,
-          office: otherParty?.name,
+          officeLogo: otherParty?.officeLogo || senderLogo,
+          office: otherParty?.name || (isSender ? (msg.receiver_type === "unit_director" ? "SDU Admin" : "Unknown") : (msg.sender_type === "unit_director" ? "SDU Admin" : "Unknown")),
         };
       }) || [];
 
@@ -225,13 +229,18 @@ router.get("/", authenticateToken, async (req, res) => {
         const isSender = msg.sender_id === userId;
         const otherPartyId = isSender ? msg.receiver_id : msg.sender_id;
         const otherParty = userMap[otherPartyId];
+        
+        // Get sender info for displaying who sent the message
+        const senderInfo = userMap[msg.sender_id];
+        const senderName = senderInfo?.name || (msg.sender_type === "unit_director" ? "SDU Admin" : "Unknown");
+        const senderLogo = senderInfo?.officeLogo || (msg.sender_type === "unit_director" ? "/logos/sdu-logo-colored.webp" : "/images/default_logo.webp");
 
         // Show "Message deleted" if the message is deleted and user is not the one who deleted it
         const isDeletedByOther = msg.is_deleted && msg.deleted_by !== userId;
 
         return {
           id: msg.id,
-          sender: otherParty?.name || "Unknown",
+          sender: senderName,
           senderId: msg.sender_id,
           senderType: msg.sender_type,
           receiverId: msg.receiver_id,
@@ -248,8 +257,8 @@ router.get("/", authenticateToken, async (req, res) => {
           createdAt: msg.created_at,
           isSent: isSender,
           otherPartyId: otherPartyId,
-          office: otherParty?.office,
-          officeLogo: otherParty?.officeLogo,
+          office: otherParty?.name || (msg.sender_type === "unit_director" ? "SDU Admin" : (msg.receiver_type === "unit_director" ? "SDU Admin" : "Unknown")),
+          officeLogo: otherParty?.officeLogo || senderLogo,
           isDeleted: msg.is_deleted || false,
           deletedBy: msg.deleted_by || null,
         };
