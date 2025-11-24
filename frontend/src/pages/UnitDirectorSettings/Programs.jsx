@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
@@ -7,6 +7,7 @@ import SettingsNavbar from "./SettingsNavbar";
 import UnitDirectorService from "@/services/unitDirectorService";
 import TableSkeleton from "@/components/TableSkeleton";
 import SuccessModal from "@/components/SuccessModal";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
 /**
  * Programs Management Page
@@ -14,11 +15,17 @@ import SuccessModal from "@/components/SuccessModal";
  */
 export default function ProgramsManagement() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedOfficeId, setSelectedOfficeId] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [newProgramName, setNewProgramName] = useState("");
+  const [newProgramDescription, setNewProgramDescription] = useState("");
   const [editingProgram, setEditingProgram] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [programToDelete, setProgramToDelete] = useState(null);
 
   // Fetch offices data
   const {
@@ -29,6 +36,39 @@ export default function ProgramsManagement() {
     queryKey: ["unit-director-offices"],
     queryFn: () => UnitDirectorService.getOffices(),
     staleTime: 2 * 60 * 1000,
+  });
+
+  // Add program mutation
+  const addProgramMutation = useMutation({
+    mutationFn: ({ officeId, programData }) =>
+      UnitDirectorService.addProgram(officeId, programData),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["unit-director-offices"]);
+      setNewProgramName("");
+      setNewProgramDescription("");
+      setSuccessMessage("Program added successfully!");
+      setShowSuccessModal(true);
+      setIsAdding(false);
+    },
+    onError: (error) => {
+      console.error("Add program error:", error);
+      alert(error.response?.data?.error || "Failed to add program");
+      setIsAdding(false);
+    },
+  });
+
+  // Delete program mutation
+  const deleteProgramMutation = useMutation({
+    mutationFn: (programId) => UnitDirectorService.deleteProgram(programId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["unit-director-offices"]);
+      setSuccessMessage("Program deleted successfully!");
+      setShowSuccessModal(true);
+    },
+    onError: (error) => {
+      console.error("Delete program error:", error);
+      alert(error.response?.data?.error || "Failed to delete program");
+    },
   });
 
   const offices = officesData?.offices || [];
@@ -67,12 +107,21 @@ export default function ProgramsManagement() {
                 className="flex items-center gap-2 text-[#4D49FC] hover:underline mb-4"
                 style={{ fontFamily: "Inter, sans-serif" }}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
                 Back to Settings
               </button>
-
               {/* Header */}
               <div className="mb-6">
                 <h1
@@ -80,13 +129,14 @@ export default function ProgramsManagement() {
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
                   Program Management
-
                 </h1>
-                <p className="text-gray-500 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p
+                  className="text-gray-500 text-sm"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   Manage programs for each office
                 </p>
               </div>
-
               {/* Program Name and Office Selector */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 {/* Program Name Input */}
@@ -99,13 +149,27 @@ export default function ProgramsManagement() {
                     className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
                     style={{ fontFamily: "Inter, sans-serif" }}
                   />
+                  <div className="mb-2"></div>
+                  <input
+                    type="text"
+                    placeholder="Description"
+                    value={newProgramDescription}
+                    onChange={(e) => setNewProgramDescription(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  />
                 </div>
 
                 {/* Office Dropdown */}
                 <div className="relative">
                   <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full px-3 py-2 text-sm border-2 border-[#4D49FC] cursor-pointer rounded-lg focus:border-[#4D49FC] focus:outline-none text-left flex items-center justify-between bg-white hover:bg-[#F8F8FF] transition-colors"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsDropdownOpen(!isDropdownOpen);
+                    }}
+                    className="w-full px-3 py-2 text-sm border-2 border-[#4D49FC] rounded-lg focus:border-[#4D49FC] focus:outline-none text-left flex items-center justify-between bg-white hover:bg-[#F8F8FF] transition-colors"
                     style={{ fontFamily: "Inter, sans-serif" }}
                   >
                     <span
@@ -138,7 +202,7 @@ export default function ProgramsManagement() {
 
                   {/* Dropdown Menu */}
                   {isDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-2 bg-white border-2 border-[#E5E5FF] rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-2 bg-white border-2 border-[#E5E5FF] rounded-lg shadow-xl max-h-64 overflow-y-auto">
                       {isLoading ? (
                         <div
                           className="p-4 text-center text-gray-500 text-sm"
@@ -151,11 +215,14 @@ export default function ProgramsManagement() {
                           {offices.map((office) => (
                             <button
                               key={office.id}
-                              onClick={() => {
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 setSelectedOfficeId(office.id);
                                 setIsDropdownOpen(false);
                               }}
-                              className="w-full px-3 py-2 cursor-pointer hover:bg-[#F0F0FF] rounded-lg flex items-center gap-2 transition-colors text-left"
+                              className="w-full px-3 py-2 hover:bg-[#F0F0FF] rounded-lg flex items-center gap-2 transition-colors text-left"
                             >
                               {getOfficeLogo(office.acronym) && (
                                 <img
@@ -178,34 +245,41 @@ export default function ProgramsManagement() {
                   )}
                 </div>
               </div>
-
               {/* ADD Button */}
               <div className="flex justify-end mb-4">
                 <button
                   onClick={() => {
-                    if (newProgramName.trim() && selectedOfficeId) {
-                      // TODO: Add program API call
-                      console.log(
-                        "Adding program:",
-                        newProgramName,
-                        "to office:",
-                        selectedOfficeId
-                      );
-                      setNewProgramName("");
+                    if (
+                      newProgramName.trim() &&
+                      selectedOfficeId &&
+                      !isAdding
+                    ) {
+                      setIsAdding(true);
+                      addProgramMutation.mutate({
+                        officeId: selectedOfficeId,
+                        programData: {
+                          title: newProgramName.trim(),
+                          description: newProgramDescription.trim() || null,
+                        },
+                      });
                     }
                   }}
-                  disabled={!newProgramName.trim() || !selectedOfficeId}
+                  disabled={
+                    !newProgramName.trim() || !selectedOfficeId || isAdding
+                  }
                   className="px-6 py-2 bg-[#4D49FC] text-white font-bold rounded-lg cursor-pointer hover:bg-[#3D39EC] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  ADD
+                  {isAdding ? "ADDING..." : "ADD"}
                 </button>
-              </div>              {/* Programs Table */}
+              </div>
+
+              {/* Programs Table */}
               <div
                 className="h-full flex flex-col"
                 style={{ fontFamily: "Inter, sans-serif" }}
               >
-              <style>{`
+                <style>{`
                 .programs-scroll-container::-webkit-scrollbar {
                   width: 5px;
                 }
@@ -221,99 +295,110 @@ export default function ProgramsManagement() {
                 }
               `}</style>
 
-              {/* Table Header */}
-              <div className="bg-[#1E22AA] text-white rounded-xl px-6 py-3 mb-1 grid grid-cols-[180px_1fr_160px] gap-4 items-center flex-shrink-0">
-                <div className="text-xs font-semibold uppercase">Office</div>
-                <div className="text-xs font-semibold uppercase">
-                  Program Name
-                </div>
-                <div className="text-xs font-semibold uppercase text-right mr-5">
-                  Action
-                </div>
-              </div>
-
-              {/* Table Body - Scrollable Container */}
-              {isLoading ? (
-                <div className="bg-white rounded-xl shadow-md p-6">
-                  <TableSkeleton rows={5} columns={2} />
-                </div>
-              ) : error ? (
-                <div
-                  className="bg-white rounded-xl shadow-md p-6 text-center text-red-600"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Error loading programs: {error.message}
-                </div>
-              ) : !selectedOfficeId ? (
-                <div
-                  className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Please select an office to view its programs
-                </div>
-              ) : programs.length === 0 ? (
-                <div
-                  className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  No programs found for this office
-                </div>
-              ) : (
-                <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 programs-scroll-container min-h-0">
-                  <div className="space-y-1.5">
-                    {programs.map((program, idx) => (
-                      <div
-                        key={idx}
-                        className="bg-[#F4F4F4] hover:bg-[#D4D1FF] transition-colors rounded-lg px-6 py-3 grid grid-cols-[180px_1fr_160px] gap-4 items-center"
-                      >
-                        <div className="flex items-center gap-2">
-                          {selectedOffice &&
-                            getOfficeLogo(selectedOffice.acronym) && (
-                              <img
-                                src={getOfficeLogo(selectedOffice.acronym)}
-                                alt={selectedOffice.acronym}
-                                className="w-6 h-6 object-contain flex-shrink-0"
-                              />
-                            )}
-                          <span
-                            className="text-[#4D49FC] font-semibold text-xs whitespace-nowrap"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            {selectedOffice?.acronym}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <span
-                            className="text-[#4D49FC] font-semibold text-sm truncate"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            {program.title || program.name || program}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => setEditingProgram(program)}
-                            className="px-4 py-1.5 bg-[#4D49FC] text-white font-semibold rounded-md hover:bg-[#201f65] transition-colors text-xs"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            EDIT
-                          </button>
-                          <button
-                            onClick={() => {
-                              // TODO: Delete program API call
-                              console.log("Deleting program:", program);
-                            }}
-                            className="px-4 py-1.5 bg-[#FF4D4D] text-white font-semibold rounded-md hover:bg-[#E63939] transition-colors text-xs"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                          >
-                            DELETE
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                {/* Table Header */}
+                <div className="bg-[#1E22AA] text-white rounded-xl px-6 py-3 mb-1 grid grid-cols-[180px_1fr_160px] gap-4 items-center flex-shrink-0">
+                  <div className="text-xs font-semibold uppercase">Office</div>
+                  <div className="text-xs font-semibold uppercase">
+                    Program Name & Description
+                  </div>
+                  <div className="text-xs font-semibold uppercase text-right mr-5">
+                    Action
                   </div>
                 </div>
-              )}
+
+                {/* Table Body - Scrollable Container */}
+                {isLoading ? (
+                  <div className="bg-white rounded-xl shadow-md p-6">
+                    <TableSkeleton rows={5} columns={2} />
+                  </div>
+                ) : error ? (
+                  <div
+                    className="bg-white rounded-xl shadow-md p-6 text-center text-red-600"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
+                    Error loading programs: {error.message}
+                  </div>
+                ) : !selectedOfficeId ? (
+                  <div
+                    className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
+                    Please select an office to view its programs
+                  </div>
+                ) : programs.length === 0 ? (
+                  <div
+                    className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
+                    No programs found for this office
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 programs-scroll-container min-h-0">
+                    <div className="space-y-1.5">
+                      {programs.map((program, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-[#F4F4F4] hover:bg-[#D4D1FF] transition-colors rounded-lg px-6 py-3 grid grid-cols-[180px_1fr_160px] gap-4 items-center"
+                        >
+                          <div className="flex items-center gap-2">
+                            {selectedOffice &&
+                              getOfficeLogo(selectedOffice.acronym) && (
+                                <img
+                                  src={getOfficeLogo(selectedOffice.acronym)}
+                                  alt={selectedOffice.acronym}
+                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                />
+                              )}
+                            <span
+                              className="text-[#4D49FC] font-semibold text-xs whitespace-nowrap"
+                              style={{ fontFamily: "Inter, sans-serif" }}
+                            >
+                              {selectedOffice?.acronym}
+                            </span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span
+                              className="text-[#4D49FC] font-semibold text-sm"
+                              style={{ fontFamily: "Inter, sans-serif" }}
+                            >
+                              {program.title || program.name || program}
+                            </span>
+                            {program.description && (
+                              <span
+                                className="text-gray-600 text-xs mt-1 line-clamp-2"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {program.description}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setEditingProgram(program)}
+                              className="px-4 py-1.5 bg-[#4D49FC] text-white font-semibold rounded-md hover:bg-[#201f65] transition-colors text-xs"
+                              style={{ fontFamily: "Inter, sans-serif" }}
+                            >
+                              EDIT
+                            </button>
+                            <button
+                              onClick={() => {
+                                setProgramToDelete(program);
+                                setDeleteModalOpen(true);
+                              }}
+                              disabled={deleteProgramMutation.isPending}
+                              className="px-4 py-1.5 bg-[#FF4D4D] text-white font-semibold rounded-md hover:bg-[#E63939] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
+                              style={{ fontFamily: "Inter, sans-serif" }}
+                            >
+                              {deleteProgramMutation.isPending
+                                ? "DELETING..."
+                                : "DELETE"}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -371,6 +456,22 @@ export default function ProgramsManagement() {
               />
             </div>
 
+            <div className="mb-4">
+              <label
+                className="block text-sm font-bold text-[#040195] mb-2"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Description
+              </label>
+              <textarea
+                defaultValue={editingProgram.description || ""}
+                rows={3}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#4D49FC] focus:outline-none resize-none"
+                style={{ fontFamily: "Inter, sans-serif" }}
+                placeholder="Enter program description..."
+              />
+            </div>
+
             <div className="flex gap-3">
               <button
                 onClick={() => setEditingProgram(null)}
@@ -399,9 +500,32 @@ export default function ProgramsManagement() {
       {/* Success Modal */}
       <SuccessModal
         show={showSuccessModal}
-        title="Successfully Updated"
-        message="The program has been updated successfully."
-        onClose={() => setShowSuccessModal(false)}
+        title="Success"
+        message={successMessage || "Operation completed successfully."}
+        onClose={() => {
+          setShowSuccessModal(false);
+          setSuccessMessage("");
+        }}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        title="Delete Program"
+        message="Are you sure you want to delete this program? This action cannot be undone."
+        itemName={programToDelete?.title || programToDelete?.name}
+        onConfirm={() => {
+          if (programToDelete?.id) {
+            deleteProgramMutation.mutate(programToDelete.id);
+            setDeleteModalOpen(false);
+          }
+        }}
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setProgramToDelete(null);
+        }}
+        isLoading={deleteProgramMutation.isPending}
+        confirmButtonText="Delete Program"
       />
     </div>
   );
