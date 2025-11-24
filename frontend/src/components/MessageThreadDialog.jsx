@@ -20,6 +20,29 @@ export default function MessageThreadDialog({ contact, onClose }) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Delete message mutation
+  const deleteMessageMutation = useMutation({
+    mutationFn: (messageId) => MessageService.deleteMessage(messageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["allMessages"]);
+      queryClient.invalidateQueries(["messages"]);
+      queryClient.invalidateQueries(["all-messages"]);
+    },
+    onError: (error) => {
+      setErrorMessage(
+        `Failed to delete message: ${error.message || "Unknown error"}`
+      );
+      setShowErrorModal(true);
+    },
+  });
+
+  // Handle delete message
+  const handleDeleteMessage = (messageId) => {
+    if (window.confirm("Are you sure you want to delete this message?")) {
+      deleteMessageMutation.mutate(messageId);
+    }
+  };
+
   // Fetch all messages
   const { data: allMessagesData } = useQuery({
     queryKey: ["allMessages"],
@@ -141,12 +164,36 @@ export default function MessageThreadDialog({ contact, onClose }) {
                     }`}
                   >
                     <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-sm ${
+                      className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-sm relative group ${
                         isSent
                           ? "bg-[#4D49FC] text-white"
                           : "bg-white text-gray-900"
                       }`}
                     >
+                      {/* Delete button */}
+                      <button
+                        onClick={() => handleDeleteMessage(message.id)}
+                        disabled={deleteMessageMutation.isPending}
+                        className={`absolute -top-2 -right-2 p-1.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 ${
+                          isSent
+                            ? "bg-red-600 hover:bg-red-700 text-white"
+                            : "bg-red-600 hover:bg-red-700 text-white"
+                        }`}
+                        title="Delete message"
+                      >
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+
                       <div className="mb-1">
                         <p
                           className={`text-xs font-bold ${
