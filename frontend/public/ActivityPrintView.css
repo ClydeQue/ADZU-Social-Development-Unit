@@ -277,18 +277,21 @@
 .print-demo-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .print-demo-label {
   font-size: 9pt;
   font-weight: bold;
   color: #040195;
+  flex-shrink: 0;
 }
 
 .print-demo-value {
   font-size: 9pt;
   color: #040195;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* Partners */

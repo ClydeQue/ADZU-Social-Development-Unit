@@ -373,39 +373,53 @@ export default function UnitDirectorReports() {
       sdgAlignment
     };
 
-    // Create a temporary container for print view
-    const printContainer = document.createElement('div');
-    printContainer.id = 'print-container';
-    printContainer.style.position = 'fixed';
-    printContainer.style.top = '0';
-    printContainer.style.left = '0';
-    printContainer.style.width = '100%';
-    printContainer.style.height = '100%';
-    printContainer.style.backgroundColor = 'white';
-    printContainer.style.zIndex = '99999';
-    printContainer.style.overflow = 'auto';
-    document.body.appendChild(printContainer);
+    // Open new window for print
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow pop-ups to print this document.');
+      return;
+    }
 
-    // Render the print view
-    const root = ReactDOM.createRoot(printContainer);
-    root.render(
-      <ConsolidatedReportPrintView 
-        reportData={reportData}
-        month={currentMonth}
-        year={currentYear}
-      />
-    );
+    // Write the HTML structure
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Consolidated Report - ${currentMonth}/${currentYear}</title>
+        <link rel="stylesheet" href="/ConsolidatedReportPrintView.css">
+        <style>
+          body { margin: 0; padding: 0; }
+          @media print {
+            @page { margin: 0.4in 0.6in; }
+          }
+        </style>
+      </head>
+      <body>
+        <div id="print-root"></div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
 
-    // Wait for rendering and images to load, then print
+    // Wait for styles to load
     setTimeout(() => {
-      window.print();
+      const root = ReactDOM.createRoot(printWindow.document.getElementById('print-root'));
+      root.render(
+        <ConsolidatedReportPrintView 
+          reportData={reportData}
+          month={currentMonth}
+          year={currentYear}
+        />
+      );
       
-      // Clean up after print dialog closes
+      // Trigger print after rendering
       setTimeout(() => {
-        root.unmount();
-        document.body.removeChild(printContainer);
-      }, 100);
-    }, 500);
+        printWindow.focus();
+        printWindow.print();
+      }, 800);
+    }, 200);
   };
 
   // Filter reports based on search query (office, program, activity, due, submitted)
