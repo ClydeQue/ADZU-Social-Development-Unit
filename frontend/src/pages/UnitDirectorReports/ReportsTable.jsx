@@ -49,38 +49,33 @@ const ReportsTable = ({ reports }) => {
       const response = await UnitDirectorService.getActivityById(reportId);
       const activity = response.activity || response;
       
-      // Open print window
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        alert('Please allow pop-ups for this website to print reports.');
-        return;
-      }
+      // Create a temporary container for print view
+      const printContainer = document.createElement('div');
+      printContainer.id = 'print-container';
+      printContainer.style.position = 'fixed';
+      printContainer.style.top = '0';
+      printContainer.style.left = '0';
+      printContainer.style.width = '100%';
+      printContainer.style.height = '100%';
+      printContainer.style.backgroundColor = 'white';
+      printContainer.style.zIndex = '99999';
+      printContainer.style.overflow = 'auto';
+      document.body.appendChild(printContainer);
 
-      // Write the document structure
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Print Activity Report</title>
-          <link rel="stylesheet" href="/ActivityPrintView.css">
-        </head>
-        <body>
-          <div id="print-root"></div>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
+      // Render the print view
+      const root = ReactDOM.createRoot(printContainer);
+      root.render(<ActivityPrintView activity={activity} />);
 
-      // Wait for fonts and styles to load
+      // Wait for rendering and images to load, then print
       setTimeout(() => {
-        const root = ReactDOM.createRoot(printWindow.document.getElementById('print-root'));
-        root.render(<ActivityPrintView activity={activity} />);
+        window.print();
         
-        // Wait for rendering and then print
+        // Clean up after print dialog closes
         setTimeout(() => {
-          printWindow.print();
-        }, 500);
-      }, 100);
+          root.unmount();
+          document.body.removeChild(printContainer);
+        }, 100);
+      }, 500);
     } catch (error) {
       console.error('Error printing report:', error);
       alert('Failed to load report for printing. Please try again.');
