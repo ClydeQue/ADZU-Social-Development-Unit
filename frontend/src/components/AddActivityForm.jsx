@@ -568,6 +568,9 @@ export default function AddActivityForm({
               {/* Venue row 1: Street, Barangay, Male */}
               <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
+                  <div className="text-xs font-semibold text-[#040195] mb-1">
+                    Venue
+                  </div>
                   <div className="text-[9px] text-[#8180C9] mb-0.5">
                     Street / Room / Building
                   </div>
@@ -598,6 +601,9 @@ export default function AddActivityForm({
                 </div>
 
                 <div>
+                  <div className="text-xs font-semibold text-[#040195] mb-1">
+                    Sex Count
+                  </div>
                   <div className="text-[9px] text-[#8180C9] mb-0.5">Male</div>
                   <input
                     type="number"

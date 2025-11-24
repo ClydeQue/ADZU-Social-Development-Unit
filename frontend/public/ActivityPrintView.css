@@ -1,0 +1,380 @@
+@font-face {
+  font-family: 'Matura';
+  src: url('/fonts/MATURASC_1.TTF') format('truetype');
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.4in 0.6in;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+.print-view {
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 40px;
+  background: white;
+  background-image: url('/logos/pdflogo/adzu-logo-pdf-bg.webp');
+  background-repeat: no-repeat;
+  background-position: center 50%;
+  background-size: 60%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  position: relative;
+}
+
+/* Header */
+.print-header {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  gap: 20px;
+}
+
+.print-header-left,
+.print-header-right {
+  flex-shrink: 0;
+}
+
+.print-header-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.print-header-center {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.print-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.print-university-name {
+  font-family: 'Matura', serif;
+  font-size: 18pt;
+  font-weight: bold;
+  color: #040195;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+}
+
+.print-university-subtitle {
+  font-family: 'Times New Roman', serif;
+  font-size: 9pt;
+  font-style: italic;
+  color: #666666;
+  margin: 0 0 3px 0;
+}
+
+.print-unit-name {
+  font-family: 'Times New Roman', serif;
+  font-size: 11pt;
+  font-weight: bold;
+  color: #040195;
+  margin: 0;
+}
+
+/* Office Section */
+.print-office-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.print-office-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.print-status-dates {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+.print-office-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.print-office-name {
+  font-size: 16pt;
+  font-weight: bold;
+  color: #040195;
+}
+
+.print-status-badge {
+  background-color: #10b981;
+  color: white;
+  padding: 4px 28px;
+  border-radius: 10px;
+  font-size: 9pt;
+  font-weight: bold;
+  min-width: 200px;
+  text-align: center;
+}
+
+/* Dates */
+.print-dates {
+  margin-bottom: 10px;
+}
+
+.print-dates-inline {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  justify-content: center;
+}
+
+.print-date-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.print-dates-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 200px;
+}
+
+.print-date-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.print-date-label {
+  font-weight: bold;
+  font-size: 10pt;
+  min-width: 150px;
+  color: #040195;
+}
+
+.print-date-value {
+  font-size: 10pt;
+  color: #040195;
+}
+
+/* Activity Title */
+.print-activity-title {
+  font-size: 14pt;
+  font-weight: bold;
+  color: #040195;
+  margin: 15px 0 10px 0;
+}
+
+/* Description */
+.print-description {
+  font-size: 10pt;
+  color: #040195;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+/* Divider */
+.print-divider-thick {
+  border-bottom: 3px solid #040195;
+  margin: 15px 0;
+}
+
+.print-divider {
+  border-bottom: 1px solid #040195;
+  margin: 15px 0;
+}
+
+/* Section Title */
+.print-section-title {
+  font-size: 12pt;
+  font-weight: bold;
+  color: #040195;
+  margin: 10px 0 8px 0;
+  text-transform: uppercase;
+}
+
+/* Section Content */
+.print-section-content {
+  font-size: 10pt;
+  color: #040195;
+  margin-bottom: 10px;
+  text-align: justify;
+}
+
+/* SDG Grid */
+.print-sdg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 15px;
+  margin-bottom: 10px;
+}
+
+.print-sdg-item {
+  font-size: 10pt;
+  color: #040195;
+}
+
+/* Three Column Layout */
+.print-three-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.print-column {
+  flex: 1;
+}
+
+.print-column:not(:last-child) {
+  border-right: 2px solid #040195;
+  padding-right: 15px;
+  margin-right: 0;
+}
+
+.print-column-title {
+  font-size: 10pt;
+  font-weight: bold;
+  color: #040195;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.print-column-content {
+  font-size: 9pt;
+  color: #040195;
+  margin: 0;
+}
+
+.print-demographics {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.print-demo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.print-demo-label {
+  font-size: 9pt;
+  font-weight: bold;
+  color: #040195;
+}
+
+.print-demo-value {
+  font-size: 9pt;
+  color: #040195;
+}
+
+/* Partners */
+.print-partners-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px 15px;
+  margin-bottom: 8px;
+}
+
+.print-partners-grid-2 {
+  margin-top: 8px;
+}
+
+.print-partners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.print-partner-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.print-partner-name {
+  font-size: 10pt;
+  font-weight: bold;
+  color: #040195;
+  margin: 0;
+}
+
+.print-partner-type {
+  font-size: 9pt;
+  font-style: italic;
+  color: #040195;
+  margin: 0 0 0 15px;
+}
+
+.print-partner-nature {
+  font-size: 9pt;
+  color: #040195;
+  margin: 0 0 0 15px;
+}
+
+.print-budgets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Budget */
+.print-budget {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.print-budget-amount {
+  font-size: 10pt;
+  color: #040195;
+}
+
+.print-budget-type {
+  font-size: 10pt;
+  color: #040195;
+}
+
+@media print {
+  .print-view {
+    padding: 0.3in 0.4in;
+    margin: 0;
+    background-position: center 50% !important;
+    background-size: 60% !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+  
+  .print-divider {
+    page-break-inside: avoid;
+  }
+  
+  .print-section-title {
+    page-break-after: avoid;
+  }
+}

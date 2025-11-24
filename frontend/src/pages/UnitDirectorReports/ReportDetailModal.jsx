@@ -77,7 +77,7 @@ export default function ReportDetailModal({ report, activity, onClose }) {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write('<!DOCTYPE html><html><head><title>Print Activity</title>');
-      printWindow.document.write('<link rel="stylesheet" href="/src/components/ActivityPrintView.css">');
+      printWindow.document.write('<link rel="stylesheet" href="/ActivityPrintView.css">');
       printWindow.document.write('</head><body><div id="print-root"></div></body></html>');
       printWindow.document.close();
       

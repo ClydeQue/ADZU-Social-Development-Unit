@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from '@tanstack/react-query';
+import ReactDOM from 'react-dom/client';
 import UnitDirectorService from '@/services/unitDirectorService';
 import ReportDetailModal from './ReportDetailModal';
 import ReportModalSkeleton from '@/components/ReportModalSkeleton';
+import ActivityPrintView from '@/components/ActivityPrintView';
  
 const ReportsTable = ({ reports }) => {
   const [viewedReports, setViewedReports] = useState([]);
@@ -39,6 +41,50 @@ const ReportsTable = ({ reports }) => {
 
   const handleCloseModal = () => {
     setSelectedReport(null);
+  };
+
+  const handlePrintReport = async (reportId) => {
+    try {
+      // Fetch the activity data first
+      const response = await UnitDirectorService.getActivityById(reportId);
+      const activity = response.activity || response;
+      
+      // Open print window
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('Please allow pop-ups for this website to print reports.');
+        return;
+      }
+
+      // Write the document structure
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Print Activity Report</title>
+          <link rel="stylesheet" href="/ActivityPrintView.css">
+        </head>
+        <body>
+          <div id="print-root"></div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+      // Wait for fonts and styles to load
+      setTimeout(() => {
+        const root = ReactDOM.createRoot(printWindow.document.getElementById('print-root'));
+        root.render(<ActivityPrintView activity={activity} />);
+        
+        // Wait for rendering and then print
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      }, 100);
+    } catch (error) {
+      console.error('Error printing report:', error);
+      alert('Failed to load report for printing. Please try again.');
+    }
   };
 
   const currentReport = reports.find(r => r.id === selectedReport);
@@ -108,7 +154,7 @@ const ReportsTable = ({ reports }) => {
                   View
                 </button>
                 <button 
-                  onClick={() => markAsViewed(report.id)}
+                  onClick={() => handlePrintReport(report.id)}
                   className="px-3 py-0.5 bg-[#4D49FC] text-white rounded-md text-[0.65rem] font-semibold hover:bg-[#201f65] hover:cursor-pointer transition-colors whitespace-nowrap"
                 >
                   Print

@@ -380,7 +380,7 @@ export default function UnitDirectorReports() {
       <html>
         <head>
           <title>Consolidated Report - ${currentMonth}/${currentYear}</title>
-          <link rel="stylesheet" href="/src/components/ConsolidatedReportPrintView.css">
+          <link rel="stylesheet" href="/ConsolidatedReportPrintView.css">
         </head>
         <body>
           <div id="print-root"></div>
