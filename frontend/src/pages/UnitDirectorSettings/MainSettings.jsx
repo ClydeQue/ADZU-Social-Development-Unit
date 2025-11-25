@@ -634,16 +634,18 @@ export default function MainSettings() {
 
                   <form onSubmit={handlePasswordChange} className="space-y-4">
                     {/* Username Display (read-only) */}
-                    <div className="mb-6 p-4 bg-gray-100 border-2 border-gray-300 rounded-lg">
+                    <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-[#040195] rounded-lg shadow-sm">
                       <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
+                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                          <svg className="w-5 h-5 text-[#040195]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
                         <div>
-                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide" style={{ fontFamily: "Inter, sans-serif" }}>
-                            Username
+                          <label className="text-xs font-semibold text-[#040195] uppercase tracking-wide" style={{ fontFamily: "Inter, sans-serif" }}>
+                            Current Username
                           </label>
-                          <p className="text-base font-bold text-gray-700 mt-0.5" style={{ fontFamily: "Inter, sans-serif" }}>
+                          <p className="text-lg font-bold text-[#040195] mt-0.5" style={{ fontFamily: "Inter, sans-serif" }}>
                             {user?.username || 'Unit Director'}
                           </p>
                         </div>
@@ -868,67 +870,21 @@ export default function MainSettings() {
                   </button>
 
                   <form onSubmit={handleUsernameChange} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Current Username (read-only) */}
-                      <div>
-                        <label
-                          className="block text-base font-bold text-[#040195] mb-2"
-                          style={{ fontFamily: "Inter, sans-serif" }}
-                        >
-                          Username
-                        </label>
-                        <input
-                          type="text"
-                          value={user?.username || 'Unit Director'}
-                          readOnly
-                          className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
-                          style={{ fontFamily: "Inter, sans-serif" }}
-                        />
-                      </div>
-
-                      {/* Current Password for Confirmation */}
-                      <div>
-                        <label
-                          className="block text-base font-bold text-[#040195] mb-2"
-                          style={{ fontFamily: "Inter, sans-serif" }}
-                        >
-                          Current Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={
-                              showPasswords.usernameConfirm
-                                ? "text"
-                                : "password"
-                            }
-                            value={usernameForm.currentPassword}
-                            onChange={(e) =>
-                              setUsernameForm({
-                                ...usernameForm,
-                                currentPassword: e.target.value,
-                              })
-                            }
-                            className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full focus:border-[#4D49FC] focus:ring-4 focus:ring-[#4D49FC]/20 outline-none transition-all text-gray-600 text-sm"
-                            style={{ fontFamily: "Inter, sans-serif" }}
-                            placeholder="**************"
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowPasswords({
-                                ...showPasswords,
-                                usernameConfirm: !showPasswords.usernameConfirm,
-                              })
-                            }
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#040195] transition-colors"
-                          >
-                            {showPasswords.usernameConfirm ? (
-                              <EyeOff size={18} />
-                            ) : (
-                              <Eye size={18} />
-                            )}
-                          </button>
+                    {/* Current Username (read-only) */}
+                    <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-[#040195] rounded-lg shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                          <svg className="w-5 h-5 text-[#040195]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold text-[#040195] uppercase tracking-wide" style={{ fontFamily: "Inter, sans-serif" }}>
+                            Current Username
+                          </label>
+                          <p className="text-lg font-bold text-[#040195] mt-0.5" style={{ fontFamily: "Inter, sans-serif" }}>
+                            {user?.username || 'Unit Director'}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -958,13 +914,13 @@ export default function MainSettings() {
                         />
                       </div>
 
-                      {/* Retype Password */}
+                      {/* Current Password for Confirmation */}
                       <div>
                         <label
                           className="block text-base font-bold text-[#040195] mb-2"
                           style={{ fontFamily: "Inter, sans-serif" }}
                         >
-                          Retype Password
+                          Current Password
                         </label>
                         <div className="relative">
                           <input
@@ -974,10 +930,16 @@ export default function MainSettings() {
                                 : "password"
                             }
                             value={usernameForm.currentPassword}
-                            readOnly
-                            className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
+                            onChange={(e) =>
+                              setUsernameForm({
+                                ...usernameForm,
+                                currentPassword: e.target.value,
+                              })
+                            }
+                            className="w-full px-5 py-3 border-[3px] border-[#040195] rounded-full focus:border-[#4D49FC] focus:ring-4 focus:ring-[#4D49FC]/20 outline-none transition-all text-gray-600 text-sm"
                             style={{ fontFamily: "Inter, sans-serif" }}
                             placeholder="**************"
+                            required
                           />
                           <button
                             type="button"

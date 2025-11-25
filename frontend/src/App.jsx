@@ -190,6 +190,14 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/office/cces/settings/programs"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <CCESSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/office/cces/help"
           element={
             <ProtectedRoute requiredRole="office_user">
@@ -236,6 +244,14 @@ const AppContent = () => {
         />
         <Route
           path="/office/acca/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACCASettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/acca/settings/programs"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACCASettings />
@@ -296,13 +312,42 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/office/aces/settings/programs"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACESSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/office/aces/help"
           element={
             <ProtectedRoute requiredRole="office_user">
               <OfficeHelp
                 basePath="/office/aces"
                 officeId="aces"
-                officeName="AdZu Center for Engagement and Social Development"
+                officeName="AdZu Center for Extension Services"
+              />
+            </ProtectedRoute>
+          }
+        />
+        {/* CCES Routes */}
+        <Route
+          path="/office/cces/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <CCESSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/cces/help"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <OfficeHelp
+                basePath="/office/cces"
+                officeId="cces"
+                officeName="Community and Civic Engagement Services"
               />
             </ProtectedRoute>
           }
@@ -342,6 +387,14 @@ const AppContent = () => {
         />
         <Route
           path="/office/altec/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ALTECSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/altec/settings/programs"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ALTECSettings />
@@ -402,6 +455,14 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/office/apc/settings/programs"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <APCSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/office/apc/help"
           element={
             <ProtectedRoute requiredRole="office_user">
@@ -448,6 +509,14 @@ const AppContent = () => {
         />
         <Route
           path="/office/aclg/settings"
+          element={
+            <ProtectedRoute requiredRole="office_user">
+              <ACLGSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/office/aclg/settings/programs"
           element={
             <ProtectedRoute requiredRole="office_user">
               <ACLGSettings />

@@ -65,6 +65,11 @@ router.get(
         };
       });
 
+      console.log(`✅ GET /api/settings - Returning ${formattedOffices.length} offices`);
+      formattedOffices.forEach(office => {
+        console.log(`  - ${office.acronym}: ${office.programs?.length || 0} programs`);
+      });
+
       res.json({
         success: true,
         offices: formattedOffices,

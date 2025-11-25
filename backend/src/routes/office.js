@@ -195,6 +195,8 @@ router.get("/:officeId/programs", authenticateToken, async (req, res) => {
 
     if (error) throw error;
 
+    console.log(`✅ GET /api/office/${officeId}/programs - Found ${programs?.length || 0} programs`);
+
     res.json({ programs });
   } catch (error) {
     console.error("Get office programs error:", error);
@@ -1032,6 +1034,318 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
 });
 
 // ============ OFFICE-SPECIFIC ROUTES ============
+
+// ============ PROGRAM REQUEST ROUTES ============
+
+// Get program requests for an office
+router.get("/program-requests", authenticateToken, requireRole(["office_user"]), async (req, res) => {
+  try {
+    const officeId = req.user.office_id;
+
+    const { data: requests, error } = await supabase
+      .from("program_requests")
+      .select("id, office_id, title, description, status, created_at, updated_at")
+      .eq("office_id", officeId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    res.json({ requests });
+  } catch (error) {
+    console.error("Get program requests error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Submit a program request
+router.post("/program-requests", authenticateToken, requireRole(["office_user"]), async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    const officeId = req.user.office_id;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: "Program title is required" });
+    }
+
+    const { data: request, error } = await supabase
+      .from("program_requests")
+      .insert({
+        office_id: officeId,
+        title: title.trim(),
+        description: description?.trim() || null,
+        status: "pending",
+        request_type: "create", // Set request type for new program requests
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    console.log('✅ Program request created:', {
+      id: request.id,
+      office_id: request.office_id,
+      request_type: request.request_type,
+      status: request.status,
+      title: request.title
+    });
+
+    res.status(201).json({
+      message: "Program request submitted successfully",
+      request,
+    });
+  } catch (error) {
+    console.error("Submit program request error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Delete a program request (office can delete their own pending requests)
+router.delete("/program-requests/:requestId", authenticateToken, requireRole(["office_user"]), async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const officeId = req.user.office_id;
+
+    // Check if request exists and belongs to this office
+    const { data: request, error: fetchError } = await supabase
+      .from("program_requests")
+      .select("id, office_id, status")
+      .eq("id", requestId)
+      .single();
+
+    if (fetchError || !request) {
+      return res.status(404).json({ error: "Program request not found" });
+    }
+
+    if (request.office_id !== officeId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const { error: deleteError } = await supabase
+      .from("program_requests")
+      .delete()
+      .eq("id", requestId);
+
+    if (deleteError) throw deleteError;
+
+    res.json({ message: "Program request deleted successfully" });
+  } catch (error) {
+    console.error("Delete program request error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ============ PROGRAM CHANGE REQUEST ROUTES (Edit/Delete approval system) ============
+// Uses the unified program_requests table with request_type column
+
+// Get program change requests for an office (update/delete only)
+router.get("/program-change-requests", authenticateToken, requireRole(["office_user"]), async (req, res) => {
+  try {
+    const officeId = req.user.office_id;
+
+    const { data: requests, error } = await supabase
+      .from("program_requests")
+      .select(`
+        id,
+        program_id,
+        office_id,
+        request_type,
+        title,
+        description,
+        new_title,
+        new_description,
+        status,
+        reason,
+        created_at,
+        updated_at,
+        programs(id, title, description)
+      `)
+      .eq("office_id", officeId)
+      .in("request_type", ["update", "delete"])
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    res.json({ changeRequests: requests });
+  } catch (error) {
+    console.error("Get program change requests error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Submit a program update request
+router.post("/program-change-requests/update", authenticateToken, requireRole(["office_user"]), async (req, res) => {
+  try {
+    const { program_id, new_title, new_description, reason } = req.body;
+    const officeId = req.user.office_id;
+
+    if (!program_id) {
+      return res.status(400).json({ error: "Program ID is required" });
+    }
+
+    // Verify the program belongs to this office
+    const { data: program, error: programError } = await supabase
+      .from("programs")
+      .select("id, office_id, title, description")
+      .eq("id", program_id)
+      .single();
+
+    if (programError || !program) {
+      return res.status(404).json({ error: "Program not found" });
+    }
+
+    if (program.office_id !== officeId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Check if there's already a pending request for this program
+    const { data: existingRequest } = await supabase
+      .from("program_requests")
+      .select("id")
+      .eq("program_id", program_id)
+      .eq("status", "pending")
+      .in("request_type", ["update", "delete"])
+      .single();
+
+    if (existingRequest) {
+      return res.status(400).json({ 
+        error: "There is already a pending change request for this program" 
+      });
+    }
+
+    const { data: request, error } = await supabase
+      .from("program_requests")
+      .insert({
+        program_id,
+        office_id: officeId,
+        request_type: "update",
+        title: program.title, // Keep original title
+        description: program.description, // Keep original description
+        new_title,
+        new_description,
+        reason,
+        status: "pending",
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({
+      message: "Program update request submitted successfully",
+      request,
+    });
+  } catch (error) {
+    console.error("Submit program update request error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Submit a program delete request
+router.post("/program-change-requests/delete", authenticateToken, requireRole(["office_user"]), async (req, res) => {
+  try {
+    const { program_id, reason } = req.body;
+    const officeId = req.user.office_id;
+
+    if (!program_id) {
+      return res.status(400).json({ error: "Program ID is required" });
+    }
+
+    // Verify the program belongs to this office
+    const { data: program, error: programError } = await supabase
+      .from("programs")
+      .select("id, office_id, title, description")
+      .eq("id", program_id)
+      .single();
+
+    if (programError || !program) {
+      return res.status(404).json({ error: "Program not found" });
+    }
+
+    if (program.office_id !== officeId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Check if there's already a pending request for this program
+    const { data: existingRequest } = await supabase
+      .from("program_requests")
+      .select("id")
+      .eq("program_id", program_id)
+      .eq("status", "pending")
+      .in("request_type", ["update", "delete"])
+      .single();
+
+    if (existingRequest) {
+      return res.status(400).json({ 
+        error: "There is already a pending change request for this program" 
+      });
+    }
+
+    const { data: request, error } = await supabase
+      .from("program_requests")
+      .insert({
+        program_id,
+        office_id: officeId,
+        request_type: "delete",
+        title: program.title, // Store program title for reference
+        description: program.description,
+        reason,
+        status: "pending",
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({
+      message: "Program delete request submitted successfully",
+      request,
+    });
+  } catch (error) {
+    console.error("Submit program delete request error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Cancel/delete a program change request (office can delete their own pending requests)
+router.delete("/program-change-requests/:requestId", authenticateToken, requireRole(["office_user"]), async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const officeId = req.user.office_id;
+
+    // Check if request exists and belongs to this office
+    const { data: request, error: fetchError } = await supabase
+      .from("program_requests")
+      .select("id, office_id, status, request_type")
+      .eq("id", requestId)
+      .single();
+
+    if (fetchError || !request) {
+      return res.status(404).json({ error: "Change request not found" });
+    }
+
+    if (request.office_id !== officeId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    if (request.status !== "pending") {
+      return res.status(400).json({ 
+        error: "Can only cancel pending requests" 
+      });
+    }
+
+    const { error: deleteError } = await supabase
+      .from("program_requests")
+      .delete()
+      .eq("id", requestId);
+
+    if (deleteError) throw deleteError;
+
+    res.json({ message: "Change request cancelled successfully" });
+  } catch (error) {
+    console.error("Cancel change request error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 // Get office activities for calendar
 router.get("/:officeId/activities", authenticateToken, async (req, res) => {

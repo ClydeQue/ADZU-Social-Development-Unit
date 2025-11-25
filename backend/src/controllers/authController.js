@@ -293,10 +293,12 @@ class AuthController {
 
       // Add office info for office users
       if (user.user_type === "office_user" && user.offices) {
+        userData.office_id = user.office_id; // CRITICAL: Include office_id
         userData.office = {
           id: user.offices.id,
           name: user.offices.name,
           acronym: user.offices.acronym,
+          description: user.offices.description,
         };
       }
 

@@ -1,19 +1,23 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { useAuth } from "@/context/AuthContext";
 import OfficeDashboardLayout from "@/components/OfficeDashboardLayout";
 import { Eye, EyeOff } from "lucide-react";
 import UserService from "@/services/userService";
 import Alert from "@/components/Alert";
 import SuccessModal from "@/components/SuccessModal";
+import OfficeManagePrograms from "./ManagePrograms";
 
 /**
  * Office Settings Page
- * Provides password and username change for office users
+ * Provides password and username change, manage programs, and program requests
+ * with tabbed navigation similar to Unit Director Settings
  */
 export default function OfficeSettings({ officeColor, basePath, officeId }) {
-  const { user } = useAuth();
   const [activeForm, setActiveForm] = useState(null); // null, 'password', 'username'
+  
+  // Determine active view based on URL path
+  const currentPath = window.location.pathname;
+  const isManagePrograms = currentPath.includes('/settings/programs');
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: "", message: "" });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -207,9 +211,11 @@ export default function OfficeSettings({ officeColor, basePath, officeId }) {
             </div>
           )}
 
-          {/* Main View */}
-          {!activeForm && (
-            <div>
+          {/* Conditional Content Based on URL */}
+          {isManagePrograms ? (
+            <OfficeManagePrograms />
+          ) : (
+            <>
               {/* Header */}
               <div className="mb-6 pb-6 border-b-2 border-gray-200">
                 <h2
@@ -225,6 +231,10 @@ export default function OfficeSettings({ officeColor, basePath, officeId }) {
                   Configure your account preferences
                 </p>
               </div>
+
+              {/* Account Settings Content */}
+              {!activeForm && (
+                <div>
 
               {/* Account Settings Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -592,6 +602,8 @@ export default function OfficeSettings({ officeColor, basePath, officeId }) {
                 </form>
               </div>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

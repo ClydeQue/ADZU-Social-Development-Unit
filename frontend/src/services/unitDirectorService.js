@@ -114,6 +114,50 @@ class UnitDirectorService {
       `api/messages/delete-old-conversations?officeId=${officeId}`
     );
   }
+
+  /**
+   * Get all program requests
+   */
+  async getProgramRequests() {
+    return await api.get("api/unit-director/program-requests");
+  }
+
+  /**
+   * Get program create requests only
+   */
+  async getProgramCreateRequests() {
+    return await api.get("api/unit-director/program-requests?type=create");
+  }
+
+  /**
+   * Get program edit/update requests only
+   */
+  async getProgramEditRequests() {
+    return await api.get("api/unit-director/program-requests?type=update");
+  }
+
+  /**
+   * Get program delete requests only
+   */
+  async getProgramDeleteRequests() {
+    return await api.get("api/unit-director/program-requests?type=delete");
+  }
+
+  /**
+   * Approve program request
+   */
+  async approveProgramRequest(requestId) {
+    return await api.put(`api/unit-director/program-requests/${requestId}/approve`);
+  }
+
+  /**
+   * Reject program request
+   */
+  async rejectProgramRequest(requestId, rejectionReason = "") {
+    return await api.put(`api/unit-director/program-requests/${requestId}/reject`, {
+      rejection_reason: rejectionReason,
+    });
+  }
 }
 
 export default new UnitDirectorService();

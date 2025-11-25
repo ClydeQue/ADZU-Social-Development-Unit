@@ -54,6 +54,55 @@ class UserService {
   async deleteUser(userId) {
     return await api.delete(`api/user/${userId}`);
   }
+
+  /**
+   * Get program requests for office
+   */
+  async getProgramRequests() {
+    return await api.get("api/office/program-requests");
+  }
+
+  /**
+   * Submit program request
+   */
+  async submitProgramRequest(requestData) {
+    return await api.post("api/office/program-requests", requestData);
+  }
+
+  /**
+   * Delete program request
+   */
+  async deleteProgramRequest(requestId) {
+    return await api.delete(`api/office/program-requests/${requestId}`);
+  }
+
+  /**
+   * Get program change requests for office
+   */
+  async getProgramChangeRequests() {
+    return await api.get("api/office/program-change-requests");
+  }
+
+  /**
+   * Submit program update request
+   */
+  async submitProgramUpdateRequest(requestData) {
+    return await api.post("api/office/program-change-requests/update", requestData);
+  }
+
+  /**
+   * Submit program delete request
+   */
+  async submitProgramDeleteRequest(requestData) {
+    return await api.post("api/office/program-change-requests/delete", requestData);
+  }
+
+  /**
+   * Cancel program change request
+   */
+  async cancelProgramChangeRequest(requestId) {
+    return await api.delete(`api/office/program-change-requests/${requestId}`);
+  }
 }
 
 export default new UserService();

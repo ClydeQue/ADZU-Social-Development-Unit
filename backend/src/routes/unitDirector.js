@@ -934,4 +934,251 @@ router.post(
   }
 );
 
+// ============ PROGRAM REQUEST ROUTES (Unified - Create/Update/Delete) ============
+
+// Get all pending program requests (all types)
+router.get(
+  "/program-requests",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { type } = req.query; // Optional filter by request_type
+
+      // Build query
+      let query = supabase
+        .from("program_requests")
+        .select(`
+          id, 
+          office_id, 
+          program_id,
+          request_type,
+          title, 
+          description,
+          new_title,
+          new_description,
+          reason,
+          status, 
+          created_at, 
+          updated_at,
+          offices(id, name, acronym),
+          programs(id, title, description)
+        `);
+
+      // Filter by request type if specified - MUST happen before order
+      if (type && ["create", "update", "delete"].includes(type)) {
+        console.log(`🔍 Filtering program requests by type: ${type}`);
+        query = query.eq("request_type", type);
+      } else {
+        console.log(`⚠️ No type filter applied, returning all requests`);
+      }
+      
+      // Apply ordering
+      query = query.order("created_at", { ascending: false });
+
+      const { data: requests, error } = await query;
+
+      if (error) {
+        console.error("❌ Query error:", error);
+        throw error;
+      }
+
+      console.log(`🔍 Unit Director Program Requests Query (type=${type}):`, {
+        totalRequests: requests?.length || 0,
+        requestTypes: requests?.map(r => r.request_type),
+        nullRequestTypes: requests?.filter(r => !r.request_type).length,
+        statuses: requests?.map(r => r.status),
+        requests: requests?.map(r => ({ id: r.id, type: r.request_type, status: r.status, title: r.title }))
+      });
+
+      res.json({ requests });
+    } catch (error) {
+      console.error("Get program requests error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Approve a program request (handles create/update/delete)
+router.put(
+  "/program-requests/:requestId/approve",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { requestId } = req.params;
+      const unitDirectorId = req.user.id;
+
+      // Get the request details
+      const { data: request, error: fetchError } = await supabase
+        .from("program_requests")
+        .select("id, office_id, program_id, request_type, title, description, new_title, new_description, status")
+        .eq("id", requestId)
+        .single();
+
+      if (fetchError || !request) {
+        return res.status(404).json({ error: "Program request not found" });
+      }
+
+      if (request.status !== "pending") {
+        return res.status(400).json({ error: "Request is not pending" });
+      }
+
+      let result = {};
+
+      // Handle different request types
+      switch (request.request_type) {
+        case "create":
+          // Create new program
+          const { data: newProgram, error: createError } = await supabase
+            .from("programs")
+            .insert({
+              office_id: request.office_id,
+              title: request.title,
+              description: request.description,
+              is_fixed: false,
+            })
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          result = { program: newProgram, action: "created" };
+          break;
+
+        case "update":
+          // Update existing program
+          if (!request.program_id) {
+            return res.status(400).json({ error: "Program ID is required for update" });
+          }
+
+          const { data: updatedProgram, error: updateProgramError } = await supabase
+            .from("programs")
+            .update({
+              title: request.new_title || request.title,
+              description: request.new_description || request.description,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", request.program_id)
+            .select()
+            .single();
+
+          if (updateProgramError) throw updateProgramError;
+          result = { program: updatedProgram, action: "updated" };
+          break;
+
+        case "delete":
+          // Delete existing program
+          if (!request.program_id) {
+            return res.status(400).json({ error: "Program ID is required for delete" });
+          }
+
+          // Check if program has activities
+          const { data: activities, error: activitiesError } = await supabase
+            .from("activities")
+            .select("id")
+            .eq("program_id", request.program_id)
+            .limit(1);
+
+          if (activitiesError) throw activitiesError;
+
+          if (activities && activities.length > 0) {
+            return res.status(400).json({ 
+              error: "Cannot delete program with existing activities. Please delete activities first." 
+            });
+          }
+
+          const { error: deleteProgramError } = await supabase
+            .from("programs")
+            .delete()
+            .eq("id", request.program_id);
+
+          if (deleteProgramError) throw deleteProgramError;
+          result = { programId: request.program_id, action: "deleted" };
+          break;
+
+        default:
+          return res.status(400).json({ error: "Invalid request type" });
+      }
+
+      // Update request status to approved
+      const { error: updateRequestError } = await supabase
+        .from("program_requests")
+        .update({
+          status: "approved",
+          reviewed_by: unitDirectorId,
+          reviewed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", requestId);
+
+      if (updateRequestError) throw updateRequestError;
+
+      res.json({
+        message: `Program request approved and program ${result.action}`,
+        ...result,
+      });
+    } catch (error) {
+      console.error("Approve program request error:", error);
+      res.status(500).json({ error: "Server error", details: error.message });
+    }
+  }
+);
+
+// Reject a program request
+router.put(
+  "/program-requests/:requestId/reject",
+  authenticateToken,
+  requireRole("unit_director"),
+  async (req, res) => {
+    try {
+      const { requestId } = req.params;
+      const { rejection_reason } = req.body;
+      const unitDirectorId = req.user.id;
+
+      // Get the request details
+      const { data: request, error: fetchError } = await supabase
+        .from("program_requests")
+        .select("id, status, request_type")
+        .eq("id", requestId)
+        .single();
+
+      if (fetchError || !request) {
+        return res.status(404).json({ error: "Program request not found" });
+      }
+
+      if (request.status !== "pending") {
+        return res.status(400).json({ error: "Request is not pending" });
+      }
+
+      // Update request status to rejected
+      const updateData = {
+        status: "rejected",
+        reviewed_by: unitDirectorId,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      // Add rejection reason if provided
+      if (rejection_reason) {
+        updateData.rejection_reason = rejection_reason;
+      }
+
+      const { error: updateError } = await supabase
+        .from("program_requests")
+        .update(updateData)
+        .eq("id", requestId);
+
+      if (updateError) throw updateError;
+
+      res.json({
+        message: "Program request rejected",
+        requestType: request.request_type,
+      });
+    } catch (error) {
+      console.error("Reject program request error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 module.exports = router;

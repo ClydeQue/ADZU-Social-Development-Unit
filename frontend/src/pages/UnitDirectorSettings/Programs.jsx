@@ -16,6 +16,7 @@ import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 export default function ProgramsManagement() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("manage"); // "manage", "create-requests", "edit-requests", "delete-requests"
   const [selectedOfficeId, setSelectedOfficeId] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [newProgramName, setNewProgramName] = useState("");
@@ -26,6 +27,7 @@ export default function ProgramsManagement() {
   const [isAdding, setIsAdding] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [programToDelete, setProgramToDelete] = useState(null);
+  const [clearedRequestIds, setClearedRequestIds] = useState([]);
 
   // Fetch offices data
   const {
@@ -34,7 +36,11 @@ export default function ProgramsManagement() {
     error,
   } = useQuery({
     queryKey: ["unit-director-offices"],
-    queryFn: () => UnitDirectorService.getOffices(),
+    queryFn: async () => {
+      const data = await UnitDirectorService.getOffices();
+      console.log('✅ Unit Director Offices fetched:', data);
+      return data;
+    },
     staleTime: 2 * 60 * 1000,
   });
 
@@ -71,11 +77,120 @@ export default function ProgramsManagement() {
     },
   });
 
+  // Fetch program requests by type
+  const { data: createRequestsData, isLoading: createRequestsLoading } = useQuery({
+    queryKey: ["program-create-requests"],
+    queryFn: async () => {
+      const data = await UnitDirectorService.getProgramCreateRequests();
+      console.log('✅ CREATE Requests Data:', {
+        rawData: data,
+        requestsCount: data?.requests?.length || 0,
+        requests: data?.requests?.map(r => ({
+          id: r.id,
+          request_type: r.request_type,
+          status: r.status,
+          title: r.title,
+          office: r.offices?.acronym
+        }))
+      });
+      return data;
+    },
+    staleTime: 5000, // Reduced cache time for debugging
+    refetchOnMount: true,
+  });
+
+  const { data: editRequestsData, isLoading: editRequestsLoading } = useQuery({
+    queryKey: ["program-edit-requests"],
+    queryFn: async () => {
+      const data = await UnitDirectorService.getProgramEditRequests();
+      console.log('✅ EDIT Requests Data:', {
+        rawData: data,
+        requestsCount: data?.requests?.length || 0,
+        requests: data?.requests?.map(r => ({
+          id: r.id,
+          request_type: r.request_type,
+          status: r.status,
+          title: r.title,
+          office: r.offices?.acronym
+        }))
+      });
+      return data;
+    },
+    staleTime: 5000,
+    refetchOnMount: true,
+  });
+
+  const { data: deleteRequestsData, isLoading: deleteRequestsLoading } = useQuery({
+    queryKey: ["program-delete-requests"],
+    queryFn: async () => {
+      const data = await UnitDirectorService.getProgramDeleteRequests();
+      console.log('✅ DELETE Requests Data:', {
+        rawData: data,
+        requestsCount: data?.requests?.length || 0,
+        requests: data?.requests?.map(r => ({
+          id: r.id,
+          request_type: r.request_type,
+          status: r.status,
+          title: r.title,
+          office: r.offices?.acronym
+        }))
+      });
+      return data;
+    },
+    staleTime: 5000,
+    refetchOnMount: true,
+  });
+
+  // Approve program request mutation
+  const approveRequestMutation = useMutation({
+    mutationFn: (requestId) => UnitDirectorService.approveProgramRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["program-create-requests"]);
+      queryClient.invalidateQueries(["program-edit-requests"]);
+      queryClient.invalidateQueries(["program-delete-requests"]);
+      queryClient.invalidateQueries(["unit-director-offices"]);
+      setSuccessMessage("Program request approved successfully!");
+      setShowSuccessModal(true);
+    },
+    onError: (error) => {
+      console.error("Approve request error:", error);
+      alert(error.response?.data?.error || "Failed to approve request");
+    },
+  });
+
+  // Reject program request mutation
+  const rejectRequestMutation = useMutation({
+    mutationFn: (requestId) => UnitDirectorService.rejectProgramRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["program-create-requests"]);
+      queryClient.invalidateQueries(["program-edit-requests"]);
+      queryClient.invalidateQueries(["program-delete-requests"]);
+      setSuccessMessage("Program request rejected");
+      setShowSuccessModal(true);
+    },
+    onError: (error) => {
+      console.error("Reject request error:", error);
+      alert(error.response?.data?.error || "Failed to reject request");
+    },
+  });
+
   const offices = officesData?.offices || [];
   const selectedOffice = offices.find(
     (office) => office.id === selectedOfficeId
   );
   const programs = selectedOffice?.programs || [];
+  
+  console.log('📊 Unit Director Programs Debug:', {
+    officesCount: offices.length,
+    selectedOfficeId,
+    selectedOffice: selectedOffice ? {
+      id: selectedOffice.id,
+      acronym: selectedOffice.acronym,
+      programsCount: selectedOffice.programs?.length || 0,
+      programs: selectedOffice.programs
+    } : null,
+    programs
+  });
 
   // Get office logo path
   const getOfficeLogo = (acronym) => {
@@ -137,6 +252,72 @@ export default function ProgramsManagement() {
                   Manage programs for each office
                 </p>
               </div>
+
+              {/* Tabs */}
+              <div className="flex gap-2 mb-6 border-b-2 border-gray-200">
+                <button
+                  onClick={() => setActiveTab("manage")}
+                  className={`px-6 py-3 font-semibold transition-all ${
+                    activeTab === "manage"
+                      ? "text-[#4D49FC] border-b-4 border-[#4D49FC]"
+                      : "text-gray-500 hover:text-[#4D49FC]"
+                  }`}
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Manage Programs
+                </button>
+                <button
+                  onClick={() => setActiveTab("create-requests")}
+                  className={`px-6 py-3 font-semibold transition-all relative ${
+                    activeTab === "create-requests"
+                      ? "text-[#4D49FC] border-b-4 border-[#4D49FC]"
+                      : "text-gray-500 hover:text-[#4D49FC]"
+                  }`}
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Create Requests
+                  {createRequestsData?.requests?.filter(r => r.status === "pending" && !clearedRequestIds.includes(r.id)).length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {createRequestsData.requests.filter(r => r.status === "pending" && !clearedRequestIds.includes(r.id)).length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("edit-requests")}
+                  className={`px-6 py-3 font-semibold transition-all relative ${
+                    activeTab === "edit-requests"
+                      ? "text-[#4D49FC] border-b-4 border-[#4D49FC]"
+                      : "text-gray-500 hover:text-[#4D49FC]"
+                  }`}
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Edit Requests
+                  {editRequestsData?.requests?.filter(r => r.status === "pending" && !clearedRequestIds.includes(r.id)).length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {editRequestsData.requests.filter(r => r.status === "pending" && !clearedRequestIds.includes(r.id)).length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("delete-requests")}
+                  className={`px-6 py-3 font-semibold transition-all relative ${
+                    activeTab === "delete-requests"
+                      ? "text-[#4D49FC] border-b-4 border-[#4D49FC]"
+                      : "text-gray-500 hover:text-[#4D49FC]"
+                  }`}
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Delete Requests
+                  {deleteRequestsData?.requests?.filter(r => r.status === "pending" && !clearedRequestIds.includes(r.id)).length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {deleteRequestsData.requests.filter(r => r.status === "pending" && !clearedRequestIds.includes(r.id)).length}
+                    </span>
+                  )}
+                </button>
+              </div>
+              {/* Manage Programs Tab Content */}
+              {activeTab === "manage" && (
+                <>
               {/* Program Name and Office Selector */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 {/* Program Name Input */}
@@ -400,6 +581,579 @@ export default function ProgramsManagement() {
                   </div>
                 )}
               </div>
+              </>
+              )}
+
+              {/* Create Requests Tab Content */}
+              {activeTab === "create-requests" && (
+                <div className="h-full flex flex-col">
+                  <style>{`
+                    .requests-scroll-container::-webkit-scrollbar {
+                      width: 5px;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-track {
+                      background: transparent;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-thumb {
+                      background-color: #040195;
+                      border-radius: 42px;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-thumb:hover {
+                      background-color: #030174;
+                    }
+                  `}</style>
+
+                  {/* Clear Button */}
+                  <div className="flex justify-end mb-3">
+                    <button
+                      onClick={() => {
+                        const requestIds = createRequestsData?.requests?.map(r => r.id) || [];
+                        setClearedRequestIds(prev => [...prev, ...requestIds]);
+                      }}
+                      disabled={!createRequestsData?.requests?.filter(r => !clearedRequestIds.includes(r.id)).length}
+                      className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs flex items-center gap-2"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      CLEAR LIST
+                    </button>
+                  </div>
+
+                  {/* Table Header */}
+                  <div className="bg-[#1E22AA] text-white rounded-xl px-6 py-3 mb-1 grid grid-cols-[150px_200px_1fr_120px_200px] gap-4 items-center flex-shrink-0">
+                    <div className="text-xs font-semibold uppercase">Office</div>
+                    <div className="text-xs font-semibold uppercase">Program Title</div>
+                    <div className="text-xs font-semibold uppercase">Description</div>
+                    <div className="text-xs font-semibold uppercase">Status</div>
+                    <div className="text-xs font-semibold uppercase text-center">Actions</div>
+                  </div>
+
+                  {/* Table Body */}
+                  {createRequestsLoading ? (
+                    <div className="bg-white rounded-xl shadow-md p-6">
+                      <TableSkeleton rows={5} columns={5} />
+                    </div>
+                  ) : !createRequestsData?.requests || createRequestsData.requests.filter(r => !clearedRequestIds.includes(r.id)).length === 0 ? (
+                    <div
+                      className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      No create program requests found
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 requests-scroll-container min-h-0">
+                      <div className="space-y-1.5">
+                        {createRequestsData.requests.filter(r => !clearedRequestIds.includes(r.id)).map((request) => (
+                          <div
+                            key={request.id}
+                            className={`${
+                              request.status === "pending"
+                                ? "bg-[#FFF9E6] border-2 border-yellow-300"
+                                : request.status === "approved"
+                                ? "bg-[#E6F7ED] border-2 border-green-300"
+                                : "bg-[#FFE6E6] border-2 border-red-300"
+                            } rounded-lg px-6 py-3 grid grid-cols-[150px_200px_1fr_120px_200px] gap-4 items-center transition-colors`}
+                          >
+                            {/* Office */}
+                            <div className="flex items-center gap-2">
+                              {getOfficeLogo(request.offices?.acronym) && (
+                                <img
+                                  src={getOfficeLogo(request.offices.acronym)}
+                                  alt={request.offices.acronym}
+                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                />
+                              )}
+                              <span
+                                className="text-[#4D49FC] font-semibold text-xs"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.offices?.acronym || "N/A"}
+                              </span>
+                            </div>
+
+                            {/* Title */}
+                            <div>
+                              <span
+                                className="text-[#040195] font-semibold text-sm"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.title}
+                              </span>
+                            </div>
+
+                            {/* Description */}
+                            <div>
+                              <span
+                                className="text-gray-600 text-xs line-clamp-2"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.description || "No description"}
+                              </span>
+                            </div>
+
+                            {/* Status Badge */}
+                            <div>
+                              <span
+                                className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                  request.status === "pending"
+                                    ? "bg-yellow-500 text-white"
+                                    : request.status === "approved"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-red-500 text-white"
+                                }`}
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.status.toUpperCase()}
+                              </span>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-center gap-2">
+                              {request.status === "pending" && (
+                                <>
+                                  <button
+                                    onClick={() => approveRequestMutation.mutate(request.id)}
+                                    disabled={approveRequestMutation.isPending}
+                                    className="px-4 py-1.5 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
+                                    style={{ fontFamily: "Inter, sans-serif" }}
+                                  >
+                                    {approveRequestMutation.isPending ? "..." : "APPROVE"}
+                                  </button>
+                                  <button
+                                    onClick={() => rejectRequestMutation.mutate(request.id)}
+                                    disabled={rejectRequestMutation.isPending}
+                                    className="px-4 py-1.5 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
+                                    style={{ fontFamily: "Inter, sans-serif" }}
+                                  >
+                                    {rejectRequestMutation.isPending ? "..." : "REJECT"}
+                                  </button>
+                                </>
+                              )}
+                              {request.status === "approved" && (
+                                <span
+                                  className="text-green-600 text-xs font-semibold"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  ✓ Approved & Created
+                                </span>
+                              )}
+                              {request.status === "rejected" && (
+                                <span
+                                  className="text-red-600 text-xs font-semibold"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  ✗ Rejected
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Edit Requests Tab Content */}
+              {activeTab === "edit-requests" && (
+                <div className="h-full flex flex-col">
+                  <style>{`
+                    .requests-scroll-container::-webkit-scrollbar {
+                      width: 5px;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-track {
+                      background: transparent;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-thumb {
+                      background-color: #040195;
+                      border-radius: 42px;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-thumb:hover {
+                      background-color: #030174;
+                    }
+                  `}</style>
+
+                  {/* Clear Button */}
+                  <div className="flex justify-end mb-3">
+                    <button
+                      onClick={() => {
+                        const requestIds = editRequestsData?.requests?.map(r => r.id) || [];
+                        setClearedRequestIds(prev => [...prev, ...requestIds]);
+                      }}
+                      disabled={!editRequestsData?.requests?.filter(r => !clearedRequestIds.includes(r.id)).length}
+                      className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs flex items-center gap-2"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      CLEAR LIST
+                    </button>
+                  </div>
+
+                  {/* Table Header */}
+                  <div className="bg-[#1E22AA] text-white rounded-xl px-6 py-3 mb-1 grid grid-cols-[120px_1fr_1fr_100px_180px] gap-4 items-center flex-shrink-0">
+                    <div className="text-xs font-semibold uppercase">Office</div>
+                    <div className="text-xs font-semibold uppercase">Current</div>
+                    <div className="text-xs font-semibold uppercase">Proposed</div>
+                    <div className="text-xs font-semibold uppercase">Status</div>
+                    <div className="text-xs font-semibold uppercase text-center">Actions</div>
+                  </div>
+
+                  {/* Table Body */}
+                  {editRequestsLoading ? (
+                    <div className="bg-white rounded-xl shadow-md p-6">
+                      <TableSkeleton rows={5} columns={5} />
+                    </div>
+                  ) : !editRequestsData?.requests || editRequestsData.requests.filter(r => !clearedRequestIds.includes(r.id)).length === 0 ? (
+                    <div
+                      className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      No edit program requests found
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 requests-scroll-container min-h-0">
+                      <div className="space-y-1.5">
+                        {editRequestsData.requests.filter(r => !clearedRequestIds.includes(r.id)).map((request) => (
+                          <div
+                            key={request.id}
+                            className={`${
+                              request.status === "pending"
+                                ? "bg-[#FFF9E6] border-2 border-yellow-300"
+                                : request.status === "approved"
+                                ? "bg-[#E6F7ED] border-2 border-green-300"
+                                : "bg-[#FFE6E6] border-2 border-red-300"
+                            } rounded-lg px-6 py-3 grid grid-cols-[120px_1fr_1fr_100px_180px] gap-4 items-start transition-colors`}
+                          >
+                            {/* Office */}
+                            <div className="flex items-center gap-2">
+                              {getOfficeLogo(request.offices?.acronym) && (
+                                <img
+                                  src={getOfficeLogo(request.offices.acronym)}
+                                  alt={request.offices.acronym}
+                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                />
+                              )}
+                              <span
+                                className="text-[#4D49FC] font-semibold text-xs"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.offices?.acronym || "N/A"}
+                              </span>
+                            </div>
+
+                            {/* Current Values */}
+                            <div className="flex flex-col gap-1">
+                              <div className="flex flex-col">
+                                <span
+                                  className="text-[#040195] font-bold text-xs mb-1"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  Current Title:
+                                </span>
+                                <span
+                                  className="text-gray-700 text-sm"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  {request.programs?.title || "N/A"}
+                                </span>
+                              </div>
+                              <div className="flex flex-col mt-2">
+                                <span
+                                  className="text-[#040195] font-bold text-xs mb-1"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  Current Description:
+                                </span>
+                                <span
+                                  className="text-gray-600 text-xs line-clamp-2"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  {request.programs?.description || "No description"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Proposed Values */}
+                            <div className="flex flex-col gap-1">
+                              <div className="flex flex-col">
+                                <span
+                                  className="text-orange-600 font-bold text-xs mb-1"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  New Title:
+                                </span>
+                                <span
+                                  className="text-gray-700 text-sm font-semibold"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  {request.new_title || request.title || "N/A"}
+                                </span>
+                              </div>
+                              <div className="flex flex-col mt-2">
+                                <span
+                                  className="text-orange-600 font-bold text-xs mb-1"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  New Description:
+                                </span>
+                                <span
+                                  className="text-gray-600 text-xs line-clamp-2"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  {request.new_description || request.description || "No description"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Status Badge */}
+                            <div className="flex items-start pt-2">
+                              <span
+                                className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                  request.status === "pending"
+                                    ? "bg-yellow-500 text-white"
+                                    : request.status === "approved"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-red-500 text-white"
+                                }`}
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.status.toUpperCase()}
+                              </span>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-start justify-center gap-2 pt-2">
+                              {request.status === "pending" && (
+                                <>
+                                  <button
+                                    onClick={() => approveRequestMutation.mutate(request.id)}
+                                    disabled={approveRequestMutation.isPending}
+                                    className="px-4 py-1.5 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
+                                    style={{ fontFamily: "Inter, sans-serif" }}
+                                  >
+                                    {approveRequestMutation.isPending ? "..." : "APPROVE"}
+                                  </button>
+                                  <button
+                                    onClick={() => rejectRequestMutation.mutate(request.id)}
+                                    disabled={rejectRequestMutation.isPending}
+                                    className="px-4 py-1.5 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
+                                    style={{ fontFamily: "Inter, sans-serif" }}
+                                  >
+                                    {rejectRequestMutation.isPending ? "..." : "REJECT"}
+                                  </button>
+                                </>
+                              )}
+                              {request.status === "approved" && (
+                                <span
+                                  className="text-green-600 text-xs font-semibold"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  ✓ Approved
+                                </span>
+                              )}
+                              {request.status === "rejected" && (
+                                <span
+                                  className="text-red-600 text-xs font-semibold"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  ✗ Rejected
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Delete Requests Tab Content */}
+              {activeTab === "delete-requests" && (
+                <div className="h-full flex flex-col">
+                  <style>{`
+                    .requests-scroll-container::-webkit-scrollbar {
+                      width: 5px;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-track {
+                      background: transparent;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-thumb {
+                      background-color: #040195;
+                      border-radius: 42px;
+                    }
+                    .requests-scroll-container::-webkit-scrollbar-thumb:hover {
+                      background-color: #030174;
+                    }
+                  `}</style>
+
+                  {/* Clear Button */}
+                  <div className="flex justify-end mb-3">
+                    <button
+                      onClick={() => {
+                        const requestIds = deleteRequestsData?.requests?.map(r => r.id) || [];
+                        setClearedRequestIds(prev => [...prev, ...requestIds]);
+                      }}
+                      disabled={!deleteRequestsData?.requests?.filter(r => !clearedRequestIds.includes(r.id)).length}
+                      className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs flex items-center gap-2"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      CLEAR LIST
+                    </button>
+                  </div>
+
+                  {/* Table Header */}
+                  <div className="bg-[#1E22AA] text-white rounded-xl px-6 py-3 mb-1 grid grid-cols-[120px_200px_1fr_200px_100px_180px] gap-4 items-center flex-shrink-0">
+                    <div className="text-xs font-semibold uppercase">Office</div>
+                    <div className="text-xs font-semibold uppercase">Program Title</div>
+                    <div className="text-xs font-semibold uppercase">Reason</div>
+                    <div className="text-xs font-semibold uppercase">Requested By</div>
+                    <div className="text-xs font-semibold uppercase">Status</div>
+                    <div className="text-xs font-semibold uppercase text-center">Actions</div>
+                  </div>
+
+                  {/* Table Body */}
+                  {deleteRequestsLoading ? (
+                    <div className="bg-white rounded-xl shadow-md p-6">
+                      <TableSkeleton rows={5} columns={6} />
+                    </div>
+                  ) : !deleteRequestsData?.requests || deleteRequestsData.requests.filter(r => !clearedRequestIds.includes(r.id)).length === 0 ? (
+                    <div
+                      className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      No delete program requests found
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 requests-scroll-container min-h-0">
+                      <div className="space-y-1.5">
+                        {deleteRequestsData.requests.filter(r => !clearedRequestIds.includes(r.id)).map((request) => (
+                          <div
+                            key={request.id}
+                            className={`${
+                              request.status === "pending"
+                                ? "bg-[#FFEBEE] border-2 border-red-200"
+                                : request.status === "approved"
+                                ? "bg-[#E6F7ED] border-2 border-green-300"
+                                : "bg-[#FFE6E6] border-2 border-red-300"
+                            } rounded-lg px-6 py-3 grid grid-cols-[120px_200px_1fr_200px_100px_180px] gap-4 items-center transition-colors`}
+                          >
+                            {/* Office */}
+                            <div className="flex items-center gap-2">
+                              {getOfficeLogo(request.offices?.acronym) && (
+                                <img
+                                  src={getOfficeLogo(request.offices.acronym)}
+                                  alt={request.offices.acronym}
+                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                />
+                              )}
+                              <span
+                                className="text-[#4D49FC] font-semibold text-xs"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.offices?.acronym || "N/A"}
+                              </span>
+                            </div>
+
+                            {/* Program Title */}
+                            <div>
+                              <span
+                                className="text-[#040195] font-semibold text-sm"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.programs?.title || request.title || "N/A"}
+                              </span>
+                            </div>
+
+                            {/* Reason */}
+                            <div>
+                              <span
+                                className="text-gray-600 text-xs line-clamp-2"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.reason || "No reason provided"}
+                              </span>
+                            </div>
+
+                            {/* Requested By */}
+                            <div>
+                              <span
+                                className="text-gray-700 text-xs"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.offices?.acronym || "Unknown"}
+                              </span>
+                            </div>
+
+                            {/* Status Badge */}
+                            <div>
+                              <span
+                                className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                  request.status === "pending"
+                                    ? "bg-red-500 text-white"
+                                    : request.status === "approved"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-red-600 text-white"
+                                }`}
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                              >
+                                {request.status.toUpperCase()}
+                              </span>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-center gap-2">
+                              {request.status === "pending" && (
+                                <>
+                                  <button
+                                    onClick={() => approveRequestMutation.mutate(request.id)}
+                                    disabled={approveRequestMutation.isPending}
+                                    className="px-4 py-1.5 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
+                                    style={{ fontFamily: "Inter, sans-serif" }}
+                                  >
+                                    {approveRequestMutation.isPending ? "..." : "APPROVE"}
+                                  </button>
+                                  <button
+                                    onClick={() => rejectRequestMutation.mutate(request.id)}
+                                    disabled={rejectRequestMutation.isPending}
+                                    className="px-4 py-1.5 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
+                                    style={{ fontFamily: "Inter, sans-serif" }}
+                                  >
+                                    {rejectRequestMutation.isPending ? "..." : "REJECT"}
+                                  </button>
+                                </>
+                              )}
+                              {request.status === "approved" && (
+                                <span
+                                  className="text-green-600 text-xs font-semibold"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  ✓ Deleted
+                                </span>
+                              )}
+                              {request.status === "rejected" && (
+                                <span
+                                  className="text-red-600 text-xs font-semibold"
+                                  style={{ fontFamily: "Inter, sans-serif" }}
+                                >
+                                  ✗ Rejected
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </main>
