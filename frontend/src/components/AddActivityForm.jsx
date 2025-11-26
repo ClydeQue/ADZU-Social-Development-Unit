@@ -310,7 +310,7 @@ export default function AddActivityForm({
                 onChange={(e) =>
                   handleInputChange("projectName", e.target.value)
                 }
-                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
+                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400 cursor-pointer"
                 placeholder="Project Name"
                 required
               />
@@ -336,7 +336,7 @@ export default function AddActivityForm({
                     <button
                       type="button"
                       onClick={() => toggleDropdown("program")}
-                      className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
+                      className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between cursor-pointer"
                     >
                       <span
                         className={formData.programId ? "" : "text-gray-400"}
@@ -411,7 +411,7 @@ export default function AddActivityForm({
                   handleInputChange("description", e.target.value)
                 }
                 rows={2}
-                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none resize-none placeholder:text-gray-400"
+                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none resize-none placeholder:text-gray-400 cursor-pointer"
                 placeholder="It brings you in-depth conversations about candidates shaping Zamboanga's future..."
                 required
               />
@@ -425,7 +425,7 @@ export default function AddActivityForm({
                 <button
                   type="button"
                   onClick={() => toggleDropdown("phase")}
-                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
+                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between cursor-pointer"
                 >
                   <span className={formData.phase ? "" : "text-gray-400"}>
                     {formData.phase || "Select phase"}
@@ -568,7 +568,7 @@ export default function AddActivityForm({
               {/* Venue row 1: Street, Barangay, Male */}
               <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
-                  <div className="text-xs font-semibold text-[#040195] mb-1">
+                  <div className="text-xs font-semibold text-[#040195] mb-2">
                     Venue
                   </div>
                   <div className="text-[9px] text-[#8180C9] mb-0.5">
@@ -585,23 +585,24 @@ export default function AddActivityForm({
                   />
                 </div>
 
-                <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">
-                    Town / Barangay
+                  <div>
+                    <div className="inline-block "></div>
+                    <div className="text-[9px] text-[#8180C9] mb-0.5">
+                      Town / Barangay
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.venue.barangay}
+                      onChange={(e) =>
+                        handleVenueChange("barangay", e.target.value)
+                      }
+                      className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
+                      placeholder="Zone"
+                    />
                   </div>
-                  <input
-                    type="text"
-                    value={formData.venue.barangay}
-                    onChange={(e) =>
-                      handleVenueChange("barangay", e.target.value)
-                    }
-                    className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
-                    placeholder="Zone"
-                  />
-                </div>
 
                 <div>
-                  <div className="text-xs font-semibold text-[#040195] mb-1">
+                  <div className="text-xs font-semibold text-[#040195] mb-2">
                     Sex Count
                   </div>
                   <div className="text-[9px] text-[#8180C9] mb-0.5">Male</div>

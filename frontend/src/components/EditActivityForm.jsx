@@ -403,7 +403,7 @@ export default function EditActivityForm({
                 onChange={(e) =>
                   handleInputChange("projectName", e.target.value)
                 }
-                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
+                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400 cursor-pointer"
                 placeholder="Activity Name"
                 required
               />
@@ -423,7 +423,7 @@ export default function EditActivityForm({
                     <button
                       type="button"
                       onClick={() => toggleDropdown("program")}
-                      className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between gap-2"
+                      className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between gap-2 cursor-pointer"
                     >
                       <span
                         className={formData.programId ? "" : "text-gray-400"}
@@ -464,7 +464,7 @@ export default function EditActivityForm({
                               handleInputChange("programId", program.id);
                               setTimeout(() => closeDropdown("program"), 0);
                             }}
-                            className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                            className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                           >
                             {program.title}
                           </button>
@@ -505,7 +505,7 @@ export default function EditActivityForm({
                   );
                 }}
                 rows={2}
-                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none resize-none placeholder:text-gray-400"
+                className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none resize-none placeholder:text-gray-400 cursor-pointer"
                 placeholder="Activity description..."
               />
             </div>
@@ -518,7 +518,7 @@ export default function EditActivityForm({
                 <button
                   type="button"
                   onClick={() => toggleDropdown("phase")}
-                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between gap-2"
+                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between gap-2 cursor-pointer"
                 >
                   <span className={formData.phase ? "" : "text-gray-400"}>
                     {formData.phase || "Select phase"}
@@ -560,7 +560,7 @@ export default function EditActivityForm({
                           handleInputChange("phase", phase);
                           setTimeout(() => closeDropdown("phase"), 0);
                         }}
-                        className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                        className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                       >
                         {phase}
                       </button>
@@ -661,48 +661,35 @@ export default function EditActivityForm({
               {/* Venue rows */}
               <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
-                  <div className="text-xs font-semibold text-[#040195] mb-1">
-                    Venue
-                  </div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">
-                    Street / Room / Building
-                  </div>
+                  <label className="block text-xs font-semibold text-[#040195] mb-2">Venue</label>
+                  <label className="block text-[9px] text-[#8180C9] mb-0.5">Street / Room / Building</label>
                   <input
                     type="text"
                     value={formData.venue.street}
-                    onChange={(e) =>
-                      handleVenueChange("street", e.target.value)
-                    }
+                    onChange={(e) => handleVenueChange("street", e.target.value)}
                     className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="Venue"
                   />
                 </div>
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">
-                    Town / Barangay
-                  </div>
+                  <div className="inline-block "></div>
+                  <label className="block text-[9px] text-[#8180C9] mb-0.5 ">Zone</label>
                   <input
                     type="text"
                     value={formData.venue.barangay}
-                    onChange={(e) =>
-                      handleVenueChange("barangay", e.target.value)
-                    }
+                    onChange={(e) => handleVenueChange("barangay", e.target.value)}
                     className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="Zone"
                   />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-[#040195] mb-1">
-                    Sex Count
-                  </div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Male</div>
+                  <label className="block text-xs font-semibold text-[#040195] mb-2">Sex Count</label>
+                  <label className="block text-[9px] text-[#8180C9] mb-0.5">Male</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.male_participants}
-                    onChange={(e) =>
-                      handleInputChange("male_participants", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("male_participants", e.target.value)}
                     className="w-16 px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] text-center focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="0"
                   />
@@ -711,9 +698,8 @@ export default function EditActivityForm({
 
               <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">
-                    Municipality / City
-                  </div>
+                  <label className="block text-xs font-semibold text-[#040195] mb-2">Municipality / City</label>
+                  <label className="block text-[9px] text-[#8180C9] mb-0.5">City</label>
                   <input
                     type="text"
                     value={formData.venue.city}
@@ -723,28 +709,24 @@ export default function EditActivityForm({
                   />
                 </div>
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">
-                    Province
-                  </div>
+                  <div className="inline-block text-xs font-semibold text-[#040195] mb-1"></div>
+                  <label className="block text-[9px] text-[#8180C9] mb-0.5">Province</label>
                   <input
                     type="text"
                     value={formData.venue.province}
-                    onChange={(e) =>
-                      handleVenueChange("province", e.target.value)
-                    }
+                    onChange={(e) => handleVenueChange("province", e.target.value)}
                     className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="Province"
                   />
                 </div>
                 <div>
-                  <div className="text-[9px] text-[#8180C9] mb-0.5">Female</div>
+                  <div className="inline-block text-xs font-semibold text-[#040195] mb-1"></div>
+                  <label className="block text-[9px] text-[#8180C9] mb-0.5">Count</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.female_participants}
-                    onChange={(e) =>
-                      handleInputChange("female_participants", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("female_participants", e.target.value)}
                     className="w-16 px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] text-center focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
                     placeholder="0"
                   />
@@ -831,7 +813,7 @@ export default function EditActivityForm({
                                       0
                                     );
                                   }}
-                                  className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                                  className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                                 >
                                   {type}
                                 </button>
@@ -938,7 +920,7 @@ export default function EditActivityForm({
                             onClick={() =>
                               toggleDropdown(`budget-type-${index}`)
                             }
-                            className="w-full px-3 py-2 border border-[#8180C9] rounded-[11px] text-sm text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between gap-2"
+                            className="w-full px-3 py-2 border border-[#8180C9] rounded-[11px] text-sm text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between gap-2 cursor-pointer"
                           >
                             <span
                               className={budget.type ? "" : "text-gray-400"}
@@ -991,7 +973,7 @@ export default function EditActivityForm({
                                       0
                                     );
                                   }}
-                                  className="w-full px-3 py-2 text-sm text-left text-[#040195] hover:bg-[#F5F5FF] transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                                  className="w-full px-3 py-2 text-sm text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
                                 >
                                   {type.label}
                                 </button>
