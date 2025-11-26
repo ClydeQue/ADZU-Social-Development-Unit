@@ -8,7 +8,11 @@ const router = express.Router();
  * Get all notifications
  */
 router.get("/", authenticateToken, async (req, res) => {
-  console.log("Fetching notifications for user:", req.user?.id);
+  console.log("Fetching notifications for user:", {
+    id: req.user?.id,
+    userType: req.user?.userType,
+    office_id: req.user?.office_id,
+  });
   try {
     // Get deets
     const selectFields = `
@@ -22,24 +26,37 @@ router.get("/", authenticateToken, async (req, res) => {
       `;
 
     let notificationsResult;
-  
-    if (req.user.userType !== "unit_director" && req.user.office_id) {
-      // Office-limited query
+
+    // Unit Director: See ALL office notifications
+    // Office User: Only see their own office notifications
+    if (req.user.userType === "unit_director") {
+      console.log("Unit Director: Fetching all office notifications");
+      notificationsResult = await supabase
+        .from("notifications")
+        .select(selectFields)
+        .order("created_at", { ascending: false });
+    } else if (req.user.userType === "office_user" && req.user.office_id) {
+      console.log(
+        `Office User: Fetching notifications for office ${req.user.office_id}`
+      );
       notificationsResult = await supabase
         .from("notifications")
         .select(selectFields)
         .eq("office_id", req.user.office_id)
         .order("created_at", { ascending: false });
     } else {
-      // Unit director or no office filter
-      notificationsResult = await supabase
-        .from("notifications")
-        .select(selectFields)
-        .order("created_at", { ascending: false });
+      // Fallback: no notifications if user type is unknown or office user without office_id
+      console.warn(
+        "User has no valid role or office_id, returning empty notifications"
+      );
+      return res.json({
+        items: [],
+        unread: 0,
+      });
     }
 
     const { data: notifications, error } = notificationsResult;
-    
+
     if (error) {
       console.error("Error fetching notifications:", error);
       throw error;
@@ -59,7 +76,10 @@ router.get("/", authenticateToken, async (req, res) => {
             .in("id", activityIds)
         : { data: [] },
       officeIds.length > 0
-        ? supabase.from("offices").select("id, name, acronym").in("id", officeIds)
+        ? supabase
+            .from("offices")
+            .select("id, name, acronym")
+            .in("id", officeIds)
         : { data: [] },
     ]);
 
@@ -95,7 +115,6 @@ router.get("/", authenticateToken, async (req, res) => {
           );
           return null;
         }
-        
 
         if (!activity) {
           console.log(
@@ -108,22 +127,21 @@ router.get("/", authenticateToken, async (req, res) => {
         // Map acronym to correct logo file name
         const acronymLower = office.acronym?.toLowerCase();
         const logoMap = {
-          'acca': '/images/acca_logo_small.webp',
-          'aces': '/images/aces_logo_small.webp',
-          'aclg': '/images/aclg_logo_small.webp',
-          'altec': '/images/altec_logo_small.webp',
-          'apc': '/images/apc_logo_small.webp',
-          'cces': '/images/cces_logo_small.webp'
+          acca: "/images/acca_logo_small.webp",
+          aces: "/images/aces_logo_small.webp",
+          aclg: "/images/aclg_logo_small.webp",
+          altec: "/images/altec_logo_small.webp",
+          apc: "/images/apc_logo_small.webp",
+          cces: "/images/cces_logo_small.webp",
         };
 
-
-        let indicatorColor = '#040195'; // Default blue
-        if (notification.type === 'Reminder') {
-          indicatorColor = '#ef4444'; // Red for due/overdue
-        } else if (notification.type === 'Report') {
-          indicatorColor = '#22c55e'; // Green for submitted
-        } else if (notification.type === 'Updated') {
-          indicatorColor = '#3b82f6'; // Blue for updated
+        let indicatorColor = "#040195"; // Default blue
+        if (notification.type === "Reminder") {
+          indicatorColor = "#ef4444"; // Red for due/overdue
+        } else if (notification.type === "Report") {
+          indicatorColor = "#22c55e"; // Green for submitted
+        } else if (notification.type === "Updated") {
+          indicatorColor = "#3b82f6"; // Blue for updated
         }
 
         return {
@@ -138,28 +156,34 @@ router.get("/", authenticateToken, async (req, res) => {
           createdAt: notification.created_at,
           updatedAt: notification.updated_at,
           time: getTimeAgo(notification.created_at),
-          updatedTime: notification.updated_at ? getTimeAgo(notification.updated_at) : null,
+          updatedTime: notification.updated_at
+            ? getTimeAgo(notification.updated_at)
+            : null,
           unread: !notification.read_at,
-          logo: logoMap[acronymLower] || '/images/default_logo.webp',
+          logo: logoMap[acronymLower] || "/images/default_logo.webp",
           indicatorColor: indicatorColor,
         };
       })
       .filter(Boolean); // Remove null entries
 
-    // Get unread count
-    // Get unread count (apply office filter for non-unit director)
+    // Get unread count with same filtering logic
     let unreadCountResult;
-    if (req.user.userType !== "unit_director" && req.user.office_id) {
+    if (req.user.userType === "unit_director") {
+      // Unit Director: Count all unread notifications
+      unreadCountResult = await supabase
+        .from("notifications")
+        .select("id", { count: "exact" })
+        .is("read_at", null);
+    } else if (req.user.userType === "office_user" && req.user.office_id) {
+      // Office User: Count only their office's unread notifications
       unreadCountResult = await supabase
         .from("notifications")
         .select("id", { count: "exact" })
         .eq("office_id", req.user.office_id)
         .is("read_at", null);
     } else {
-      unreadCountResult = await supabase
-        .from("notifications")
-        .select("id", { count: "exact" })
-        .is("read_at", null);
+      // Fallback: no unread count
+      unreadCountResult = { count: 0 };
     }
 
     const { count: unreadCount, error: countError } = unreadCountResult;
@@ -193,19 +217,40 @@ router.get("/", authenticateToken, async (req, res) => {
 
 /**
  * Mark notification as read
+ * Office users can only mark their own office notifications as read
  */
 router.put("/:id/read", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data, error } = await supabase
+    // Build the update query
+    let updateQuery = supabase
       .from("notifications")
       .update({ read_at: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
+      .eq("id", id);
 
-    if (error) throw error;
+    // Office users can only mark their own office notifications as read
+    if (req.user.userType === "office_user" && req.user.office_id) {
+      updateQuery = updateQuery.eq("office_id", req.user.office_id);
+      console.log(
+        `Office user marking notification ${id} as read (office: ${req.user.office_id})`
+      );
+    } else if (req.user.userType === "unit_director") {
+      console.log(`Unit Director marking notification ${id} as read`);
+    }
+
+    const { data, error } = await updateQuery.select().single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        // No rows returned - either doesn't exist or user doesn't have access
+        return res.status(404).json({
+          error: "Notification not found or access denied",
+          message: "You can only mark your own office notifications as read",
+        });
+      }
+      throw error;
+    }
 
     res.json(data);
   } catch (error) {
