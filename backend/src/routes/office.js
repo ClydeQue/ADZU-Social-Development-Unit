@@ -100,9 +100,15 @@ router.get("/:officeId/dashboard", authenticateToken, async (req, res) => {
 
       if (activitiesError) throw activitiesError;
       activities = activitiesData || [];
+      
+      // Debug: Log activities and their phase values
+      console.log(`📊 Dashboard for office ${officeId}:`);
+      console.log(`   Total activities: ${activities.length}`);
+      console.log(`   Activities with phases:`, activities.map(a => ({ id: a.id, phase: a.phase, status: a.status })));
     }
 
     // Calculate statistics based on activities (similar to Unit Director dashboard)
+    // Cards use STATUS field for completed/pending, and PHASE field for in_progress
     const statistics = {
       total_programs: programs.length,
       completed: activities.filter((a) => a.status === "completed").length,
@@ -119,6 +125,17 @@ router.get("/:officeId/dashboard", authenticateToken, async (req, res) => {
       completed_programs: programs.filter((p) => p.status === "completed")
         .length,
       upcoming_programs: programs.filter((p) => p.status === "upcoming").length,
+    };
+
+    // Calculate phase distribution for bar chart
+    // Uses the PHASE field from the activity form dropdown:
+    // "Planning", "Implementation", "In Progress", "Completed", "Cancelled"
+    const phaseDistribution = {
+      planning: activities.filter((a) => a.phase && a.phase.toLowerCase() === "planning").length,
+      implementation: activities.filter((a) => a.phase && a.phase.toLowerCase() === "implementation").length,
+      in_progress: activities.filter((a) => a.phase && a.phase.toLowerCase() === "in progress").length,
+      completed: activities.filter((a) => a.phase && a.phase.toLowerCase() === "completed").length,
+      cancelled: activities.filter((a) => a.phase && a.phase.toLowerCase() === "cancelled").length,
     };
 
     // Get all upcoming activities (where end_date >= today) sorted in ascending order
@@ -164,6 +181,7 @@ router.get("/:officeId/dashboard", authenticateToken, async (req, res) => {
       office,
       programs,
       statistics,
+      phaseDistribution,
       upcomingPrograms: upcomingActivities,
     });
   } catch (error) {
@@ -263,14 +281,64 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
           notes,
           created_at,
           updated_at,
-          programs(id, title)
+          programs(id, title, office_id)
         `
         )
         .in("program_id", programIds)
         .order("start_date", { ascending: false });
 
       if (activitiesError) throw activitiesError;
-      activities = activitiesData || [];
+      activities = (activitiesData || []).map(a => ({ ...a, is_partner_activity: false }));
+    }
+
+    // Also fetch activities where this office is listed as an Internal partner
+    if (office.acronym) {
+      const { data: partnerActivities, error: partnerError } = await supabase
+        .from("activities")
+        .select(
+          `
+          id,
+          program_id,
+          activity_name,
+          start_date,
+          end_date,
+          implementing_partners,
+          partner_type,
+          partner_name,
+          objectives,
+          participants_count,
+          venue,
+          budget_amount,
+          budget_type,
+          sdg_number,
+          status,
+          phase,
+          notes,
+          created_at,
+          updated_at,
+          programs(id, title, office_id, offices(id, name, acronym))
+        `
+        )
+        .ilike("partner_type", `%Internal%`)
+        .ilike("partner_name", `%${office.acronym}%`)
+        .order("start_date", { ascending: false });
+
+      if (partnerError) {
+        console.error("Error fetching partner activities:", partnerError);
+      } else if (partnerActivities && partnerActivities.length > 0) {
+        // Filter out activities that already belong to this office's programs
+        // and mark them as partner activities
+        const existingIds = new Set(activities.map(a => a.id));
+        const newPartnerActivities = partnerActivities
+          .filter(a => !existingIds.has(a.id) && !programIds.includes(a.program_id))
+          .map(a => ({ 
+            ...a, 
+            is_partner_activity: true,
+            partner_office: a.programs?.offices || null
+          }));
+        
+        activities = [...activities, ...newPartnerActivities];
+      }
     }
 
     // Calculate comprehensive statistics
@@ -378,8 +446,8 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
     // Recent programs (last 5)
     const recentPrograms = programs.slice(0, 5);
 
-    // Recent activities (last 10)
-    const recentActivities = activities.slice(0, 10);
+    // All activities (was limited to 10, now includes all activities including partner activities)
+    const recentActivities = activities;
 
     // Monthly activity trend (last 6 months)
     const monthlyTrend = [];

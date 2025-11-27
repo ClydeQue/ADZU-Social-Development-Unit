@@ -13,7 +13,7 @@ import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
  * Displays detailed information about an activity in a centered floating modal
  * Design based on the provided mockup with blue header and clean layout
  */
-export default function ActivityDetailModal({ activity, onClose, onDelete, basePath }) {
+export default function ActivityDetailModal({ activity, onClose, onDelete, basePath, isPartnerActivity = false }) {
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -172,28 +172,44 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
       >
         {/* Action Buttons at Top */}
         <div className="flex  items-center justify-end gap-2  ">
-          {/* Delete Button */}
-          <button
-            onClick={handleDeleteClick}
-            className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl
-             hover:bg-[#bc3d2c] active:bg-[#9b2c1a] hover:cursor-pointer transition-colors bg-[#4D49FC]"
-
-            title="Delete Activity"
-          >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {/* Partner Activity Badge */}
+          {isPartnerActivity && (
+            <div className="flex-1">
+              <span 
+                className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-md"
+                style={{ backgroundColor: '#10B981', color: 'white' }}
+              >
+                Partner Activity
+              </span>
+            </div>
+          )}
           
-          {/* Edit Button */}
-          <button
-            onClick={handleEdit}
-            className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
-            bg-[#4D49FC]  text-white text-sm font-bold"
-            title="Edit Activity"
-          >
-            EDIT
-          </button>
+          {/* Delete Button - hidden for partner activities */}
+          {!isPartnerActivity && (
+            <button
+              onClick={handleDeleteClick}
+              className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl
+               hover:bg-[#bc3d2c] active:bg-[#9b2c1a] hover:cursor-pointer transition-colors bg-[#4D49FC]"
+
+              title="Delete Activity"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
+          
+          {/* Edit Button - hidden for partner activities */}
+          {!isPartnerActivity && (
+            <button
+              onClick={handleEdit}
+              className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
+              bg-[#4D49FC]  text-white text-sm font-bold"
+              title="Edit Activity"
+            >
+              EDIT
+            </button>
+          )}
           
           {/* Close Button */}
           <button
@@ -488,22 +504,45 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
               PRINT
             </button>
 
-            {/* View Full Report Button */}
-            {activity.report_url ? (
-              <a
-                href={activity.report_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
-              >
+            {/* View Full Report Button(s) */}
+            {(() => {
+              // Parse report URLs - could be JSON array or single string
+              let reportUrls = [];
+              if (activity.report_url) {
+                try {
+                  const parsed = JSON.parse(activity.report_url);
+                  reportUrls = Array.isArray(parsed) ? parsed.filter(url => url && url.trim()) : [activity.report_url];
+                } catch {
+                  // If not valid JSON, treat as single URL
+                  if (activity.report_url.trim()) {
+                    reportUrls = [activity.report_url];
+                  }
+                }
+              }
               
-                VIEW FULL REPORT
-              </a>
-            ) : (
-              <span className="text-gray-500 text-sm italic">
-                No link provided
-              </span>
-            )}
+              if (reportUrls.length > 0) {
+                return (
+                  <div className="flex flex-wrap gap-2">
+                    {reportUrls.map((url, index) => (
+                      <a
+                        key={index}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+                      >
+                        {reportUrls.length > 1 ? `REPORT ${index + 1}` : 'VIEW FULL REPORT'}
+                      </a>
+                    ))}
+                  </div>
+                );
+              }
+              return (
+                <span className="text-gray-500 text-sm italic">
+                  No link provided
+                </span>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -524,4 +563,5 @@ ActivityDetailModal.propTypes = {
   onDelete: PropTypes.func,
   officeColor: PropTypes.string,
   basePath: PropTypes.string.isRequired,
+  isPartnerActivity: PropTypes.bool,
 };

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import MessageService from "@/services/messageService";
 import ComposeMessageDialog from "./ComposeMessageDialog";
 import MessageThreadDialog from "./MessageThreadDialog";
+import ListSkeleton from "./ListSkeleton";
 
 /**
  * Inbox Dropdown Component
@@ -154,8 +155,8 @@ function InboxDropdown({ onMessageClick }) {
           {/* Messages List */}
           <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
             {isLoading ? (
-              <div className="px-4 py-8 text-center">
-                <p className="text-xs text-gray-400">Loading messages...</p>
+              <div className="px-4 py-4">
+                <ListSkeleton items={4} />
               </div>
             ) : error ? (
               <div className="px-4 py-8 text-center">

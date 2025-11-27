@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import NotificationService from "@/services/notificationService";
 import { getTimeAgo, formatDate } from "@/utils/timeFormat";
 import NotificationModal from "@/components/NotificationModal";
+import ListSkeleton from "./ListSkeleton";
 
 /**
  * Reusable Notification Dropdown Component
@@ -140,8 +141,8 @@ function NotificationDropdown({ onNotificationClick }) {
           {/* Notifications List */}
           <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
             {notificationsLoading ? (
-              <div className="px-4 py-6 text-center text-xs text-gray-400">
-                Loading notifications...
+              <div className="px-4 py-4">
+                <ListSkeleton items={4} />
               </div>
             ) : notificationsError ? (
               <div className="px-4 py-6 text-center">

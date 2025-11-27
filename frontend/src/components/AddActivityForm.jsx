@@ -7,6 +7,9 @@ import { SDG_GOALS, getSDGIcon } from "@/utils/sdgData";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
 
+// Office acronyms for Internal partner type
+const OFFICE_ACRONYMS = ["ACCA", "ACES", "ACLG", "ALTEC", "APC", "CCES"];
+
 /**
  * Reusable Add Activity Form Component
  * Works for all offices based on officeId
@@ -55,7 +58,7 @@ export default function AddActivityForm({
     partners: [{ name: "", type: "", nature: "" }],
     budgets: [{ amount: "", type: "external" }],
     thumbnail: null,
-    reportUrl: "",
+    reportUrls: [""],
     sdgs: [],
   });
 
@@ -126,6 +129,27 @@ export default function AddActivityForm({
     if (formData.budgets.length > 1) {
       const newBudgets = formData.budgets.filter((_, i) => i !== index);
       setFormData((prev) => ({ ...prev, budgets: newBudgets }));
+    }
+  };
+
+  // Report URL handlers
+  const handleReportUrlChange = (index, value) => {
+    const newReportUrls = [...formData.reportUrls];
+    newReportUrls[index] = value;
+    setFormData((prev) => ({ ...prev, reportUrls: newReportUrls }));
+  };
+
+  const addReportUrl = () => {
+    setFormData((prev) => ({
+      ...prev,
+      reportUrls: [...prev.reportUrls, ""],
+    }));
+  };
+
+  const removeReportUrl = (index) => {
+    if (formData.reportUrls.length > 1) {
+      const newReportUrls = formData.reportUrls.filter((_, i) => i !== index);
+      setFormData((prev) => ({ ...prev, reportUrls: newReportUrls }));
     }
   };
 
@@ -223,7 +247,7 @@ export default function AddActivityForm({
         // Submit SDG numbers as array of integers
         sdg_numbers: formData.sdgs.map((id) => parseInt(id)),
         phase: formData.phase || null,
-        report_url: formData.reportUrl || null,
+        report_url: JSON.stringify(formData.reportUrls.filter(url => url.trim() !== '')),
         classification: formData.classification || null,
       };
 
@@ -270,7 +294,7 @@ export default function AddActivityForm({
         onSubmit={handleSubmit}
         className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8"
       >
-        {/* Header with Hashtag and Action Buttons */}
+        {/* Header with Action Buttons */}
         <div className="flex items-center justify-between mb-8">
           <h1
             className="text-4xl font-black font-inter"
@@ -603,7 +627,7 @@ export default function AddActivityForm({
 
                 <div>
                   <div className="text-xs font-semibold text-[#040195] mb-2">
-                    Sex Count
+                    fnt
                   </div>
                   <div className="text-[9px] text-[#8180C9] mb-0.5">Male</div>
                   <input
@@ -679,14 +703,63 @@ export default function AddActivityForm({
                         <div className="text-[9px] text-[#8180C9] mb-0.5">
                           Name
                         </div>
-                        <input
-                          type="text"
-                          value={partner.name}
-                          onChange={(e) =>
-                            handlePartnerChange(index, "name", e.target.value)
-                          }
-                          className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
-                        />
+                        {partner.type === "Internal" ? (
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                toggleDropdown(`partner-name-${index}`)
+                              }
+                              className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
+                            >
+                              <span
+                                className={partner.name ? "" : "text-gray-400"}
+                              >
+                                {partner.name || "Select Office"}
+                              </span>
+                              <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
+                                <svg
+                                  width="9"
+                                  height="10"
+                                  viewBox="0 0 9 8"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z"
+                                    fill="white"
+                                  />
+                                </svg>
+                              </div>
+                            </button>
+                            {dropdownOpen[`partner-name-${index}`] && (
+                              <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg max-h-40 overflow-y-auto">
+                                {OFFICE_ACRONYMS.map((acronym) => (
+                                  <button
+                                    key={acronym}
+                                    type="button"
+                                    onClick={() => {
+                                      handlePartnerChange(index, "name", acronym);
+                                      closeDropdown(`partner-name-${index}`);
+                                    }}
+                                    className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                                  >
+                                    {acronym}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            value={partner.name}
+                            onChange={(e) =>
+                              handlePartnerChange(index, "name", e.target.value)
+                            }
+                            className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
+                          />
+                        )}
                       </div>
                       <div>
                         <div className="text-[9px] text-[#8180C9] mb-0.5">
@@ -723,6 +796,7 @@ export default function AddActivityForm({
                           {dropdownOpen[`partner-type-${index}`] && (
                             <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg">
                               {[
+                                "Internal",
                                 "Government",
                                 "Non-Government",
                                 "Institutional",
@@ -732,6 +806,10 @@ export default function AddActivityForm({
                                   type="button"
                                   onClick={() => {
                                     handlePartnerChange(index, "type", type);
+                                    // Clear name when switching to/from Internal
+                                    if (type === "Internal" || partner.type === "Internal") {
+                                      handlePartnerChange(index, "name", "");
+                                    }
                                     closeDropdown(`partner-type-${index}`);
                                   }}
                                   className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
@@ -980,23 +1058,54 @@ export default function AddActivityForm({
                 </div>
               </div>
 
-              {/* Reports Section */}
+              {/* Reports Section - Multiple URLs */}
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  FULL REPORT URL
+                  FULL REPORT URL(S)
                 </label>
-                <div className="text-[9px] text-[#8180C9] mb-0.5">
-                  Paste report link
+                <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
+                  {formData.reportUrls.map((url, index) => (
+                    <div key={index} className="flex gap-1.5 items-center">
+                      <div className="flex-1">
+                        <div className="text-[9px] text-[#8180C9] mb-0.5">
+                          Link {index + 1}
+                        </div>
+                        <input
+                          type="url"
+                          value={url}
+                          onChange={(e) => handleReportUrlChange(index, e.target.value)}
+                          className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
+                          placeholder="https://example.com/report.pdf"
+                        />
+                      </div>
+                      <div className="flex items-end pb-0.5">
+                        {index === formData.reportUrls.length - 1 ? (
+                          <button
+                            type="button"
+                            onClick={addReportUrl}
+                            className="p-1.5 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] transition-colors group"
+                            title="Add Link"
+                          >
+                            <svg className="w-3 h-3" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9.41477 25.1818V0.500017H16.2841V25.1818H9.41477ZM0.5 16.2841V9.41479H25.1818V16.2841H0.5Z" fill="white" />
+                            </svg>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => removeReportUrl(index)}
+                            className="p-1.5 rounded-full bg-red-500 hover:bg-red-600 transition-colors group"
+                            title="Remove Link"
+                          >
+                            <svg className="w-3 h-3" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M14.9997 8.66504C15.736 8.66504 16.3335 9.26182 16.3337 9.99805C16.3337 10.7344 15.7361 11.332 14.9997 11.332H4.99969C4.26347 11.3319 3.66669 10.7343 3.66669 9.99805C3.66686 9.26193 4.26357 8.66522 4.99969 8.66504H14.9997Z" fill="white" stroke="white" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <input
-                  type="url"
-                  value={formData.reportUrl}
-                  onChange={(e) =>
-                    handleInputChange("reportUrl", e.target.value)
-                  }
-                  className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
-                  placeholder="https://example.com/report.pdf"
-                />
               </div>
 
               <div>

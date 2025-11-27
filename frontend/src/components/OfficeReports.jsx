@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import OfficeService from "@/services/officeService";
 import ActivityDetailModal from "./ActivityDetailModal";
 import CardGridSkeleton from "@/components/CardGridSkeleton";
+import ReportModalSkeleton from "@/components/ReportModalSkeleton";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
 
@@ -21,6 +22,7 @@ export default function OfficeReports({
   const [deleteMode, setDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedActivityId, setSelectedActivityId] = useState(null);
+  const [isSelectedPartnerActivity, setIsSelectedPartnerActivity] = useState(false);
   const [sortBy, setSortBy] = useState("");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [searchParams] = useSearchParams();
@@ -51,7 +53,7 @@ export default function OfficeReports({
   });
 
   // Fetch detailed activity data when an activity is selected
-  const { data: selectedActivity } = useQuery({
+  const { data: selectedActivity, isLoading: isLoadingActivity } = useQuery({
     queryKey: ["activity", selectedActivityId],
     queryFn: () => OfficeService.getActivity(selectedActivityId),
     enabled: !!selectedActivityId,
@@ -145,6 +147,8 @@ export default function OfficeReports({
           phase: activity.phase,
           startDate: activity.start_date,
           endDate: activity.end_date,
+          isPartnerActivity: activity.is_partner_activity || false,
+          partnerOffice: activity.partner_office || null,
         };
       }) || [];
 
@@ -170,15 +174,17 @@ export default function OfficeReports({
   }, [projectsData, sortBy]);
 
   // Handle clicking on a project card
-  const handleProjectClick = (projectId) => {
+  const handleProjectClick = (projectId, isPartnerActivity = false) => {
     if (!deleteMode) {
       setSelectedActivityId(projectId);
+      setIsSelectedPartnerActivity(isPartnerActivity);
     }
   };
 
   // Close the activity detail modal
   const closeModal = () => {
     setSelectedActivityId(null);
+    setIsSelectedPartnerActivity(false);
   };
 
   if (isLoading) {
@@ -188,14 +194,19 @@ export default function OfficeReports({
   return (
     <>
       {/* Activity Detail Modal */}
-      {selectedActivityId && selectedActivity && (
-        <ActivityDetailModal
-          activity={selectedActivity}
-          onClose={closeModal}
-          onDelete={handleDeleteSingle}
-          officeColor={officeColor}
-          basePath={basePath}
-        />
+      {selectedActivityId && (
+        isLoadingActivity ? (
+          <ReportModalSkeleton onClose={closeModal} />
+        ) : selectedActivity ? (
+          <ActivityDetailModal
+            activity={selectedActivity}
+            onClose={closeModal}
+            onDelete={isSelectedPartnerActivity ? null : handleDeleteSingle}
+            officeColor={officeColor}
+            basePath={basePath}
+            isPartnerActivity={isSelectedPartnerActivity}
+          />
+        ) : null
       )}
 
       <div
@@ -272,21 +283,22 @@ export default function OfficeReports({
 
                 return (
                   <div
-                    key={project.id}
+                      key={project.id}
                     className="relative rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200 shadow-lg h-52"
                     style={{
-                      border: deleteMode
+                      border: deleteMode && !project.isPartnerActivity
                         ? "5px solid #FF0022"
                         : "0px solid transparent",
+                      opacity: deleteMode && project.isPartnerActivity ? 0.5 : 1,
                     }}
                     onClick={() =>
                       deleteMode
-                        ? toggleItemSelection(project.id)
-                        : handleProjectClick(project.id)
+                        ? !project.isPartnerActivity && toggleItemSelection(project.id)
+                        : handleProjectClick(project.id, project.isPartnerActivity)
                     }
                   >
-                    {/* Checkbox in Delete Mode */}
-                    {deleteMode && (
+                    {/* Checkbox in Delete Mode - hide for partner activities */}
+                    {deleteMode && !project.isPartnerActivity && (
                       <div className="absolute top-2 right-2 z-10">
                         <div
                           className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
@@ -309,6 +321,19 @@ export default function OfficeReports({
                             </svg>
                           )}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Partner Activity Badge */}
+                    {project.isPartnerActivity && !deleteMode && (
+                      <div className="absolute top-2 left-2 z-10">
+                        <span 
+                          className="px-2 py-1 rounded-full text-[0.6rem] font-bold uppercase tracking-wide shadow-md"
+                          style={{ backgroundColor: '#10B981', color: 'white' }}
+                          title={`Partner activity from ${project.partnerOffice?.acronym || 'another office'}`}
+                        >
+                          Partner
+                        </span>
                       </div>
                     )}
 
