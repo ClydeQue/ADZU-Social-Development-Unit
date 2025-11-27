@@ -7,6 +7,7 @@ import { SDG_GOALS, getSDGIcon } from "@/utils/sdgData";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
 import FormSkeleton from "@/components/FormSkeleton";
+import DatePicker from "@/components/DatePicker";
 
 // Office acronyms for Internal partner type
 const OFFICE_ACRONYMS = ["ACCA", "ACES", "ACLG", "ALTEC", "APC", "CCES"];
@@ -396,26 +397,26 @@ export default function EditActivityForm({
       `}</style>
       <form
         onSubmit={handleSubmit}
-        className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8"
+        className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8"
       >
         {/* Header with Action Buttons */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: officeColor }}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: officeColor }}>
             {formData.projectName || "Edit Activity"}
           </h1>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
            
             <button
               type="button"
               onClick={() => navigate(`${basePath}/projects`)}
-              className="px-4 py-1.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] text-sm font-semibold hover:bg-gray-100 hover:cursor-pointer transition-colors"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] text-xs sm:text-sm font-semibold hover:bg-gray-100 hover:cursor-pointer transition-colors"
             >
               CANCEL
             </button>
             <button
               type="submit"
               disabled={updateMutation.isLoading}
-              className="px-4 py-1.5 rounded-lg bg-[#4D49FC] text-white text-sm font-semibold hover:opacity-80 hover:cursor-pointer transition-opacity disabled:opacity-50"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg bg-[#4D49FC] text-white text-xs sm:text-sm font-semibold hover:opacity-80 hover:cursor-pointer transition-opacity disabled:opacity-50"
             >
               {updateMutation.isLoading ? "UPDATING..." : "UPDATE"}
             </button>
@@ -425,7 +426,7 @@ export default function EditActivityForm({
         {/* Form Grid Layout */}
         <div className="space-y-3">
           {/* Row 1: Project Name, Program/Component, Status */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
                 Project Name
@@ -520,8 +521,8 @@ export default function EditActivityForm({
           </div>
 
           {/* Row 2: Description (col-span-2), Phase */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div className="lg:col-span-2">
               <label className="block text-xs font-bold text-[#040195] mb-1">
                 Description
               </label>
@@ -605,7 +606,7 @@ export default function EditActivityForm({
           </div>
 
           {/* Row 3: Objectives, Participant Demographics, Dates */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
                 Objectives
@@ -662,37 +663,29 @@ export default function EditActivityForm({
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   Inception
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={formData.initiation}
-                  onChange={(e) =>
-                    handleInputChange("initiation", e.target.value)
-                  }
-                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none"
+                  onChange={(value) => handleInputChange("initiation", value)}
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   Implementation
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={formData.implementation}
-                  onChange={(e) =>
-                    handleInputChange("implementation", e.target.value)
-                  }
-                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none"
+                  onChange={(value) => handleInputChange("implementation", value)}
                 />
               </div>
             </div>
           </div>
 
           {/* Rows 4-6: Venue/Partners/Budget + SDG */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {/* Left side: 2 columns */}
-            <div className="col-span-2 space-y-2">
+            <div className="lg:col-span-2 space-y-2">
               {/* Venue rows */}
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
                   <label className="block text-xs font-semibold text-[#040195] mb-2">Venue</label>
                   <label className="block text-[9px] text-[#8180C9] mb-0.5">Street / Room / Building</label>
@@ -729,7 +722,7 @@ export default function EditActivityForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
                   <label className="block text-xs font-semibold text-[#040195] mb-2">Municipality / City</label>
                   <label className="block text-[9px] text-[#8180C9] mb-0.5">City</label>
@@ -771,11 +764,11 @@ export default function EditActivityForm({
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   Partners
                 </label>
-                <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
+                <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-2 sm:space-y-1.5">
                   {formData.partners.map((partner, index) => (
                     <div
                       key={index}
-                      className="grid grid-cols-[1fr_1fr_1fr_auto] gap-1.5"
+                      className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_1fr_auto] gap-1.5"
                     >
                       <div>
                         <div className="text-[9px] text-[#8180C9] mb-0.5">
@@ -989,7 +982,7 @@ export default function EditActivityForm({
                   {formData.budgets.map((budget, index) => (
                     <div
                       key={index}
-                      className="grid grid-cols-[1fr_1fr_auto] gap-2"
+                      className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-2"
                     >
                       <div>
                         <div className="text-[9px] text-[#8180C9] mb-0.5">

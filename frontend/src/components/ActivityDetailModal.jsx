@@ -171,12 +171,12 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         {/* Action Buttons at Top */}
-        <div className="flex  items-center justify-end gap-2  ">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {/* Partner Activity Badge */}
           {isPartnerActivity && (
             <div className="flex-1">
               <span 
-                className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-md"
+                className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wide shadow-md"
                 style={{ backgroundColor: '#10B981', color: 'white' }}
               >
                 Partner Activity
@@ -188,12 +188,12 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           {!isPartnerActivity && (
             <button
               onClick={handleDeleteClick}
-              className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl
+              className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl
                hover:bg-[#bc3d2c] active:bg-[#9b2c1a] hover:cursor-pointer transition-colors bg-[#4D49FC]"
 
               title="Delete Activity"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
@@ -203,8 +203,8 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           {!isPartnerActivity && (
             <button
               onClick={handleEdit}
-              className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
-              bg-[#4D49FC]  text-white text-sm font-bold"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
+              bg-[#4D49FC] text-white text-xs sm:text-sm font-bold"
               title="Edit Activity"
             >
               EDIT
@@ -214,11 +214,11 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="w-10 h-10 sm:w-8 sm:h-8 flex ml-2 items-center justify-center rounded-full 
+            className="w-8 h-8 sm:w-10 sm:h-10 flex ml-1 sm:ml-2 items-center justify-center rounded-full 
             bg-white ring-3 ring-[#4D49FC] hover:cursor-pointer hover:bg-gray-300 transition-colors"
             title="Close"
           >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#4D49FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#4D49FC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -229,17 +229,30 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           className="relative sm:p-2 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between"
         >
           <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
-            {/* Logo/Icon Container */}
-            <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
-              <img 
-                src={activity.image_url || '/reports/default.webp'} 
-                alt={activity.activity_name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/reports/default.webp';
-                }}
-              />
+            {/* Logo/Icon Container with Phase Pill */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+                <img 
+                  src={activity.image_url || '/reports/default.webp'} 
+                  alt={activity.activity_name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/reports/default.webp';
+                  }}
+                />
+              </div>
+              {/* Phase Pill - Split Design */}
+              {activity.phase && (
+                <div className="w-20 sm:w-32 flex rounded-full overflow-hidden border-2 border-[#4D49FC]">
+                  <span className="flex-1 bg-white text-[#4D49FC] text-[7px] sm:text-[9px] font-semibold py-0.5 text-center">
+                    PHASE
+                  </span>
+                  <span className="flex-1 bg-[#4D49FC] text-white text-[7px] sm:text-[9px] font-bold py-0.5 text-center uppercase">
+                    {activity.phase}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Program Title and Description */}
@@ -256,7 +269,7 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
                   {activity.programs?.offices?.acronym || activity.programs?.offices?.name || 'Office'}
                 </span>
               </div>
-              <h2 className="text-[#4D49FC]  w-80 lg:w-100  text-xl sm:text-3xl font-black mb-2 leading-tight uppercase">
+              <h2 className="text-[#4D49FC] w-full sm:w-80 lg:w-100 text-lg sm:text-xl md:text-3xl font-black mb-2 leading-tight uppercase">
                 {activity.activity_name}
               </h2>
               <div className="text-[#040195] text-xs sm:text-sm font-semibold mb-1">
@@ -481,11 +494,11 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 mt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4">
             {/* Print Button */}
             <button
               onClick={handlePrint}
-              className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity bg-[#4D49FC] text-white text-sm font-bold"
+              className="px-3 sm:px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity bg-[#4D49FC] text-white text-xs sm:text-sm font-bold"
               title="Print Activity"
             >
               <svg
@@ -522,14 +535,14 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
               
               if (reportUrls.length > 0) {
                 return (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-col sm:flex-row flex-wrap gap-2">
                     {reportUrls.map((url, index) => (
                       <a
                         key={index}
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-[#4D49FC] text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-[#3d39cc] hover:cursor-pointer transition-colors flex items-center justify-center gap-2 shadow-lg"
                       >
                         {reportUrls.length > 1 ? `REPORT ${index + 1}` : 'VIEW FULL REPORT'}
                       </a>

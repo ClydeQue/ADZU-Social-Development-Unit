@@ -214,13 +214,13 @@ export default function OfficeReports({
         style={{ fontFamily: "Inter, sans-serif" }}
       >
         {/* Sort Dropdown */}
-        <div className="flex gap-3 items-center mb-3">
+        <div className="flex gap-2 sm:gap-3 items-center mb-2 sm:mb-3">
           <div className="relative">
             <button
               onClick={() => setShowSortDropdown(!showSortDropdown)}
-              className={`bg-white px-6 py-2.5 pr-10 rounded-full ${
+              className={`bg-white px-4 sm:px-6 py-2 sm:py-2.5 pr-8 sm:pr-10 rounded-full ${
                 showSortDropdown ? "ring-2 ring-[#4D49FC]" : "ring-0"
-              } text-sm font-semibold text-[#040195] border-none shadow-md cursor-pointer flex items-center gap-2`}
+              } text-xs sm:text-sm font-semibold text-[#040195] border-none shadow-md cursor-pointer flex items-center gap-2`}
               style={{ fontFamily: "Inter, sans-serif" }}
             >
               <span>
@@ -275,16 +275,16 @@ export default function OfficeReports({
 
         {/* Projects Grid with Action Buttons on Right */}
         {projects.length > 0 ? (
-          <div className="flex gap-4 h-full">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 h-full">
             {/* Grid Container - Full Height with padding to prevent border cutoff */}
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 auto-rows-min content-start overflow-auto p-1">
+            <div className="flex-1 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 auto-rows-min content-start overflow-auto p-1">
               {projects.map((project) => {
                 const isSelected = selectedItems.includes(project.id);
 
                 return (
                   <div
                       key={project.id}
-                    className="relative rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200 shadow-lg h-52"
+                    className="relative rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200 shadow-lg h-40 sm:h-48 lg:h-52"
                     style={{
                       border: deleteMode && !project.isPartnerActivity
                         ? "5px solid #FF0022"
@@ -370,15 +370,15 @@ export default function OfficeReports({
               })}
             </div>
 
-            {/* Vertical Action Buttons - Right Side */}
-            <div className="flex flex-col gap-2">
+            {/* Action Buttons - Horizontal on mobile, Vertical on desktop */}
+            <div className="flex flex-row sm:flex-col gap-2 justify-center sm:justify-start">
               <button
                 onClick={() => navigate(`${basePath}/add-activity`)}
-                className="p-3 text-white font-bold hover:cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity shadow-lg flex items-center justify-center"
+                className="p-2.5 sm:p-3 text-white font-bold hover:cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity shadow-lg flex items-center justify-center"
                 style={{ backgroundColor: "#4D49FC", borderRadius: "10px" }}
                 title="Create New Project"
               >
-                <img src="/icons/add.svg" alt="Add" className="w-5 h-5" />
+                <img src="/icons/add.svg" alt="Add" className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={toggleDeleteMode}
@@ -427,26 +427,26 @@ export default function OfficeReports({
             </div>
           </div>
         ) : (
-          <div className="flex gap-4 h-full">
-            <div className="flex-1 flex flex-col items-center justify-center py-20 px-4">
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 h-full">
+            <div className="flex-1 flex flex-col items-center justify-center py-12 sm:py-20 px-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
                 No Activities Found
               </h3>
-              <p className="text-red-600 text-sm text-center max-w-md">
+              <p className="text-red-600 text-xs sm:text-sm text-center max-w-md">
                 If you think this is an error, please contact your system
                 administrator.
               </p>
             </div>
 
-            {/* Vertical Action Buttons - Right Side */}
-            <div className="flex flex-col gap-2">
+            {/* Action Buttons - Horizontal on mobile, Vertical on desktop */}
+            <div className="flex flex-row sm:flex-col gap-2 justify-center sm:justify-start">
               <button
                 onClick={() => navigate(`${basePath}/add-activity`)}
-                className="p-3 text-white font-bold hover:cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity shadow-lg flex items-center justify-center"
+                className="p-2.5 sm:p-3 text-white font-bold hover:cursor-pointer hover:opacity-90 active:opacity-75 transition-opacity shadow-lg flex items-center justify-center"
                 style={{ backgroundColor: "#4D49FC", borderRadius: "10px" }}
                 title="Create New Project"
               >
-                <img src="/icons/add.svg" alt="Add" className="w-5 h-5" />
+                <img src="/icons/add.svg" alt="Add" className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
