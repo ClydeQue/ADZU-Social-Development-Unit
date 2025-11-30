@@ -237,16 +237,16 @@ export default function ReportDetailModal({ report, activity, onClose }) {
           }
         `}</style>
         {/* Action Buttons at Top */}
-        <div className="flex items-center justify-end gap-2 mb-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 mb-2">
           {/* Print Button */}
           <button
             onClick={handlePrint}
-            className="px-4 py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
-            bg-[#4D49FC] text-white text-sm font-bold"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center rounded-xl hover:opacity-90 hover:cursor-pointer transition-opacity
+            bg-[#4D49FC] text-white text-xs sm:text-sm font-bold"
             title="Print Report"
           >
             <svg
-              className="w-4 h-4 mr-2"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -264,12 +264,12 @@ export default function ReportDetailModal({ report, activity, onClose }) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="w-10 h-10 sm:w-8 sm:h-8 flex ml-2 items-center justify-center rounded-full 
+            className="w-8 h-8 sm:w-10 sm:h-10 flex ml-1 sm:ml-2 items-center justify-center rounded-full 
             bg-white ring-3 ring-[#4D49FC] hover:cursor-pointer hover:bg-gray-300 transition-colors"
             title="Close"
           >
             <svg
-              className="w-5 h-5 sm:w-6 sm:h-6 text-[#4D49FC]"
+              className="w-4 h-4 sm:w-5 sm:h-5 text-[#4D49FC]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -287,17 +287,30 @@ export default function ReportDetailModal({ report, activity, onClose }) {
         {/* Header Section with Program Logo/Image */}
         <div className="relative sm:p-2 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between">
           <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
-            {/* Logo/Icon Container */}
-            <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
-              <img
-                src={activity.image_url || "/reports/default.webp"}
-                alt={activity.activity_name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/reports/default.webp";
-                }}
-              />
+            {/* Logo/Icon Container with Phase Pill */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+                <img
+                  src={activity.image_url || "/reports/default.webp"}
+                  alt={activity.activity_name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/reports/default.webp";
+                  }}
+                />
+              </div>
+              {/* Phase Pill - Split Design */}
+              {activity.phase && (
+                <div className="w-20 sm:w-32 flex rounded-full overflow-hidden border-2 border-[#4D49FC] shadow-sm">
+                  <span className="flex-1 bg-[#4D49FC] text-white text-[7px] sm:text-[9px] font-bold py-0.5 text-center">
+                    PHASE
+                  </span>
+                  <span className="flex-1 bg-white text-[#4D49FC] text-[7px] sm:text-[9px] font-bold py-0.5 text-center uppercase">
+                    {activity.phase}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Program Title and Description */}
@@ -314,7 +327,7 @@ export default function ReportDetailModal({ report, activity, onClose }) {
                   {report.office}
                 </span>
               </div>
-              <h2 className="text-[#4D49FC] w-80 lg:w-100 text-xl sm:text-3xl font-black mb-2 leading-tight uppercase">
+              <h2 className="text-[#4D49FC] w-full sm:w-80 lg:w-100 text-lg sm:text-xl md:text-3xl font-black mb-2 leading-tight uppercase">
                 {activity.activity_name}
               </h2>
               <div className="text-[#040195] text-xs sm:text-sm font-semibold mb-1">
@@ -676,35 +689,57 @@ export default function ReportDetailModal({ report, activity, onClose }) {
             </>
           )}
 
-          {/* View Full Report Button */}
-          {activity.report_url ? (
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => window.open(activity.report_url, "_blank")}
-                className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-                VIEW FULL REPORT
-              </button>
-            </div>
-          ) : (
-            <div className="flex justify-end mt-6">
-              <span className="text-gray-500 text-sm italic">
-                No link provided
-              </span>
-            </div>
-          )}
+          {/* View Full Report Button(s) */}
+          {(() => {
+            // Parse report URLs - could be JSON array or single string
+            let reportUrls = [];
+            if (activity.report_url) {
+              try {
+                const parsed = JSON.parse(activity.report_url);
+                reportUrls = Array.isArray(parsed) ? parsed.filter(url => url && url.trim()) : [activity.report_url];
+              } catch {
+                // If not valid JSON, treat as single URL
+                if (activity.report_url.trim()) {
+                  reportUrls = [activity.report_url];
+                }
+              }
+            }
+            
+            if (reportUrls.length > 0) {
+              return (
+                <div className="flex flex-wrap justify-end gap-2 mt-6">
+                  {reportUrls.map((url, index) => (
+                    <button
+                      key={index}
+                      onClick={() => window.open(url, "_blank")}
+                      className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      {reportUrls.length > 1 ? `REPORT ${index + 1}` : 'VIEW FULL REPORT'}
+                    </button>
+                  ))}
+                </div>
+              );
+            }
+            return (
+              <div className="flex justify-end mt-6">
+                <span className="text-gray-500 text-sm italic">
+                  No link provided
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 

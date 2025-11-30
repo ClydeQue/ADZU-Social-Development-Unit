@@ -113,8 +113,8 @@ export default function MessageThreadDialog({ contact, onClose }) {
   };
 
   return (
-    <div className="absolute right-0 top-full mt-2 z-50 w-[90vw] sm:w-[500px] shadow-2xl">
-      <div className="bg-white rounded-xl overflow-hidden flex flex-col max-h-[80vh] border border-gray-200">
+    <div className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:top-full sm:mt-2 z-50 w-full sm:w-[500px] shadow-2xl">
+      <div className="bg-white sm:rounded-xl overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[80vh] border-0 sm:border border-gray-200">
         {/* Header */}
         <div className="bg-[#E8E7FF] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">

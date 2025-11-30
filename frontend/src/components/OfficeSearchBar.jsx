@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import OfficeService from "@/services/officeService";
 import ActivityDetailModal from "./ActivityDetailModal";
+import ReportModalSkeleton from "@/components/ReportModalSkeleton";
 
 /**
  * Office Search Bar Component
@@ -264,13 +265,17 @@ export default function OfficeSearchBar({ basePath, officeColor = "#4D49FC" }) {
       </div>
 
       {/* Modal - Same pattern as OfficeReports */}
-      {selectedActivityId && selectedActivity && !isLoadingActivity && (
-        <ActivityDetailModal
-          activity={selectedActivity}
-          onClose={handleCloseModal}
-          officeColor={officeColor}
-          basePath={basePath}
-        />
+      {selectedActivityId && (
+        isLoadingActivity ? (
+          <ReportModalSkeleton onClose={handleCloseModal} />
+        ) : selectedActivity ? (
+          <ActivityDetailModal
+            activity={selectedActivity}
+            onClose={handleCloseModal}
+            officeColor={officeColor}
+            basePath={basePath}
+          />
+        ) : null
       )}
     </>
   );

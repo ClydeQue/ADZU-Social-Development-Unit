@@ -6,6 +6,11 @@ import PropTypes from "prop-types";
 import { SDG_GOALS, getSDGIcon } from "@/utils/sdgData";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
+import FormSkeleton from "@/components/FormSkeleton";
+import DatePicker from "@/components/DatePicker";
+
+// Office acronyms for Internal partner type
+const OFFICE_ACRONYMS = ["ACCA", "ACES", "ACLG", "ALTEC", "APC", "CCES"];
 
 /**
  * Edit Activity Form Component
@@ -63,7 +68,7 @@ export default function EditActivityForm({
     partners: [{ name: "", type: "", nature: "" }],
     budgets: [{ amount: "", type: "external" }],
     thumbnail: null,
-    reportUrl: "",
+    reportUrls: [""],
     sdgs: [],
   });
 
@@ -136,7 +141,19 @@ export default function EditActivityForm({
         partners:
           partners.length > 0 ? partners : [{ name: "", type: "", nature: "" }],
         budgets,
-        reportUrl: activity.report_url || "",
+        reportUrls: (() => {
+          // Parse report URLs from JSON string or single value
+          if (activity.report_url) {
+            try {
+              const parsed = JSON.parse(activity.report_url);
+              return Array.isArray(parsed) && parsed.length > 0 ? parsed : [""];
+            } catch {
+              // If not valid JSON, treat as single URL
+              return [activity.report_url];
+            }
+          }
+          return [""];
+        })(),
         sdgs,
       });
     }
@@ -209,6 +226,27 @@ export default function EditActivityForm({
     if (formData.budgets.length > 1) {
       const newBudgets = formData.budgets.filter((_, i) => i !== index);
       setFormData((prev) => ({ ...prev, budgets: newBudgets }));
+    }
+  };
+
+  // Report URL handlers
+  const handleReportUrlChange = (index, value) => {
+    const newReportUrls = [...formData.reportUrls];
+    newReportUrls[index] = value;
+    setFormData((prev) => ({ ...prev, reportUrls: newReportUrls }));
+  };
+
+  const addReportUrl = () => {
+    setFormData((prev) => ({
+      ...prev,
+      reportUrls: [...prev.reportUrls, ""],
+    }));
+  };
+
+  const removeReportUrl = (index) => {
+    if (formData.reportUrls.length > 1) {
+      const newReportUrls = formData.reportUrls.filter((_, i) => i !== index);
+      setFormData((prev) => ({ ...prev, reportUrls: newReportUrls }));
     }
   };
 
@@ -305,7 +343,7 @@ export default function EditActivityForm({
         // Submit SDG numbers as array of integers
         sdg_numbers: formData.sdgs.map((id) => parseInt(id)),
         phase: formData.phase || null,
-        report_url: formData.reportUrl || null,
+        report_url: JSON.stringify(formData.reportUrls.filter(url => url.trim() !== '')),
         classification: formData.classification || null,
       };
 
@@ -319,12 +357,8 @@ export default function EditActivityForm({
     }
   };
 
-  if (activityLoading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-[#040195] text-lg">Loading activity...</div>
-      </div>
-    );
+  if (activityLoading || programsLoading) {
+    return <FormSkeleton />;
   }
 
   if (!activity) {
@@ -363,26 +397,26 @@ export default function EditActivityForm({
       `}</style>
       <form
         onSubmit={handleSubmit}
-        className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8"
+        className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8"
       >
-        {/* Header with Hashtag and Action Buttons */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: officeColor }}>
-            #{formData.projectName || "Edit Activity"}
+        {/* Header with Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: officeColor }}>
+            {formData.projectName || "Edit Activity"}
           </h1>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
            
             <button
               type="button"
               onClick={() => navigate(`${basePath}/projects`)}
-              className="px-4 py-1.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] text-sm font-semibold hover:bg-gray-100 hover:cursor-pointer transition-colors"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg border-2 border-[#4D49FC] text-[#4D49FC] text-xs sm:text-sm font-semibold hover:bg-gray-100 hover:cursor-pointer transition-colors"
             >
               CANCEL
             </button>
             <button
               type="submit"
               disabled={updateMutation.isLoading}
-              className="px-4 py-1.5 rounded-lg bg-[#4D49FC] text-white text-sm font-semibold hover:opacity-80 hover:cursor-pointer transition-opacity disabled:opacity-50"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg bg-[#4D49FC] text-white text-xs sm:text-sm font-semibold hover:opacity-80 hover:cursor-pointer transition-opacity disabled:opacity-50"
             >
               {updateMutation.isLoading ? "UPDATING..." : "UPDATE"}
             </button>
@@ -392,7 +426,7 @@ export default function EditActivityForm({
         {/* Form Grid Layout */}
         <div className="space-y-3">
           {/* Row 1: Project Name, Program/Component, Status */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
                 Project Name
@@ -487,8 +521,8 @@ export default function EditActivityForm({
           </div>
 
           {/* Row 2: Description (col-span-2), Phase */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div className="lg:col-span-2">
               <label className="block text-xs font-bold text-[#040195] mb-1">
                 Description
               </label>
@@ -572,7 +606,7 @@ export default function EditActivityForm({
           </div>
 
           {/* Row 3: Objectives, Participant Demographics, Dates */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
                 Objectives
@@ -629,37 +663,29 @@ export default function EditActivityForm({
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   Inception
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={formData.initiation}
-                  onChange={(e) =>
-                    handleInputChange("initiation", e.target.value)
-                  }
-                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none"
+                  onChange={(value) => handleInputChange("initiation", value)}
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   Implementation
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={formData.implementation}
-                  onChange={(e) =>
-                    handleInputChange("implementation", e.target.value)
-                  }
-                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none"
+                  onChange={(value) => handleInputChange("implementation", value)}
                 />
               </div>
             </div>
           </div>
 
           {/* Rows 4-6: Venue/Partners/Budget + SDG */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {/* Left side: 2 columns */}
-            <div className="col-span-2 space-y-2">
+            <div className="lg:col-span-2 space-y-2">
               {/* Venue rows */}
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
                   <label className="block text-xs font-semibold text-[#040195] mb-2">Venue</label>
                   <label className="block text-[9px] text-[#8180C9] mb-0.5">Street / Room / Building</label>
@@ -696,7 +722,7 @@ export default function EditActivityForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
                   <label className="block text-xs font-semibold text-[#040195] mb-2">Municipality / City</label>
                   <label className="block text-[9px] text-[#8180C9] mb-0.5">City</label>
@@ -738,24 +764,82 @@ export default function EditActivityForm({
                 <label className="block text-xs font-bold text-[#040195] mb-1">
                   Partners
                 </label>
-                <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
+                <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-2 sm:space-y-1.5">
                   {formData.partners.map((partner, index) => (
                     <div
                       key={index}
-                      className="grid grid-cols-[1fr_1fr_1fr_auto] gap-1.5"
+                      className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_1fr_auto] gap-1.5"
                     >
                       <div>
                         <div className="text-[9px] text-[#8180C9] mb-0.5">
                           Name
                         </div>
-                        <input
-                          type="text"
-                          value={partner.name}
-                          onChange={(e) =>
-                            handlePartnerChange(index, "name", e.target.value)
-                          }
-                          className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
-                        />
+                        {partner.type === "Internal" ? (
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                toggleDropdown(`partner-name-${index}`)
+                              }
+                              className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
+                            >
+                              <span
+                                className={partner.name ? "" : "text-gray-400"}
+                              >
+                                {partner.name || "Select Office"}
+                              </span>
+                              <div className="w-5 h-5 rounded-sm bg-[#040195] flex items-center justify-center flex-shrink-0">
+                                <svg
+                                  width="10"
+                                  height="10"
+                                  viewBox="0 0 9 8"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M4.8985 6.75C4.5136 7.41667 3.55135 7.41667 3.16645 6.75L0.135357 1.5C-0.249543 0.833334 0.231582 0 1.00138 0L7.06356 0C7.83336 0 8.31449 0.833333 7.92959 1.5L4.8985 6.75Z"
+                                    fill="white"
+                                  />
+                                </svg>
+                              </div>
+                            </button>
+                            {dropdownOpen[`partner-name-${index}`] && (
+                              <div className="absolute z-50 w-full mt-1 hover:cursor-pointer bg-white border border-[#8180C9] rounded-[11px] shadow-lg max-h-40 overflow-y-auto">
+                                {OFFICE_ACRONYMS.map((acronym) => (
+                                  <button
+                                    key={acronym}
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                    }}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handlePartnerChange(index, "name", acronym);
+                                      setTimeout(
+                                        () => closeDropdown(`partner-name-${index}`),
+                                        0
+                                      );
+                                    }}
+                                    className="w-full px-3 py-2 text-xs text-left text-[#040195] hover:bg-[#F5F5FF] cursor-pointer transition-colors first:rounded-t-[11px] last:rounded-b-[11px]"
+                                  >
+                                    {acronym}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            value={partner.name}
+                            onChange={(e) =>
+                              handlePartnerChange(index, "name", e.target.value)
+                            }
+                            className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
+                          />
+                        )}
                       </div>
                       <div>
                         <div className="text-[9px] text-[#8180C9] mb-0.5">
@@ -792,6 +876,7 @@ export default function EditActivityForm({
                           {dropdownOpen[`partner-type-${index}`] && (
                             <div className="absolute z-50 w-full mt-1 bg-white border border-[#8180C9] rounded-[11px] shadow-lg max-h-40 overflow-y-auto">
                               {[
+                                "Internal",
                                 "Government",
                                 "Non-Government",
                                 "Institutional",
@@ -807,6 +892,10 @@ export default function EditActivityForm({
                                     e.preventDefault();
                                     e.stopPropagation();
                                     handlePartnerChange(index, "type", type);
+                                    // Clear name when switching to/from Internal
+                                    if (type === "Internal" || partner.type === "Internal") {
+                                      handlePartnerChange(index, "name", "");
+                                    }
                                     setTimeout(
                                       () =>
                                         closeDropdown(`partner-type-${index}`),
@@ -893,7 +982,7 @@ export default function EditActivityForm({
                   {formData.budgets.map((budget, index) => (
                     <div
                       key={index}
-                      className="grid grid-cols-[1fr_1fr_auto] gap-2"
+                      className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-2"
                     >
                       <div>
                         <div className="text-[9px] text-[#8180C9] mb-0.5">
@@ -1059,23 +1148,54 @@ export default function EditActivityForm({
                 </div>
               </div>
 
-              {/* Reports Section */}
+              {/* Reports Section - Multiple URLs */}
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  FULL REPORT URL
+                  FULL REPORT URL(S)
                 </label>
-                <div className="text-[9px] text-[#8180C9] mb-0.5">
-                  Paste report link
+                <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
+                  {formData.reportUrls.map((url, index) => (
+                    <div key={index} className="flex gap-1.5 items-center">
+                      <div className="flex-1">
+                        <div className="text-[9px] text-[#8180C9] mb-0.5">
+                          Link {index + 1}
+                        </div>
+                        <input
+                          type="url"
+                          value={url}
+                          onChange={(e) => handleReportUrlChange(index, e.target.value)}
+                          className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
+                          placeholder="https://example.com/report.pdf"
+                        />
+                      </div>
+                      <div className="flex items-end pb-0.5">
+                        {index === formData.reportUrls.length - 1 ? (
+                          <button
+                            type="button"
+                            onClick={addReportUrl}
+                            className="p-1.5 rounded-full bg-[#4D49FC] hover:bg-[#3d39cc] transition-colors group"
+                            title="Add Link"
+                          >
+                            <svg className="w-3 h-3" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9.41477 25.1818V0.500017H16.2841V25.1818H9.41477ZM0.5 16.2841V9.41479H25.1818V16.2841H0.5Z" fill="white" />
+                            </svg>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => removeReportUrl(index)}
+                            className="p-1.5 rounded-full bg-red-500 hover:bg-red-600 transition-colors group"
+                            title="Remove Link"
+                          >
+                            <svg className="w-3 h-3" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M14.9997 8.66504C15.736 8.66504 16.3335 9.26182 16.3337 9.99805C16.3337 10.7344 15.7361 11.332 14.9997 11.332H4.99969C4.26347 11.3319 3.66669 10.7343 3.66669 9.99805C3.66686 9.26193 4.26357 8.66522 4.99969 8.66504H14.9997Z" fill="white" stroke="white" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <input
-                  type="url"
-                  value={formData.reportUrl}
-                  onChange={(e) =>
-                    handleInputChange("reportUrl", e.target.value)
-                  }
-                  className="w-full px-2 py-2 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none placeholder:text-gray-400"
-                  placeholder="https://example.com/report.pdf"
-                />
               </div>
 
               <div>

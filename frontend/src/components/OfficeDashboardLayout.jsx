@@ -9,6 +9,7 @@ import UpcomingProgramsList from "@/components/UpcomingProgramsList";
 import InboxDropdown from "@/components/InboxDropdown";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import OfficeSearchBar from "@/components/OfficeSearchBar";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 
 /**
  * Reusable Office Dashboard Layout
@@ -153,14 +154,7 @@ export default function OfficeDashboardLayout({
               {children || (
                 <div className="flex-1 flex flex-col lg:flex-row gap-3 md:min-h-0 md:overflow-hidden overflow-y-auto pb-2">
                   {dashboardLoading ? (
-                    <div className="flex-1 flex items-center justify-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 border-4 border-[#040195] border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-sm text-gray-500">
-                          Loading dashboard...
-                        </p>
-                      </div>
-                    </div>
+                    <DashboardSkeleton />
                   ) : (
                     <>
                       {/* Left Section - Upcoming Programs */}
@@ -170,6 +164,12 @@ export default function OfficeDashboardLayout({
 
                       {/* Right Section - Stats and Timeline */}
                       <div className="flex-[3] min-w-0 flex flex-col gap-3">
+                        {/* Section Header - Status Cards */}
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-[#1E0A7A] text-sm font-semibold">Activity Status</h3>
+                          <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Unit Director</span>
+                        </div>
+                        
                         {/* Top Row - Stats Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {/* Completed Card */}
@@ -189,7 +189,7 @@ export default function OfficeDashboardLayout({
                             </div>
                             <div className="mt-2">
                               <span className="text-white/70 text-[0.65rem]">
-                                Activities completed
+                                Approved by Unit Director
                               </span>
                             </div>
                           </div>
@@ -211,7 +211,7 @@ export default function OfficeDashboardLayout({
                             </div>
                             <div className="mt-2">
                               <span className="text-white/70 text-[0.65rem]">
-                                Activities in progress
+                                Being reviewed
                               </span>
                             </div>
                           </div>
@@ -232,20 +232,65 @@ export default function OfficeDashboardLayout({
                               </h2>
                             </div>
                             <p className="text-gray-500 text-xs mt-2">
-                              Activities pending
+                              Awaiting approval
                             </p>
                           </div>
                         </div>
 
-                        {/* Bottom Row - Timeline Section */}
-                        <div className="flex-1 bg-white rounded-[20px] p-5 shadow-md border border-gray-200 overflow-hidden flex flex-col">
-                          <h3 className="text-[#1E0A7A] text-2xl font-bold mb-4">
-                            Timeline
+                        {/* Bottom Row - Phase Distribution Chart (Full Width) */}
+                        <div className="flex-1 bg-white rounded-[20px] p-5 shadow-md border border-gray-200 overflow-hidden flex flex-col min-h-0">
+                          <h3 className="text-[#1E0A7A] text-xl font-bold mb-4">
+                            Activity Phases
                           </h3>
-                          <div className="flex-1 overflow-y-auto custom-scrollbar">
-                            {/* Timeline content will go here */}
-                            <div className="text-gray-400 text-sm text-center py-8">
-                              Timeline view coming soon
+                          <div className="flex-1 flex flex-col justify-center gap-2">
+                            {(() => {
+                              const phases = [
+                                { key: 'planning', label: 'Planning', color: '#6366F1' },
+                                { key: 'implementation', label: 'Implementation', color: '#8B5CF6' },
+                                { key: 'in_progress', label: 'In Progress', color: '#F59E0B' },
+                                { key: 'completed', label: 'Completed', color: '#10B981' },
+                                { key: 'cancelled', label: 'Cancelled', color: '#EF4444' },
+                              ];
+                              const total = phases.reduce((sum, p) => sum + (dashboardData?.phaseDistribution?.[p.key] || 0), 0);
+                              
+                              return phases.map((phase) => {
+                                const value = dashboardData?.phaseDistribution?.[phase.key] || 0;
+                                const percentage = Math.max((value / Math.max(total, 1)) * 100, value > 0 ? 12 : 0);
+                                
+                                return (
+                                  <div key={phase.key} className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-600 w-24 truncate">{phase.label}</span>
+                                    <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                                      <div 
+                                        className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                                        style={{ 
+                                          width: `${percentage}%`,
+                                          backgroundColor: phase.color
+                                        }}
+                                      >
+                                        {value > 0 && (
+                                          <span className="text-[10px] text-white font-semibold">{value}</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <span className="text-xs text-gray-400 w-6 text-right">{value}</span>
+                                  </div>
+                                );
+                              });
+                            })()}
+
+                            {/* Total count */}
+                            <div className="mt-2 pt-2 border-t border-gray-100">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-500">Total Activities</span>
+                                <span className="font-semibold text-[#040195]">
+                                  {(dashboardData?.phaseDistribution?.planning || 0) + 
+                                   (dashboardData?.phaseDistribution?.implementation || 0) +
+                                   (dashboardData?.phaseDistribution?.in_progress || 0) + 
+                                   (dashboardData?.phaseDistribution?.completed || 0) + 
+                                   (dashboardData?.phaseDistribution?.cancelled || 0)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>

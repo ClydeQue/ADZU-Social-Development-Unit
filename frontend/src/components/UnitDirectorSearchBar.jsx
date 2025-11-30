@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import UnitDirectorService from "@/services/unitDirectorService";
 import ActivityDetailModal from "./ActivityDetailModal";
+import ReportModalSkeleton from "@/components/ReportModalSkeleton";
 
 /**
  * Unit Director Search Bar Component
@@ -263,13 +264,17 @@ export default function UnitDirectorSearchBar({ basePath }) {
       </div>
 
       {/* Modal */}
-      {selectedActivityId && selectedActivity && !isLoadingActivity && (
-        <ActivityDetailModal
-          activity={selectedActivity}
-          onClose={handleCloseModal}
-          officeColor="#4D49FC"
-          basePath={basePath}
-        />
+      {selectedActivityId && (
+        isLoadingActivity ? (
+          <ReportModalSkeleton onClose={handleCloseModal} />
+        ) : selectedActivity ? (
+          <ActivityDetailModal
+            activity={selectedActivity}
+            onClose={handleCloseModal}
+            officeColor="#4D49FC"
+            basePath={basePath}
+          />
+        ) : null
       )}
     </>
   );
