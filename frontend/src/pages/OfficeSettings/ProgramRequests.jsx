@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import SuccessModal from "@/components/SuccessModal";
+import ListSkeleton from "@/components/ListSkeleton";
 import { Plus, Trash2 } from "lucide-react";
 import UserService from "@/services/userService";
 
@@ -146,9 +147,8 @@ export default function OfficeProgramRequests() {
 
       {/* Program Requests Grid */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <div className="inline-block w-8 h-8 border-4 border-[#040195] border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-500">Loading requests...</p>
+        <div className="py-4">
+          <ListSkeleton items={4} />
         </div>
       ) : requests.length === 0 ? (
         <div className="text-center py-12">

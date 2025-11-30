@@ -5,6 +5,7 @@ import unitDirectorSettings from "@/services/unitDirectorSettings";
 import UnitDirectorService from "@/services/unitDirectorService";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
+import ListSkeleton from "@/components/ListSkeleton";
 
 export default function EditOfficeDialog({ office, onClose }) {
   const [activeSection, setActiveSection] = useState("program"); // 'program' or 'password'
@@ -446,10 +447,8 @@ export default function EditOfficeDialog({ office, onClose }) {
                 {/* Table Body */}
                 <div className="max-h-[300px] overflow-y-auto programs-scroll">
                   {programsLoading ? (
-                    <div className="text-center py-8">
-                      <div className="text-[#4D49FC] text-sm font-semibold">
-                        Loading programs...
-                      </div>
+                    <div className="py-4 px-2">
+                      <ListSkeleton items={4} />
                     </div>
                   ) : programsError ? (
                     <div className="text-center py-8">

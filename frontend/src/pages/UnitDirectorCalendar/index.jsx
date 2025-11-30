@@ -11,6 +11,7 @@ import UnitDirectorService from "@/services/unitDirectorService";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import InboxDropdown from "@/components/InboxDropdown";
 import CalendarSkeleton from "@/components/CalendarSkeleton";
+import ReportModalSkeleton from "@/components/ReportModalSkeleton";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
 import { getOfficeLogo } from "@/utils/officeLogos";
@@ -356,6 +357,11 @@ export default function UnitDirectorCalendar() {
           </div>
         </main>
       </WhiteContainer>
+
+      {/* Activity Details Modal - Loading Skeleton */}
+      {selectedEventId && isLoadingDetails && (
+        <ReportModalSkeleton onClose={handleCloseModal} />
+      )}
 
       {/* Activity Details Modal - ReportDetailModal Style */}
       {selectedEventId && activityDetails && !isLoadingDetails && (() => {
@@ -923,35 +929,57 @@ export default function UnitDirectorCalendar() {
                   </>
                 )}
 
-                {/* View Full Report Button */}
-                {activity.report_url ? (
-                  <div className="flex justify-end mt-6">
-                    <button
-                      onClick={() => window.open(activity.report_url, "_blank")}
-                      className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                      </svg>
-                      VIEW FULL REPORT
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex justify-end mt-6">
-                    <span className="text-gray-500 text-sm italic">
-                      No link provided
-                    </span>
-                  </div>
-                )}
+                {/* View Full Report Button(s) */}
+                {(() => {
+                  // Parse report URLs - could be JSON array or single string
+                  let reportUrls = [];
+                  if (activity.report_url) {
+                    try {
+                      const parsed = JSON.parse(activity.report_url);
+                      reportUrls = Array.isArray(parsed) ? parsed.filter(url => url && url.trim()) : [activity.report_url];
+                    } catch {
+                      // If not valid JSON, treat as single URL
+                      if (activity.report_url.trim()) {
+                        reportUrls = [activity.report_url];
+                      }
+                    }
+                  }
+                  
+                  if (reportUrls.length > 0) {
+                    return (
+                      <div className="flex flex-wrap justify-end gap-2 mt-6">
+                        {reportUrls.map((url, index) => (
+                          <button
+                            key={index}
+                            onClick={() => window.open(url, "_blank")}
+                            className="px-6 py-2.5 bg-[#4D49FC] text-white text-sm font-bold rounded-xl hover:bg-[#3d39cc] cursor-pointer transition-colors flex items-center gap-2 shadow-lg"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                            {reportUrls.length > 1 ? `REPORT ${index + 1}` : 'VIEW FULL REPORT'}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="flex justify-end mt-6">
+                      <span className="text-gray-500 text-sm italic">
+                        No link provided
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>

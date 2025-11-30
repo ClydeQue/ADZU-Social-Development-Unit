@@ -5,6 +5,7 @@ import { Search, Plus, AlertCircle } from "lucide-react";
 import UserService from "@/services/userService";
 import OfficeService from "@/services/officeService";
 import SuccessModal from "@/components/SuccessModal";
+import TableSkeleton from "@/components/TableSkeleton";
 
 /**
  * Office Manage Programs Component
@@ -351,11 +352,8 @@ export default function OfficeManagePrograms() {
 
         {/* Table Body */}
         {isLoading ? (
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="text-center py-8">
-              <div className="inline-block w-6 h-6 border-3 border-[#040195] border-t-transparent rounded-full animate-spin"></div>
-              <p className="mt-3 text-gray-500 text-xs" style={{ fontFamily: "Inter, sans-serif" }}>Loading...</p>
-            </div>
+          <div className="bg-white rounded-xl shadow-md p-4">
+            <TableSkeleton rows={5} columns={2} />
           </div>
         ) : filteredPrograms.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center text-gray-500" style={{ fontFamily: "Inter, sans-serif" }}>

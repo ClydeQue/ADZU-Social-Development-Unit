@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import NotificationService from "@/services/notificationService";
 import { getTimeAgo, formatDate } from "@/utils/timeFormat";
 import NotificationModal from "@/components/NotificationModal";
-import UnitDirectorService from "@/services/unitDirectorService";
+import ListSkeleton from "./ListSkeleton";
 
 /**
  * Reusable Notification Dropdown Component
@@ -136,7 +136,7 @@ function NotificationDropdown({ onNotificationClick }) {
 
       {/* Dropdown Panel */}
       {showNotifications && (
-        <div className="absolute right-0 top-full mt-2 w-[90vw] sm:w-96 md:w-[400px] bg-white rounded-xl shadow-2xl z-50 border border-gray-100 max-w-[calc(100vw-2rem)]">
+        <div className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-full sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 md:w-[400px] bg-white rounded-xl shadow-2xl z-50 border border-gray-100 max-w-[500px]">
           {/* Header */}
           <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
             <h3 className="text-sm sm:text-base font-bold text-[#040195] mb-2">

@@ -1,8 +1,15 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardService from "@/services/dashboardService";
+import UnitDirectorService from "@/services/unitDirectorService";
 import ListSkeleton from "@/components/ListSkeleton";
+import ReportDetailModal from "@/pages/UnitDirectorReports/ReportDetailModal";
+import ReportModalSkeleton from "@/components/ReportModalSkeleton";
 
 const UpcomingActivitiesCard = () => {
+  const [selectedActivityId, setSelectedActivityId] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+
   // Fetch upcoming activities (next 3 closest to current date)
   const { data: upcomingData, isLoading } = useQuery({
     queryKey: ["upcoming-activities"],
@@ -11,7 +18,30 @@ const UpcomingActivitiesCard = () => {
     refetchOnWindowFocus: true,
   });
 
+  // Fetch selected activity details
+  const { data: activityResponse, isLoading: isLoadingDetails, error: activityError } = useQuery({
+    queryKey: ["activity", selectedActivityId],
+    queryFn: async () => {
+      if (!selectedActivityId) return null;
+      const response = await UnitDirectorService.getActivityById(selectedActivityId);
+      // Backend returns { activity: {...} }
+      return response.activity || response;
+    },
+    enabled: !!selectedActivityId,
+    staleTime: 1 * 60 * 1000,
+  });
+
   const upcoming = upcomingData?.upcoming || [];
+
+  const handleActivityClick = (item) => {
+    setSelectedActivityId(item.id);
+    setSelectedItem(item);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedActivityId(null);
+    setSelectedItem(null);
+  };
 
   // Logo mapping for offices
   const logoMap = {
@@ -55,7 +85,8 @@ const UpcomingActivitiesCard = () => {
             upcoming.map((item, index) => (
               <div
                 key={item.id || index}
-                className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-lg hover:bg-[#f8f9ff] transition-colors flex-shrink-0"
+                onClick={() => handleActivityClick(item)}
+                className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-lg hover:bg-[#f8f9ff] transition-colors flex-shrink-0 cursor-pointer"
               >
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                   <img
@@ -85,6 +116,45 @@ const UpcomingActivitiesCard = () => {
           )}
         </div>
       </div>
+
+      {/* Report Detail Modal */}
+      {selectedActivityId && selectedItem && (
+        isLoadingDetails ? (
+          <ReportModalSkeleton onClose={handleCloseModal} />
+        ) : activityError ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(4, 1, 149, 0.4)' }} onClick={handleCloseModal}>
+            <div className="bg-white rounded-lg p-8 shadow-xl max-w-md">
+              <div className="text-red-600 text-lg font-semibold mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Error Loading Activity
+              </div>
+              <p className="text-gray-700 mb-4">
+                {activityError?.message || 'Failed to load activity details'}
+              </p>
+              <button 
+                onClick={handleCloseModal}
+                className="px-4 py-2 bg-[#4D49FC] text-white rounded-md hover:bg-[#3D39EC] transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ) : activityResponse ? (
+          <ReportDetailModal
+            report={{
+              id: selectedItem.id,
+              office: selectedItem.office || '',
+              program: activityResponse.program_title || '',
+              activity: selectedItem.activity || '',
+              due: selectedItem.due || '',
+              submitted: activityResponse.created_at || '',
+              participants: activityResponse.participants_count || 0,
+              budget: activityResponse.budget_amount || 0,
+            }}
+            activity={activityResponse}
+            onClose={handleCloseModal}
+          />
+        ) : null
+      )}
     </div>
   );
 };

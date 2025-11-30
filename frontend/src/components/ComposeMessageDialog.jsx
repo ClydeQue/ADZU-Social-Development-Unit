@@ -112,8 +112,8 @@ export default function ComposeMessageDialog({ onClose, replyTo }) {
   };
 
   return (
-      <div className="absolute right-0 top-full mt-2 w-[90vw] sm:w-80 md:w-96 max-w-[400px] z-50 shadow-2xl">
-        <div className="bg-white rounded-xl overflow-hidden flex flex-col max-h-[70vh] sm:max-h-[500px] border border-gray-200">
+      <div className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-full sm:w-80 md:w-96 sm:max-w-[400px] z-50 shadow-2xl">
+        <div className="bg-white sm:rounded-xl overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[70vh] border-0 sm:border border-gray-200">
           {/* Header */}
           <div className="bg-[#E8E7FF] px-4 py-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">

@@ -5,6 +5,7 @@ import WhiteContainer from "@/components/WhiteContainer";
 import Sidebar from "@/components/Sidebar";
 import SettingsNavbar from "./SettingsNavbar";
 import SuccessModal from "@/components/SuccessModal";
+import TableSkeleton from "@/components/TableSkeleton";
 import settingsService from "@/services/settingsService";
 
 /**
@@ -231,10 +232,7 @@ export default function UsersManagement() {
 
                   {/* Table Body - Scrollable Container */}
                   {usersLoading ? (
-                    <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4D49FC] mx-auto"></div>
-                      <p className="text-gray-500 mt-4">Loading users...</p>
-                    </div>
+                    <TableSkeleton rows={5} columns={3} />
                   ) : filteredUsers.length === 0 ? (
                     <div className="bg-white rounded-xl shadow-md p-12 text-center">
                       <svg
