@@ -431,7 +431,7 @@ function NotificationDropdown({ onNotificationClick }) {
             </div>
           </div>
 
-          {/* Footer - Retry button if error */}
+          {/* Footer - Retry button if error XCVXV*/}
           {notificationsError && (
             <div className="px-4 py-2 border-t border-gray-100">
               <button
