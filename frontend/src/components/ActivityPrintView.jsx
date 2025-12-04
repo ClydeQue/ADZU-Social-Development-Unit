@@ -279,6 +279,12 @@ const ActivityPrintView = ({ activity }) => {
           <p className="print-section-content">No budget information</p>
         );
       })()}
+
+      {/* Noted By Section */}
+      <div className="print-noted-by">
+        <p className="print-noted-by-label">Noted By:</p>
+        <div className="print-noted-by-line"></div>
+      </div>
     </div>
   );
 };

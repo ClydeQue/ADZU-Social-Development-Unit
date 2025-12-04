@@ -229,41 +229,40 @@ const WelcomePage = () => {
 
           <div className="absolute inset-0 w-full h-full">
             <m.div 
-              className="hidden md:flex w-full h-full"
+              className="hidden md:flex w-full h-full relative"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               layout
               transition={layoutVariants.desktop.transition}
             >
+              {/* Background Image - Absolute positioned on left half */}
               <m.div 
-                className="w-1/2 h-full flex items-center justify-center relative overflow-visible"
-                variants={containerVariants}
-                layout
-                transition={{ duration: 4, ease: "easeInOut" }}
+                className="absolute top-0 left-0 w-10/16 h-screen z-10 "
+                variants={imageVariants}
+                initial="hidden"
+                animate="visible"
               >
-                <m.div 
-                  className="relative z-20 md:-bottom-50 lg:-bottom-20 left-12 flex items-end justify-center h-full"
-                  variants={imageVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  <Suspense fallback={
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="animate-pulse bg-white/20 w-full h-[80%] rounded-lg"></div>
-                    </div>
-                  }>
-                    <LazyImage
-                      src="/images/high.webp"
-                      alt="Students working"
-                      className="w-auto object-contain max-w-none md:h-[80%] lg:h-[99%]"
-                    />
-                  </Suspense>
-                </m.div>
+                <Suspense fallback={
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="animate-pulse bg-white/20 w-full h-full rounded-lg"></div>
+                  </div>
+                }>
+                  <LazyImage
+                    src="/images/cover-photo.webp"
+                    alt="Students working"
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: '40% 80%' }}
+                  />
+                </Suspense>
               </m.div>
 
+              {/* Spacer for left half */}
+              <div className="w-1/2 h-full"></div>
+
+              {/* Login Form - Right half */}
               <m.div 
-                className="w-1/2 h-full flex flex-col relative px-4 lg:px-8 items-center justify-end z-200"
+                className="w-1/2 h-full flex flex-col relative px-4 lg:px-8 items-center justify-end z-20"
                 variants={containerVariants}
                 layout
                 transition={{ duration: 0.3, ease: "linear" }}
@@ -589,7 +588,7 @@ const WelcomePage = () => {
               </m.div>
               
               <m.div 
-                className="absolute -bottom-24 sm:-bottom-32 md:-bottom-40 w-full z-10 h-[100%] max-h-[22rem] sm:max-h-[28rem]"
+                className="absolute inset-0 w-full h-full z-10"
                 variants={imageVariants}
                 initial="hidden"
                 animate="visible"
@@ -601,10 +600,11 @@ const WelcomePage = () => {
                   </div>
                 }>
                   <LazyImage
-                    src="/images/high.webp" 
+                    src="/images/cover-photo.webp" 
                     alt="Students working" 
                     draggable="false"
-                    className="h-full w-full object-center object-contain scale-100 sm:scale-110"
+                    className="h-full w-full object-cover"
+                    style={{ objectPosition: '30% 20%' }}
                   />
                 </Suspense>
               </m.div>

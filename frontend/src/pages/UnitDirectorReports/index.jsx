@@ -15,6 +15,11 @@ export default function UnitDirectorReports() {
   const [sortBy, setSortBy] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  
+  // Consolidate report month/year picker state
+  const [showConsolidateModal, setShowConsolidateModal] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   // Set initial sort from URL parameter
   useEffect(() => {
@@ -169,20 +174,36 @@ export default function UnitDirectorReports() {
     return transformed;
   }, [reportsData, sortBy]);
 
-  // Handler for consolidated report
+  // Open consolidate modal
   const handleConsolidateReports = () => {
-    if (!reportsData?.activities) return;
+    if (!reportsData?.activities) {
+      alert('No activities data available. Please try again later.');
+      return;
+    }
+    setShowConsolidateModal(true);
+  };
 
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // 1-12
-    const currentYear = currentDate.getFullYear();
+  // Generate the consolidated report with selected month/year
+  const generateConsolidatedReport = () => {
+    setShowConsolidateModal(false);
+    
+    const currentMonth = selectedMonth;
+    const currentYear = selectedYear;
 
-    // Filter activities for current month and year
+    // Filter activities for selected month and year
     const monthlyActivities = reportsData.activities.filter(activity => {
       if (!activity.start_date) return false;
       const activityDate = new Date(activity.start_date);
       return activityDate.getMonth() + 1 === currentMonth && activityDate.getFullYear() === currentYear;
     });
+
+    // Check if there are activities for the selected month
+    if (monthlyActivities.length === 0) {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      alert(`No activities found for ${monthNames[currentMonth - 1]} ${currentYear}. Please select a different month.`);
+      return;
+    }
 
     // Group activities by office
     const officeGroups = {};
@@ -278,7 +299,7 @@ export default function UnitDirectorReports() {
     }).sort((a, b) => a.name.localeCompare(b.name));
 
     // Calculate project statuses
-    const statusCounts = { completed: 0, 'in-progress': 0, cancelled: 0 };
+    const statusCounts = { planned: 0, completed: 0, 'in-progress': 0, cancelled: 0 };
     monthlyActivities.forEach(act => {
       const status = act.status?.toLowerCase() || '';
       const phase = act.phase?.toLowerCase() || '';
@@ -289,13 +310,17 @@ export default function UnitDirectorReports() {
         statusCounts['in-progress']++;
       } else if (status === 'cancelled') {
         statusCounts.cancelled++;
+      } else if (status === 'planned' || status === 'pending') {
+        statusCounts.planned++;
       }
     });
 
     const projectStatuses = [
+      { label: 'Planned/Pending', value: statusCounts.planned },
       { label: 'Completed', value: statusCounts.completed },
       { label: 'In Progress', value: statusCounts['in-progress'] },
       { label: 'Cancelled', value: statusCounts.cancelled },
+      { label: 'Total Projects', value: monthlyActivities.length },
     ];
 
     // Calculate partnerships from real data
@@ -334,11 +359,13 @@ export default function UnitDirectorReports() {
       }
     });
 
+    const totalPartners = partnerCounts.government + partnerCounts['non-government'] + partnerCounts.institutional + partnerCounts.internal;
     const partnerships = [
       { label: 'Government', value: partnerCounts.government },
       { label: 'Non-Government', value: partnerCounts['non-government'] },
       { label: 'Institutional', value: partnerCounts.institutional },
       { label: 'Internal', value: partnerCounts.internal },
+      { label: 'Total Partners', value: totalPartners },
     ];
 
     // Calculate SDG alignment
@@ -551,6 +578,94 @@ export default function UnitDirectorReports() {
           </div>
         </main>
       </WhiteContainer>
+
+      {/* Consolidate Report Month/Year Picker Modal */}
+      {showConsolidateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl">
+            <h2 className="text-xl font-bold text-[#040195] mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Generate Consolidated Report
+            </h2>
+            <p className="text-gray-600 text-sm mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Select the month and year for the consolidated report.
+            </p>
+            
+            <div className="flex gap-4 mb-6">
+              {/* Month Selector */}
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Month
+                </label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border-2 border-[#040195] rounded-lg text-[#040195] font-semibold focus:outline-none focus:ring-2 focus:ring-[#4D49FC] cursor-pointer"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  {[
+                    { value: 1, label: 'January' },
+                    { value: 2, label: 'February' },
+                    { value: 3, label: 'March' },
+                    { value: 4, label: 'April' },
+                    { value: 5, label: 'May' },
+                    { value: 6, label: 'June' },
+                    { value: 7, label: 'July' },
+                    { value: 8, label: 'August' },
+                    { value: 9, label: 'September' },
+                    { value: 10, label: 'October' },
+                    { value: 11, label: 'November' },
+                    { value: 12, label: 'December' },
+                  ].map((month) => (
+                    <option key={month.value} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Year Selector */}
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Year
+                </label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border-2 border-[#040195] rounded-lg text-[#040195] font-semibold focus:outline-none focus:ring-2 focus:ring-[#4D49FC] cursor-pointer"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowConsolidateModal(false)}
+                className="px-4 py-2 border-2 border-[#040195] text-[#040195] rounded-lg font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={generateConsolidatedReport}
+                className="px-4 py-2 bg-[#4D49FC] text-white rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Generate Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

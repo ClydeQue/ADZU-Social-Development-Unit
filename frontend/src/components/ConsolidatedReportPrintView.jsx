@@ -106,6 +106,15 @@ const ConsolidatedReportPrintView = ({ reportData, month, year }) => {
                   </td>
                 </tr>
               ))}
+              {/* Totals Row */}
+              <tr style={{ fontWeight: 'bold', backgroundColor: '#f0f0ff' }}>
+                <td className="text-center font-bold">TOTAL</td>
+                <td className="text-center">{reportData.summary.reduce((sum, o) => sum + o.projects, 0)}</td>
+                <td className="text-center">{reportData.summary.reduce((sum, o) => sum + o.participants, 0).toLocaleString()}</td>
+                <td className="text-center">₱ {reportData.summary.reduce((sum, o) => sum + o.internalFunds, 0).toLocaleString()}</td>
+                <td className="text-center">₱ {reportData.summary.reduce((sum, o) => sum + o.externalFunds, 0).toLocaleString()}</td>
+                <td className="text-center">-</td>
+              </tr>
             </tbody>
           </table>
           </div>
@@ -159,6 +168,12 @@ const ConsolidatedReportPrintView = ({ reportData, month, year }) => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Noted By Section */}
+      <div className="print-noted-by">
+        <p className="print-noted-by-label">Noted By:</p>
+        <div className="print-noted-by-line"></div>
       </div>
     </div>
   );

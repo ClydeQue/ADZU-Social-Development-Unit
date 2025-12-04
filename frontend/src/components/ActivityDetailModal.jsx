@@ -227,7 +227,7 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
         {/* Header Section with Program Logo/Image */}
         <div 
           className="relative sm:p-2 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between"
-        >
+          >
           <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
             {/* Logo/Icon Container with Phase Pill */}
             <div className="flex flex-col items-center gap-1">
