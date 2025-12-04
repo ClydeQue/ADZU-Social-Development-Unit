@@ -238,7 +238,7 @@ const WelcomePage = () => {
             >
               {/* Background Image - Absolute positioned on left half */}
               <m.div 
-                className="absolute top-0 left-0 w-10/16 h-screen z-10 "
+                className="absolute top-0 left-0 w-1/2 lg:w-7/12 xl:w-10/16 2xl:w-10/16 h-screen z-10"
                 variants={imageVariants}
                 initial="hidden"
                 animate="visible"
