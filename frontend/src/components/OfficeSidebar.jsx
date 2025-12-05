@@ -12,9 +12,10 @@ import NotificationService from '@/services/notificationService';
  * @param {Object} props - Component props
  * @param {string} props.basePath - Base route path for the office (e.g., '/acca')
  * @param {string} props.officeId - Office ID for mapping to logo
+ * @param {string} props.officeAcronym - Office acronym for logo mapping (e.g., 'ACCA', 'ACES')
  * @param {string} props.officeName - Office name for display
  */
-export default function OfficeSidebar({ basePath, officeId, officeName }) {
+export default function OfficeSidebar({ basePath, officeId, officeAcronym, officeName }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -173,7 +174,7 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
           <div className="relative w-full box-border bg-[#F4F4F4] border-r-0 rounded-[15px] h-full flex flex-col">
             {/* Logo */}
             <div className="p-3 py-6 flex items-center justify-center flex-shrink-0">
-              <OfficeSidebarLogo officeId={officeId} officeName={officeName} /> 
+              <OfficeSidebarLogo officeId={officeId} officeAcronym={officeAcronym} officeName={officeName} /> 
             </div>
           
             {/* MENU Section */}
@@ -291,6 +292,7 @@ export default function OfficeSidebar({ basePath, officeId, officeName }) {
 
 OfficeSidebar.propTypes = {
   basePath: PropTypes.string.isRequired,
-  officeId: PropTypes.string.isRequired,
+  officeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  officeAcronym: PropTypes.string,
   officeName: PropTypes.string,
 };

@@ -327,7 +327,7 @@ export default function AddActivityForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
-                Project Name
+                Project Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -343,7 +343,7 @@ export default function AddActivityForm({
 
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
-                Program / Component
+                Program / Component <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-2">
                 {programsLoading ? (
@@ -419,7 +419,7 @@ export default function AddActivityForm({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <div className="lg:col-span-2">
               <label className="block text-xs font-bold text-[#040195] mb-1">
-                Description
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={formData.description}
@@ -435,7 +435,7 @@ export default function AddActivityForm({
 
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
-                Phase
+                Phase <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
               <div className="relative">
                 <button
@@ -498,7 +498,7 @@ export default function AddActivityForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
-                Objectives
+                Objectives <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
               <textarea
                 value={formData.objectives}
@@ -513,7 +513,7 @@ export default function AddActivityForm({
 
             <div>
               <label className="block text-xs font-bold text-[#040195] mb-1">
-                Participant Demographics
+                Participant Demographics <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
               <div className="grid grid-cols-[70px_1fr] gap-1.5">
                 <div>
@@ -550,7 +550,7 @@ export default function AddActivityForm({
             <div className="grid grid-cols-2 gap-1.5">
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  Inception
+                  Inception <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <DatePicker
                   value={formData.initiation}
@@ -559,7 +559,7 @@ export default function AddActivityForm({
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  Implementation
+                  Implementation <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <DatePicker
                   value={formData.implementation}
@@ -675,7 +675,7 @@ export default function AddActivityForm({
               {/* Partners section */}
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  Partners
+                  Partners <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-2 sm:space-y-1.5">
                   {formData.partners.map((partner, index) => (
@@ -874,7 +874,7 @@ export default function AddActivityForm({
               {/* Budget Overview */}
               <div>
                 <label className="block text-sm font-bold text-[#040195] mb-1">
-                  Budget Overview
+                  Budget Overview <span className="text-gray-400 font-normal text-xs">(Optional)</span>
                 </label>
                 <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
                   {formData.budgets.map((budget, index) => (
@@ -1023,7 +1023,7 @@ export default function AddActivityForm({
             <div className="space-y-2">
               <div>
                 <label className="block text-sm font-bold text-[#040195] mb-1">
-                  Sustainable Development Goal(s)
+                  Sustainable Development Goal(s) <span className="text-gray-400 font-normal text-xs">(Optional)</span>
                 </label>
                 <div className="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto p-3 border border-[#8180C9] rounded-[11px]">
                   {SDG_GOALS.map((sdg) => (
@@ -1049,7 +1049,7 @@ export default function AddActivityForm({
               {/* Reports Section - Multiple URLs */}
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  FULL REPORT URL(S)
+                  FULL REPORT URL(S) <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <div className="border border-[#8180C9] rounded-[11px] p-2 space-y-1.5">
                   {formData.reportUrls.map((url, index) => (
@@ -1098,7 +1098,7 @@ export default function AddActivityForm({
 
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  Thumbnail
+                  Thumbnail <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <div className="text-[9px] text-[#8180C9] mb-0.5">
                   3 MB (max)

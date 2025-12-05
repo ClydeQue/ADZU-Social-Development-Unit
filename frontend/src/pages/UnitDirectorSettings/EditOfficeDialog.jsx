@@ -294,7 +294,7 @@ export default function EditOfficeDialog({ office, onClose }) {
                         className="block text-xs font-semibold text-[#040195] mb-1"
                         style={{ fontFamily: "Inter, sans-serif" }}
                       >
-                        Description
+                        Description <span className="text-gray-400 font-normal">(Optional)</span>
                       </label>
                       <textarea
                         value={newProgram.description}
@@ -377,7 +377,7 @@ export default function EditOfficeDialog({ office, onClose }) {
                         className="block text-xs font-semibold text-[#040195] mb-1"
                         style={{ fontFamily: "Inter, sans-serif" }}
                       >
-                        Description
+                        Description <span className="text-gray-400 font-normal">(Optional)</span>
                       </label>
                       <textarea
                         value={selectedProgram.description || ""}
@@ -537,7 +537,7 @@ export default function EditOfficeDialog({ office, onClose }) {
                   className="block text-sm font-semibold text-[#040195] mb-2"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  New Password
+                  New Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -614,7 +614,7 @@ export default function EditOfficeDialog({ office, onClose }) {
                   className="block text-sm font-semibold text-[#040195] mb-2"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  Confirm New Password
+                  Confirm New Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input

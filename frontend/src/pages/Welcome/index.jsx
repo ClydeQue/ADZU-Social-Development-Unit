@@ -309,7 +309,7 @@ const WelcomePage = () => {
                       {/* Username Field */}
                       <div>
                         <label className="block text-xs lg:text-sm font-inter font-semibold text-[#040195] mb-2">
-                          Username
+                          Username <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                           <img
@@ -333,7 +333,7 @@ const WelcomePage = () => {
                       {/* Password Field */}
                       <div>
                         <label className="block text-xs lg:text-sm font-inter font-semibold text-[#040195] mb-2">
-                          Password
+                          Password <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                           <img
@@ -488,7 +488,7 @@ const WelcomePage = () => {
                         {/* Username Field */}
                         <div className="mb-2.5 sm:mb-3">
                           <label className="block text-[0.65rem] sm:text-xs font-inter font-semibold text-[#040195] mb-1 sm:mb-1.5">
-                            Username
+                            Username <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
                             <img
@@ -512,7 +512,7 @@ const WelcomePage = () => {
                         {/* Password Field */}
                         <div className="mb-2.5 sm:mb-3">
                           <label className="block text-[0.65rem] sm:text-xs font-inter font-semibold text-[#040195] mb-1 sm:mb-1.5">
-                            Password
+                            Password <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
                             <img

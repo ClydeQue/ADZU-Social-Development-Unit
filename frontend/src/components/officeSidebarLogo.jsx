@@ -1,12 +1,18 @@
 import PropTypes from 'prop-types';
 
-const OfficeSidebarLogo = ({ officeId, officeName }) => {
-  // Convert officeId to string to ensure consistent mapping
-  // Handle undefined/null values
-  const id = officeId ? String(officeId) : '';
-  
-  // Map office IDs to logo paths - using the logos in the officeLogo folder
-  const logoMap = {
+const OfficeSidebarLogo = ({ officeId, officeAcronym, officeName }) => {
+  // Map office acronyms to logo paths (case-insensitive) - PRIMARY mapping
+  const logoMapByAcronym = {
+    'acca': '/logos/officeLogo/acca_logo_big.webp',
+    'aces': '/logos/officeLogo/aces_logo_big.webp',
+    'aclg': '/logos/officeLogo/aclg_logo_big.webp',
+    'altec': '/logos/officeLogo/altec_logo_big.webp',
+    'apc': '/logos/officeLogo/apc_logo_big.webp',
+    'cces': '/logos/officeLogo/cces_logo_big.webp',
+  };
+
+  // Map office IDs to logo paths - FALLBACK mapping
+  const logoMapById = {
     '1': '/logos/officeLogo/acca_logo_big.webp',
     '2': '/logos/officeLogo/aces_logo_big.webp',
     '3': '/logos/officeLogo/aclg_logo_big.webp',
@@ -15,7 +21,26 @@ const OfficeSidebarLogo = ({ officeId, officeName }) => {
     '6': '/logos/officeLogo/cces_logo_big.webp',
   };
 
-  const logoPath = logoMap[id] || '/logos/officeLogo/acca_logo_big.webp'; // Default fallback
+  // Try to get logo by acronym first (preferred), then by ID
+  let logoPath = '/logos/officeLogo/acca_logo_big.webp'; // default fallback
+  
+  if (officeAcronym) {
+    const acronymLower = String(officeAcronym).toLowerCase();
+    if (logoMapByAcronym[acronymLower]) {
+      logoPath = logoMapByAcronym[acronymLower];
+    }
+  } else if (officeId) {
+    const id = String(officeId);
+    if (logoMapById[id]) {
+      logoPath = logoMapById[id];
+    } else {
+      // Try as acronym fallback
+      const idLower = id.toLowerCase();
+      if (logoMapByAcronym[idLower]) {
+        logoPath = logoMapByAcronym[idLower];
+      }
+    }
+  }
   
   // Use the officeName prop if provided, otherwise use a fallback
   const displayName = officeName || 'Office';
@@ -37,7 +62,8 @@ const OfficeSidebarLogo = ({ officeId, officeName }) => {
 };
 
 OfficeSidebarLogo.propTypes = {
-  officeId: PropTypes.string.isRequired,
+  officeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  officeAcronym: PropTypes.string,
   officeName: PropTypes.string,
 };
 

@@ -79,6 +79,7 @@ export default function OfficeDashboardLayout({
           officeColor={officeColor}
           basePath={basePath}
           officeId={officeId}
+          officeAcronym={user?.office?.acronym || dashboardData?.office?.acronym}
           officeName={dashboardData?.office?.name}
         />
 
@@ -310,6 +311,6 @@ export default function OfficeDashboardLayout({
 OfficeDashboardLayout.propTypes = {
   officeColor: PropTypes.string,
   basePath: PropTypes.string.isRequired,
-  officeId: PropTypes.string.isRequired,
+  officeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   children: PropTypes.node,
 };

@@ -20,6 +20,7 @@ export default function OfficeHelp({ basePath, officeId, officeName }) {
         <OfficeSidebar
           basePath={basePath}
           officeId={officeId}
+          officeAcronym={user?.office?.acronym}
           officeName={officeName}
         />
 

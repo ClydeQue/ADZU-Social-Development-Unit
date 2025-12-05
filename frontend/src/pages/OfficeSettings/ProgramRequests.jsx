@@ -110,7 +110,7 @@ export default function OfficeProgramRequests() {
         <form onSubmit={handleSubmitRequest} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-bold text-[#040195] mb-2">
-              Program Name
+              Program Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -123,7 +123,7 @@ export default function OfficeProgramRequests() {
           </div>
           <div>
             <label className="block text-sm font-bold text-[#040195] mb-2">
-              Program Description
+              Program Description <span className="text-gray-400 font-normal">(Optional)</span>
             </label>
             <input
               type="text"

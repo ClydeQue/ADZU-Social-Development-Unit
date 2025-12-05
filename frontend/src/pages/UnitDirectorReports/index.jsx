@@ -594,7 +594,7 @@ export default function UnitDirectorReports() {
               {/* Month Selector */}
               <div className="flex-1">
                 <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Month
+                  Month <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedMonth}
@@ -626,7 +626,7 @@ export default function UnitDirectorReports() {
               {/* Year Selector */}
               <div className="flex-1">
                 <label className="block text-sm font-semibold text-[#040195] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Year
+                  Year <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedYear}
