@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { ADZU_STRATEGIC_GOALS } from '@/utils/strategicGoalsData';
 import './ActivityPrintView.css';
 
 /**
@@ -278,6 +279,41 @@ const ActivityPrintView = ({ activity }) => {
         ) : (
           <p className="print-section-content">No budget information</p>
         );
+      })()}
+
+      {/* AdZU Strategic Goals */}
+      {(() => {
+        let strategicGoals = [];
+        try {
+          if (activity?.strategic_goals) {
+            strategicGoals = typeof activity.strategic_goals === 'string'
+              ? JSON.parse(activity.strategic_goals)
+              : activity.strategic_goals;
+          }
+        } catch (e) {
+          console.error('Error parsing strategic goals:', e);
+        }
+        
+        if (strategicGoals && strategicGoals.length > 0) {
+          return (
+            <>
+              <div className="print-divider"></div>
+              <h3 className="print-section-title">AdZU STRATEGIC GOALS</h3>
+              <div className="print-strategic-goals-list">
+                {strategicGoals.map((goalId) => {
+                  const goal = ADZU_STRATEGIC_GOALS.find(g => g.id === goalId);
+                  return goal ? (
+                    <div key={goalId} className="print-strategic-goal">
+                      <span className="print-strategic-goal-icon">{goal.icon}</span>
+                      <span className="print-strategic-goal-title">{goal.title}</span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            </>
+          );
+        }
+        return null;
       })()}
 
       {/* Noted By Section */}

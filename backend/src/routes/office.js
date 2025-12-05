@@ -276,6 +276,7 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
           budget_amount,
           budget_type,
           sdg_number,
+          strategic_goals,
           status,
           phase,
           notes,
@@ -311,6 +312,7 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
           budget_amount,
           budget_type,
           sdg_number,
+          strategic_goals,
           status,
           phase,
           notes,
@@ -552,6 +554,14 @@ router.post("/activities", authenticateToken, async (req, res) => {
         : [activityData.sdg_numbers];
     }
 
+    // Parse Strategic Goals array if provided
+    let strategicGoalsArray = [];
+    if (activityData.strategic_goals) {
+      strategicGoalsArray = Array.isArray(activityData.strategic_goals)
+        ? activityData.strategic_goals
+        : [activityData.strategic_goals];
+    }
+
     // Prepare activity data with proper types
     const newActivity = {
       program_id: activityData.program_id,
@@ -594,6 +604,9 @@ router.post("/activities", authenticateToken, async (req, res) => {
       // Store SDG numbers as JSON array in existing sdg_number column
       sdg_number:
         sdgNumbersArray.length > 0 ? JSON.stringify(sdgNumbersArray) : null,
+      // Store AdZU Strategic Goals as JSON array
+      strategic_goals:
+        strategicGoalsArray.length > 0 ? JSON.stringify(strategicGoalsArray) : null,
       phase: activityData.phase || null,
       status: "pending", // Status is always pending on creation, controlled by Unit Director
       report_url: activityData.report_url || null, // URL link to report
@@ -940,6 +953,14 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
         : [updateData.sdg_numbers];
     }
 
+    // Parse Strategic Goals array if provided
+    let strategicGoalsArray = [];
+    if (updateData.strategic_goals) {
+      strategicGoalsArray = Array.isArray(updateData.strategic_goals)
+        ? updateData.strategic_goals
+        : [updateData.strategic_goals];
+    }
+
     // Prepare update data - simplified sanitization
     const sanitizedData = {};
 
@@ -1020,6 +1041,14 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     } else if (updateData.sdg_number !== undefined) {
       // Handle direct sdg_number updates
       sanitizedData.sdg_number = updateData.sdg_number;
+    }
+
+    // Strategic Goals array stored in strategic_goals column
+    if (updateData.strategic_goals !== undefined && strategicGoalsArray.length > 0) {
+      sanitizedData.strategic_goals = JSON.stringify(strategicGoalsArray);
+    } else if (updateData.strategic_goals !== undefined) {
+      // Handle empty array or explicit clear
+      sanitizedData.strategic_goals = JSON.stringify(strategicGoalsArray);
     }
 
     // Other fields

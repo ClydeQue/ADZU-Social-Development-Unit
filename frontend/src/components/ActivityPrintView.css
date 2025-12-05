@@ -361,6 +361,28 @@
   color: #040195;
 }
 
+/* Strategic Goals */
+.print-strategic-goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.print-strategic-goal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.print-strategic-goal-icon {
+  font-size: 14pt;
+}
+
+.print-strategic-goal-title {
+  font-size: 10pt;
+  color: #040195;
+}
+
 @media print {
   .print-view {
     padding: 0.3in 0.4in;

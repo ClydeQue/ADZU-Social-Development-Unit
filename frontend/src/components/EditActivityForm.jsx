@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OfficeService from "@/services/officeService";
 import PropTypes from "prop-types";
 import { SDG_GOALS, getSDGIcon } from "@/utils/sdgData";
+import { ADZU_STRATEGIC_GOALS } from "@/utils/strategicGoalsData";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
 import FormSkeleton from "@/components/FormSkeleton";
@@ -70,6 +71,7 @@ export default function EditActivityForm({
     thumbnail: null,
     reportUrls: [""],
     sdgs: [],
+    strategicGoals: [],
   });
 
   // Populate form when activity data loads
@@ -113,6 +115,20 @@ export default function EditActivityForm({
       // Parse SDGs
       const sdgs = activity.sdg_number ? [activity.sdg_number] : [];
 
+      // Parse Strategic Goals
+      let strategicGoals = [];
+      if (activity.strategic_goals) {
+        try {
+          strategicGoals = typeof activity.strategic_goals === 'string' 
+            ? JSON.parse(activity.strategic_goals) 
+            : Array.isArray(activity.strategic_goals) 
+              ? activity.strategic_goals 
+              : [activity.strategic_goals];
+        } catch (e) {
+          console.error('Error parsing strategic goals:', e);
+        }
+      }
+
       setFormData({
         projectName: activity.activity_name || "",
         programId: activity.program_id || "",
@@ -155,6 +171,7 @@ export default function EditActivityForm({
           return [""];
         })(),
         sdgs,
+        strategicGoals,
       });
     }
   }, [activity]);
@@ -259,6 +276,15 @@ export default function EditActivityForm({
     }));
   };
 
+  const handleStrategicGoalToggle = (goalId) => {
+    setFormData((prev) => ({
+      ...prev,
+      strategicGoals: prev.strategicGoals.includes(goalId)
+        ? prev.strategicGoals.filter((id) => id !== goalId)
+        : [...prev.strategicGoals, goalId],
+    }));
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -285,6 +311,27 @@ export default function EditActivityForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate description is provided
+    if (!formData.description || formData.description.trim() === "") {
+      setErrorMessage("Please provide a description for the activity.");
+      setShowErrorModal(true);
+      return;
+    }
+
+    // Validate SDG selection
+    if (!formData.sdgs || formData.sdgs.length === 0) {
+      setErrorMessage("Please select at least one Sustainable Development Goal (SDG).");
+      setShowErrorModal(true);
+      return;
+    }
+
+    // Validate Strategic Goals selection
+    if (!formData.strategicGoals || formData.strategicGoals.length === 0) {
+      setErrorMessage("Please select at least one AdZU Strategic Goal.");
+      setShowErrorModal(true);
+      return;
+    }
 
     try {
       console.log("FormData before submit:", {
@@ -342,6 +389,8 @@ export default function EditActivityForm({
         budget_type: formData.budgets[0]?.type || null,
         // Submit SDG numbers as array of integers
         sdg_numbers: formData.sdgs.map((id) => parseInt(id)),
+        // Submit AdZU Strategic Goals as array of integers
+        strategic_goals: formData.strategicGoals.map((id) => parseInt(id)),
         phase: formData.phase || null,
         report_url: JSON.stringify(formData.reportUrls.filter(url => url.trim() !== '')),
         classification: formData.classification || null,
@@ -524,7 +573,7 @@ export default function EditActivityForm({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <div className="lg:col-span-2">
               <label className="block text-xs font-bold text-[#040195] mb-1">
-                Description <span className="text-gray-400 font-normal">(Optional)</span>
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={formData.description || ""}
@@ -687,7 +736,7 @@ export default function EditActivityForm({
               {/* Venue rows */}
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
                 <div>
-                  <label className="block text-xs font-semibold text-[#040195] mb-2">Venue</label>
+                  <label className="block text-xs font-semibold text-[#040195] mb-2">Venue <span className="text-red-500">*</span></label>
                   <label className="block text-[9px] text-[#8180C9] mb-0.5">Street / Room / Building</label>
                   <input
                     type="text"
@@ -709,7 +758,7 @@ export default function EditActivityForm({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#040195] mb-2">Sex Count</label>
+                  <label className="block text-xs font-semibold text-[#040195] mb-2">Sex Count <span className="text-red-500">*</span></label>
                   <label className="block text-[9px] text-[#8180C9] mb-0.5">Male</label>
                   <input
                     type="number"
@@ -1119,13 +1168,58 @@ export default function EditActivityForm({
                   ))}
                 </div>
               </div>
+
+              {/* AdZU Strategic Goals */}
+              <div>
+                <label className="block text-sm font-bold text-[#040195] mb-1">
+                  AdZU Strategic Goal(s) <span className="text-red-500">*</span>
+                </label>
+                <div className="border border-[#8180C9] rounded-[11px] p-3">
+                  <div className="space-y-2">
+                    {ADZU_STRATEGIC_GOALS.map((goal) => (
+                      <div
+                        key={goal.id}
+                        onClick={() => handleStrategicGoalToggle(goal.id)}
+                        className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all border ${
+                          formData.strategicGoals?.includes(goal.id)
+                            ? "border-[#4D49FC] bg-[#F5F5FF] ring-1 ring-[#4D49FC]"
+                            : "border-transparent hover:bg-gray-50"
+                        }`}
+                      >
+                        <div 
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}
+                          style={{ backgroundColor: goal.color }}
+                        >
+                          {goal.id}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-[#040195] truncate">
+                            {goal.title}
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                          formData.strategicGoals?.includes(goal.id)
+                            ? "border-[#4D49FC] bg-[#4D49FC]"
+                            : "border-gray-300"
+                        }`}>
+                          {formData.strategicGoals?.includes(goal.id) && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Right side: SDG column */}
             <div className="space-y-2">
               <div>
                 <label className="block text-sm font-bold text-[#040195] mb-1">
-                  Sustainable Development Goal(s) <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+                  Sustainable Development Goal(s) <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto p-3 border border-[#8180C9] rounded-[11px]">
                   {SDG_GOALS.map((sdg) => (

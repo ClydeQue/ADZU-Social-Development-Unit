@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client';
 import UnitDirectorService from "@/services/unitDirectorService";
 import { getOfficeLogo } from "@/utils/officeLogos";
 import { getSDGIcons } from "@/utils/sdgData";
+import { getStrategicGoal } from "@/utils/strategicGoalsData";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/alerts/ErrorModal";
 import ActivityPrintView from "@/components/ActivityPrintView";
@@ -673,6 +674,50 @@ export default function ReportDetailModal({ report, activity, onClose }) {
               );
             })()}
           </div>
+
+          {/* AdZU Strategic Goals */}
+          {(() => {
+            let strategicGoals = [];
+            try {
+              if (activity.strategic_goals) {
+                strategicGoals =
+                  typeof activity.strategic_goals === "string"
+                    ? JSON.parse(activity.strategic_goals)
+                    : activity.strategic_goals;
+              }
+            } catch (e) {
+              console.error("Error parsing strategic goals:", e);
+            }
+            
+            if (strategicGoals && strategicGoals.length > 0) {
+              return (
+                <>
+                  <hr className="my-4 sm:my-6 border-[#040195]" />
+                  <div className="mb-4 sm:mb-6">
+                    <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-2 uppercase">
+                      AdZU STRATEGIC GOALS
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {strategicGoals.map((goalId) => {
+                        const goal = getStrategicGoal(goalId);
+                        return goal ? (
+                          <div
+                            key={goalId}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-white"
+                            style={{ backgroundColor: goal.color }}
+                          >
+                            <span>{goal.icon}</span>
+                            <span>{goal.shortTitle}</span>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                </>
+              );
+            }
+            return null;
+          })()}
 
           {/* Notes - Optional Row */}
           {activity.notes && (

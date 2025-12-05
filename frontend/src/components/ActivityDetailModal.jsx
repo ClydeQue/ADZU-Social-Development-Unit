@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom/client';
 import { getOfficeLogo } from '@/utils/officeLogos';
 import { getSDGIcons } from '@/utils/sdgData';
+import { getStrategicGoal } from '@/utils/strategicGoalsData';
 import ActivityPrintView from '@/components/ActivityPrintView';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
@@ -479,6 +480,55 @@ export default function ActivityDetailModal({ activity, onClose, onDelete, baseP
               );
             })()}
           </div>
+
+          {/* Row 5: AdZU Strategic Goals */}
+          {(() => {
+            let strategicGoals = [];
+            try {
+              if (activity.strategic_goals) {
+                strategicGoals = typeof activity.strategic_goals === 'string' 
+                  ? JSON.parse(activity.strategic_goals) 
+                  : Array.isArray(activity.strategic_goals) 
+                    ? activity.strategic_goals 
+                    : [activity.strategic_goals];
+              }
+            } catch (e) {
+              console.error('Error parsing strategic goals:', e);
+            }
+
+            if (strategicGoals.length > 0) {
+              return (
+                <>
+                  <hr className="my-4 sm:my-6 border-[#040195]" />
+                  <div className="mb-4 sm:mb-6">
+                    <h3 className="text-xs sm:text-sm font-bold text-[#040195] mb-3 uppercase">ADZU STRATEGIC GOALS</h3>
+                    <div className="space-y-2">
+                      {strategicGoals.map((goalId) => {
+                        const goal = getStrategicGoal(goalId);
+                        if (!goal) return null;
+                        return (
+                          <div key={goal.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                            <div 
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                              style={{ backgroundColor: goal.color }}
+                            >
+                              {goal.id}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-[#040195]">
+                                {goal.title}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              );
+            }
+            return null;
+          })()}
 
           {/* Notes - Optional Row */}
           {activity.notes && (

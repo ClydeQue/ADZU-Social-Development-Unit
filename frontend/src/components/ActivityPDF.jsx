@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import PropTypes from 'prop-types';
+import { ADZU_STRATEGIC_GOALS } from '@/utils/strategicGoalsData';
 
 // Register Matura font
 Font.register({
@@ -231,6 +232,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     color: '#040195',
     fontWeight: 'bold',
+  },
+  strategicGoalsSection: {
+    marginTop: 10,
+  },
+  strategicGoalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  strategicGoalIcon: {
+    fontSize: 12,
+    marginRight: 8,
+  },
+  strategicGoalTitle: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#040195',
   },
 });
 
@@ -495,6 +513,41 @@ const ActivityPDF = ({ activity, report }) => {
             <Text style={styles.budgetLabel}>External Fund</Text>
           </View>
         </View>
+
+        {/* AdZU STRATEGIC GOALS */}
+        {(() => {
+          let strategicGoals = [];
+          try {
+            if (activity?.strategic_goals) {
+              strategicGoals = typeof activity.strategic_goals === 'string'
+                ? JSON.parse(activity.strategic_goals)
+                : activity.strategic_goals;
+            }
+          } catch (e) {
+            console.error('Error parsing strategic goals:', e);
+          }
+          
+          if (strategicGoals && strategicGoals.length > 0) {
+            return (
+              <>
+                <View style={styles.divider} />
+                <Text style={styles.sectionTitle}>AdZU STRATEGIC GOALS</Text>
+                <View style={styles.strategicGoalsSection}>
+                  {strategicGoals.map((goalId) => {
+                    const goal = ADZU_STRATEGIC_GOALS.find(g => g.id === goalId);
+                    return goal ? (
+                      <View key={goalId} style={styles.strategicGoalRow}>
+                        <Text style={styles.strategicGoalIcon}>{goal.icon}</Text>
+                        <Text style={styles.strategicGoalTitle}>{goal.title}</Text>
+                      </View>
+                    ) : null;
+                  })}
+                </View>
+              </>
+            );
+          }
+          return null;
+        })()}
       </Page>
     </Document>
   );
