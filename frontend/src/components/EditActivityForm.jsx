@@ -69,6 +69,7 @@ export default function EditActivityForm({
     partners: [{ name: "", type: "", nature: "" }],
     budgets: [{ amount: "", type: "external" }],
     thumbnail: null,
+    thumbnailUrl: null, // Existing thumbnail URL from database
     reportUrls: [""],
     sdgs: [],
     strategicGoals: [],
@@ -172,6 +173,7 @@ export default function EditActivityForm({
         })(),
         sdgs,
         strategicGoals,
+        thumbnailUrl: activity.thumbnail_url || null,
       });
     }
   }, [activity]);
@@ -340,6 +342,21 @@ export default function EditActivityForm({
         descriptionType: typeof formData.description,
       });
 
+      // Upload new thumbnail if provided
+      let thumbnailUrl = formData.thumbnailUrl; // Keep existing URL by default
+      if (formData.thumbnail) {
+        try {
+          const uploadResult = await OfficeService.uploadThumbnail(formData.thumbnail);
+          thumbnailUrl = uploadResult.url;
+          console.log("Thumbnail uploaded:", thumbnailUrl);
+        } catch (uploadError) {
+          console.error("Thumbnail upload failed:", uploadError);
+          setErrorMessage("Failed to upload thumbnail. Please try again.");
+          setShowErrorModal(true);
+          return;
+        }
+      }
+
       // Prepare activity data for backend
       const activityData = {
         activity_name: formData.projectName,
@@ -394,6 +411,7 @@ export default function EditActivityForm({
         phase: formData.phase || null,
         report_url: JSON.stringify(formData.reportUrls.filter(url => url.trim() !== '')),
         classification: formData.classification || null,
+        thumbnail_url: thumbnailUrl,
       };
 
       console.log("ActivityData being sent to backend:", activityData);
@@ -1299,6 +1317,26 @@ export default function EditActivityForm({
                 <div className="text-[9px] text-[#8180C9] mb-0.5">
                   3 MB (max)
                 </div>
+                {/* Thumbnail Preview - Show new file or existing URL */}
+                {(formData.thumbnail || formData.thumbnailUrl) && (
+                  <div className="relative mb-2 rounded-lg overflow-hidden border border-[#8180C9]">
+                    <img 
+                      src={formData.thumbnail ? URL.createObjectURL(formData.thumbnail) : formData.thumbnailUrl} 
+                      alt="Thumbnail preview" 
+                      className="w-full h-24 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, thumbnail: null, thumbnailUrl: null }))}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition-colors"
+                      title="Remove thumbnail"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
                 <label className="flex items-center justify-center gap-1.5 w-full px-2 py-2 rounded-[11px] text-xs bg-[#4D49FC] text-white font-semibold hover:bg-[#3d39cc] transition-colors cursor-pointer group">
                   <svg
                     className="w-3.5 h-3.5"
@@ -1314,7 +1352,7 @@ export default function EditActivityForm({
                       className="group-hover:fill-gray-200 transition-colors"
                     />
                   </svg>
-                  Change
+                  {(formData.thumbnail || formData.thumbnailUrl) ? 'Change' : 'Upload'}
                   <input
                     type="file"
                     accept="image/*"

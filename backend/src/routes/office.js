@@ -4,6 +4,56 @@ const supabase = require("../config/database");
 
 const router = express.Router();
 
+// ============ THUMBNAIL UPLOAD ROUTE ============
+
+// Upload thumbnail to Supabase storage
+router.post("/upload-thumbnail", authenticateToken, async (req, res) => {
+  try {
+    const { fileData, fileName, contentType } = req.body;
+    
+    if (!fileData || !fileName) {
+      return res.status(400).json({ error: "File data and file name are required" });
+    }
+
+    // Decode base64 file data
+    const base64Data = fileData.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Generate unique filename
+    const timestamp = Date.now();
+    const uniqueFileName = `${timestamp}-${fileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const filePath = `thumbnails/${uniqueFileName}`;
+    
+    // Upload to Supabase storage
+    const { data, error } = await supabase.storage
+      .from('activity-thumbnails')
+      .upload(filePath, buffer, {
+        contentType: contentType || 'image/jpeg',
+        upsert: false
+      });
+    
+    if (error) {
+      console.error("Storage upload error:", error);
+      throw error;
+    }
+    
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('activity-thumbnails')
+      .getPublicUrl(filePath);
+    
+    res.json({
+      message: "Thumbnail uploaded successfully",
+      url: urlData.publicUrl,
+      path: filePath
+    });
+    
+  } catch (error) {
+    console.error("Upload thumbnail error:", error);
+    res.status(500).json({ error: "Failed to upload thumbnail" });
+  }
+});
+
 // Get all offices (public route for office selection)
 router.get("/all", async (req, res) => {
   try {
@@ -277,6 +327,7 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
           budget_type,
           sdg_number,
           strategic_goals,
+          thumbnail_url,
           status,
           phase,
           notes,
@@ -313,6 +364,7 @@ router.get("/:officeId/reports", authenticateToken, async (req, res) => {
           budget_type,
           sdg_number,
           strategic_goals,
+          thumbnail_url,
           status,
           phase,
           notes,
@@ -610,6 +662,7 @@ router.post("/activities", authenticateToken, async (req, res) => {
       phase: activityData.phase || null,
       status: "pending", // Status is always pending on creation, controlled by Unit Director
       report_url: activityData.report_url || null, // URL link to report
+      thumbnail_url: activityData.thumbnail_url || null, // Thumbnail image URL from storage
       notes: activityData.notes || null,
       created_by: userId,
     };
@@ -1054,6 +1107,8 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     // Other fields
     if (updateData.report_url !== undefined)
       sanitizedData.report_url = updateData.report_url;
+    if (updateData.thumbnail_url !== undefined)
+      sanitizedData.thumbnail_url = updateData.thumbnail_url;
     if (updateData.implementing_partners !== undefined)
       sanitizedData.implementing_partners = updateData.implementing_partners;
 

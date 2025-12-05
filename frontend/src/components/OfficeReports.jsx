@@ -142,7 +142,7 @@ export default function OfficeReports({
           programId: program?.id,
           programTitle: program?.title || "Program",
           activityName: activity.activity_name || "Activity",
-          image: activity.image_url || "/reports/default.webp",
+          image: activity.thumbnail_url || activity.image_url || "/reports/default.webp",
           status: activity.status,
           phase: activity.phase,
           startDate: activity.start_date,

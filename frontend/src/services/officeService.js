@@ -81,6 +81,31 @@ class OfficeService {
   async createActivity(activityData) {
     return await api.post('/api/office/activities', activityData);
   }
+
+  /**
+   * Upload thumbnail image to storage
+   * @param {File} file - The image file to upload
+   * @returns {Promise<{url: string, path: string}>} - The public URL and path of uploaded image
+   */
+  async uploadThumbnail(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const response = await api.post('/api/office/upload-thumbnail', {
+            fileData: reader.result,
+            fileName: file.name,
+            contentType: file.type
+          });
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 }
 
 export default new OfficeService();

@@ -230,6 +230,21 @@ export default function AddActivityForm({
     }
 
     try {
+      // Upload thumbnail if provided
+      let thumbnailUrl = null;
+      if (formData.thumbnail) {
+        try {
+          const uploadResult = await OfficeService.uploadThumbnail(formData.thumbnail);
+          thumbnailUrl = uploadResult.url;
+          console.log("Thumbnail uploaded:", thumbnailUrl);
+        } catch (uploadError) {
+          console.error("Thumbnail upload failed:", uploadError);
+          setErrorMessage("Failed to upload thumbnail. Please try again.");
+          setShowErrorModal(true);
+          return;
+        }
+      }
+
       // Prepare activity data for backend
       const activityData = {
         activity_name: formData.projectName,
@@ -284,6 +299,7 @@ export default function AddActivityForm({
         phase: formData.phase || null,
         report_url: JSON.stringify(formData.reportUrls.filter(url => url.trim() !== '')),
         classification: formData.classification || null,
+        thumbnail_url: thumbnailUrl,
       };
 
       console.log("Submitting activity data:", activityData);
@@ -1181,6 +1197,26 @@ export default function AddActivityForm({
                 <div className="text-[9px] text-[#8180C9] mb-0.5">
                   3 MB (max)
                 </div>
+                {/* Thumbnail Preview */}
+                {formData.thumbnail && (
+                  <div className="relative mb-2 rounded-lg overflow-hidden border border-[#8180C9]">
+                    <img 
+                      src={URL.createObjectURL(formData.thumbnail)} 
+                      alt="Thumbnail preview" 
+                      className="w-full h-24 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, thumbnail: null }))}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition-colors"
+                      title="Remove thumbnail"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
                 <label className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-[11px] text-xs bg-[#4D49FC] text-white font-semibold hover:bg-[#3d39cc] transition-colors cursor-pointer group">
                   <svg
                     className="w-3.5 h-3.5"
@@ -1196,7 +1232,7 @@ export default function AddActivityForm({
                       className="group-hover:fill-gray-200 transition-colors"
                     />
                   </svg>
-                  Change
+                  {formData.thumbnail ? 'Change' : 'Upload'}
                   <input
                     type="file"
                     accept="image/*"
