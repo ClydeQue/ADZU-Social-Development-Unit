@@ -347,7 +347,7 @@ export default function MainSettings() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                               <div className="w-12 h-12 bg-[#F0F4FF] group-hover:bg-[#040195] rounded-xl flex items-center justify-center transition-colors">
-                                <svg
+                                 <svg
                                   className="w-6 h-6 text-[#040195] group-hover:text-white transition-colors"
                                   fill="none"
                                   stroke="currentColor"
