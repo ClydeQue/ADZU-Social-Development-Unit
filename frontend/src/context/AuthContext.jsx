@@ -67,13 +67,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await AuthService.login(credentials);
       
-      console.log('🔐 Login Result:', {
-        hasAccessToken: !!result?.accessToken,
-        hasUser: !!result?.user,
-        user: result?.user,
-        officeId: result?.user?.office_id,
-      });
-      
       if (result?.accessToken && result?.user) {
         // Store session in state and localStorage for persistence
         const newSession = {
@@ -81,8 +74,6 @@ export const AuthProvider = ({ children }) => {
           accessToken: result.accessToken,
         };
         setSession(newSession);
-        
-        console.log('✅ Session set:', newSession.user);
         
         // Also store user data in localStorage for page refresh
         localStorage.setItem('sdu_user', JSON.stringify(result.user));

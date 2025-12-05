@@ -36,16 +36,7 @@ const ActivityPrintView = ({ activity }) => {
     }
   }
 
-  // Parse partners
-  let partnersData = [];
-  if (activity?.partners) {
-    try {
-      const partnersStr = typeof activity.partners === 'string' ? activity.partners : '';
-      partnersData = partnersStr.split(',').map(p => p.trim()).filter(Boolean);
-    } catch (e) {
-      console.error('Error parsing partners:', e);
-    }
-  }
+  // Partners data is directly used from activity.partners string in render
 
   // Format date
   const formatDateShort = (dateString) => {

@@ -15,7 +15,7 @@ import settingsService from "@/services/settingsService";
 export default function UsersManagement() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("users"); // 'users' or 'reset-requests'
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -23,7 +23,6 @@ export default function UsersManagement() {
   const {
     data: usersData,
     isLoading: usersLoading,
-    error: usersError,
   } = useQuery({
     queryKey: ["officeUsers"],
     queryFn: async () => {
@@ -32,7 +31,7 @@ export default function UsersManagement() {
     },
   });
 
-  const users = usersData?.users || [];
+  const users = useMemo(() => usersData?.users || [], [usersData]);
 
   // Fetch password reset requests
   const { data: resetRequestsData, isLoading: resetRequestsLoading } = useQuery({

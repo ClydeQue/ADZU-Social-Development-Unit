@@ -25,33 +25,15 @@ export default function ComposeMessageDialog({ onClose, replyTo }) {
   const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch offices list if user is unit director
-  const { data: officesData, isLoading: isLoadingOffices, error: officesError } = useQuery({
+  const { data: officesData, isLoading: isLoadingOffices } = useQuery({
     queryKey: ["offices-for-messaging"],
-    queryFn: async () => {
-      console.log("Fetching offices from API...");
-      const result = await MessageService.getOffices();
-      console.log("API Response:", result);
-      return result;
-    },
+    queryFn: () => MessageService.getOffices(),
     enabled: user?.userType === "unit_director",
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
     retry: 1,
   });
-
-  // Debug log
-  useEffect(() => {
-    if (user?.userType === "unit_director") {
-      console.log("=== COMPOSE MESSAGE DEBUG ===");
-      console.log("Offices data:", officesData);
-      console.log("Number of offices:", officesData?.offices?.length || 0);
-      console.log("Office list:", officesData?.offices?.map(o => `${o.acronym} - ${o.office}`));
-      console.log("Is loading offices:", isLoadingOffices);
-      console.log("Error:", officesError);
-      console.log("===========================");
-    }
-  }, [officesData, isLoadingOffices, officesError, user]);
 
   // Set receiver for office users (always unit director)
   useEffect(() => {

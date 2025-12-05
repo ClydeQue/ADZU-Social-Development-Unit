@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
@@ -7,7 +6,6 @@ import NotificationService from "@/services/notificationService";
 import UnitDirectorService from "@/services/unitDirectorService";
 import { getTimeAgo, formatDate } from "@/utils/timeFormat";
 import NotificationModal from "@/components/NotificationModal";
-import ListSkeleton from "./ListSkeleton";
 
 /**
  * Reusable Notification Dropdown Component

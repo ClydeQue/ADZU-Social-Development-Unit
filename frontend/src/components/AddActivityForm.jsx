@@ -19,7 +19,6 @@ const OFFICE_ACRONYMS = ["ACCA", "ACES", "ACLG", "ALTEC", "APC", "CCES"];
 export default function AddActivityForm({
   officeId,
   basePath,
-  officeColor = "#4D49FC",
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -1271,5 +1270,4 @@ AddActivityForm.propTypes = {
   officeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
     .isRequired,
   basePath: PropTypes.string.isRequired,
-  officeColor: PropTypes.string,
 };

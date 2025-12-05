@@ -150,11 +150,6 @@ router.get("/:officeId/dashboard", authenticateToken, async (req, res) => {
 
       if (activitiesError) throw activitiesError;
       activities = activitiesData || [];
-      
-      // Debug: Log activities and their phase values
-      console.log(`📊 Dashboard for office ${officeId}:`);
-      console.log(`   Total activities: ${activities.length}`);
-      console.log(`   Activities with phases:`, activities.map(a => ({ id: a.id, phase: a.phase, status: a.status })));
     }
 
     // Calculate statistics based on activities (similar to Unit Director dashboard)
@@ -262,8 +257,6 @@ router.get("/:officeId/programs", authenticateToken, async (req, res) => {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-
-    console.log(`✅ GET /api/office/${officeId}/programs - Found ${programs?.length || 0} programs`);
 
     res.json({ programs });
   } catch (error) {
@@ -557,8 +550,6 @@ router.post("/activities", authenticateToken, async (req, res) => {
     const activityData = req.body;
     const userId = req.user.id;
 
-    console.log("Create activity request:", { activityData, userId });
-
     // Validate required fields
     if (!activityData.activity_name || !activityData.program_id) {
       return res.status(400).json({
@@ -667,8 +658,6 @@ router.post("/activities", authenticateToken, async (req, res) => {
       created_by: userId,
     };
 
-    console.log("Prepared activity data:", newActivity);
-
     // Create the activity
     const { data: createdActivity, error: createError } = await supabase
       .from("activities")
@@ -681,8 +670,6 @@ router.post("/activities", authenticateToken, async (req, res) => {
       throw createError;
     }
 
-    console.log("Activity created successfully:", createdActivity);
-
     // Create notification for unit director about new activity
     try {
       await supabase.from("notifications").insert({
@@ -692,7 +679,6 @@ router.post("/activities", authenticateToken, async (req, res) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
-      console.log("Notification created for new activity");
     } catch (notifError) {
       console.error("Failed to create notification:", notifError);
       // Don't fail the request if notification fails
@@ -925,8 +911,6 @@ router.get("/activities/:activityId", authenticateToken, async (req, res) => {
       return res.status(404).json({ error: "Activity not found" });
     }
 
-    console.log("Activity data:", JSON.stringify(activity, null, 2));
-
     // Check if user has access to this office
     if (
       req.user.userType !== "unit_director" &&
@@ -947,19 +931,6 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
   try {
     const { activityId } = req.params;
     const updateData = req.body;
-
-    console.log("\n=== UPDATE ACTIVITY REQUEST ===");
-    console.log("Activity ID:", activityId);
-    console.log("Request body keys:", Object.keys(updateData));
-    console.log("Description received:", updateData.description);
-    console.log("Description type:", typeof updateData.description);
-    console.log(
-      "Description is undefined?",
-      updateData.description === undefined
-    );
-    console.log("Description is null?", updateData.description === null);
-    console.log("Description is empty string?", updateData.description === "");
-    console.log("================================\n");
 
     // First, get the activity to check permissions
     const { data: existingActivity, error: fetchError } = await supabase
@@ -1112,27 +1083,11 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
     if (updateData.implementing_partners !== undefined)
       sanitizedData.implementing_partners = updateData.implementing_partners;
 
-    console.log("\n=== SANITIZED DATA ===");
-    console.log("Description:", sanitizedData.description);
-    console.log("All fields:", Object.keys(sanitizedData));
-    console.log("======================\n");
-
-    console.log("Description in sanitizedData:", sanitizedData.description);
-    console.log("======================\n");
-
     // Update the activity
-    console.log("\n=== UPDATING DATABASE ===");
-    console.log("Fields being updated:", Object.keys(sanitizedData));
-    console.log("Description field included?", "description" in sanitizedData);
-    console.log("Description value:", sanitizedData.description);
-    console.log("Full sanitizedData:", JSON.stringify(sanitizedData, null, 2));
-
     const updatePayload = {
       ...sanitizedData,
       updated_at: new Date().toISOString(),
     };
-
-    console.log("Full update payload:", JSON.stringify(updatePayload, null, 2));
 
     const { data: updatedActivity, error: updateError } = await supabase
       .from("activities")
@@ -1141,21 +1096,10 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
       .select()
       .single();
 
-    console.log("Update complete.");
-    console.log("Update error?", updateError);
-    console.log("Updated activity description:", updatedActivity?.description);
-    console.log(
-      "Full updated activity:",
-      JSON.stringify(updatedActivity, null, 2)
-    );
-    console.log("=========================\n");
-
     if (updateError) {
       console.error("Update error:", updateError);
       throw updateError;
     }
-
-    console.log("Activity updated successfully:", updatedActivity);
 
     // Create notification for unit director about activity update
     try {
@@ -1166,7 +1110,6 @@ router.put("/activities/:activityId", authenticateToken, async (req, res) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
-      console.log("Notification created for updated activity");
     } catch (notifError) {
       console.error("Failed to create notification:", notifError);
       // Don't fail the request if notification fails
@@ -1232,14 +1175,6 @@ router.post("/program-requests", authenticateToken, requireRole(["office_user"])
       .single();
 
     if (error) throw error;
-
-    console.log('✅ Program request created:', {
-      id: request.id,
-      office_id: request.office_id,
-      request_type: request.request_type,
-      status: request.status,
-      title: request.title
-    });
 
     res.status(201).json({
       message: "Program request submitted successfully",

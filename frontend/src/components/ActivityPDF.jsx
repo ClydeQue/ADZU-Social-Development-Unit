@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
  * ActivityPDF Component
  * Generates a PDF document for activity/report details
  */
-const ActivityPDF = ({ activity, report }) => {
+const ActivityPDF = ({ activity }) => {
   // Parse venue
   let venueData = { street: '', barangay: '', city: '', province: '' };
   if (activity?.venue) {
@@ -281,24 +281,7 @@ const ActivityPDF = ({ activity, report }) => {
     }
   }
 
-  // Parse partners
-  let partnersData = [];
-  if (activity?.partners) {
-    try {
-      const partnersStr = typeof activity.partners === 'string' ? activity.partners : '';
-      // Split by comma and create array
-      partnersData = partnersStr.split(',').map(p => p.trim()).filter(Boolean);
-    } catch (e) {
-      console.error('Error parsing partners:', e);
-    }
-  }
-
-  // Format date
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not set';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
+  // Partners data is directly used from activity.partners string in render
 
   const formatDateShort = (dateString) => {
     if (!dateString) return 'Not set';
@@ -555,7 +538,6 @@ const ActivityPDF = ({ activity, report }) => {
 
 ActivityPDF.propTypes = {
   activity: PropTypes.object,
-  report: PropTypes.object,
 };
 
 export default ActivityPDF;

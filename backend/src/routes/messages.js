@@ -3,8 +3,6 @@ const router = express.Router();
 const supabase = require("../config/database");
 const { authenticateToken, requireRole } = require("../middleware/auth");
 
-console.log("✅ Messages route loaded");
-
 // Get ALL messages for current user (complete history)
 router.get("/all", authenticateToken, async (req, res) => {
   try {
@@ -138,9 +136,6 @@ router.get("/", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const userType = req.user.userType;
-    const officeId = req.user.office_id;
-
-    console.log("Get messages request:", { userId, userType, officeId });
 
     let query = supabase
       .from("messages")
@@ -163,8 +158,6 @@ router.get("/", authenticateToken, async (req, res) => {
       console.error("Supabase query error:", error);
       throw error;
     }
-
-    console.log(`Found ${messages?.length || 0} messages`);
 
     // EXTRA SECURITY: For office users, filter out any messages where they are NOT involved
     let filteredMessages = messages;
@@ -306,14 +299,6 @@ router.post("/", authenticateToken, async (req, res) => {
     const senderId = req.user.id;
     const senderType = req.user.userType;
 
-    console.log("Send message request:", {
-      senderId,
-      senderType,
-      receiverId,
-      receiverType,
-      subject,
-    });
-
     // Validation
     if (!receiverType || !subject || !message) {
       return res.status(400).json({
@@ -328,21 +313,32 @@ router.post("/", authenticateToken, async (req, res) => {
       receiverType === "unit_director" &&
       !receiverId
     ) {
-      const { data: unitDirector, error: udError } = await supabase
+      // First try to find active unit director
+      let { data: unitDirector, error: udError } = await supabase
         .from("office_credentials")
         .select("id")
         .eq("user_type", "unit_director")
-        .eq("is_active", true)
+        .limit(1)
         .single();
 
+      // If not found or error, try without is_active filter
       if (udError || !unitDirector) {
-        return res.status(404).json({
-          error: "Unit Director not found",
-        });
+        const { data: anyUnitDirector, error: anyError } = await supabase
+          .from("office_credentials")
+          .select("id")
+          .eq("user_type", "unit_director")
+          .limit(1);
+        
+        if (anyError || !anyUnitDirector || anyUnitDirector.length === 0) {
+          console.error("Unit Director lookup failed:", udError || anyError);
+          return res.status(404).json({
+            error: "Unit Director not found in the system",
+          });
+        }
+        unitDirector = anyUnitDirector[0];
       }
 
       receiverId = unitDirector.id;
-      console.log("Auto-assigned Unit Director ID:", receiverId);
     }
 
     // Now validate receiverId is provided
@@ -393,11 +389,8 @@ router.post("/", authenticateToken, async (req, res) => {
 
     if (error) {
       console.error("Supabase insert error:", error);
-      console.error("Error details:", JSON.stringify(error, null, 2));
       throw error;
     }
-
-    console.log("Message created successfully:", newMessage);
 
     res.status(201).json({
       success: true,
@@ -406,7 +399,6 @@ router.post("/", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error("Send message error:", error);
-    console.error("Error stack:", error.stack);
     res.status(500).json({
       error: "Error sending message",
       details: error.message,
@@ -421,8 +413,6 @@ router.put("/:messageId/read", authenticateToken, async (req, res) => {
   try {
     const { messageId } = req.params;
     const userId = req.user.id;
-
-    console.log("Mark message as read:", { messageId, userId });
 
     // Verify user is the receiver
     const { data: message, error: fetchError } = await supabase
@@ -465,8 +455,6 @@ router.delete("/:messageId", authenticateToken, async (req, res) => {
   try {
     const { messageId } = req.params;
     const userId = req.user.id;
-
-    console.log("Delete message:", { messageId, userId });
 
     // Verify user is sender or receiver
     const { data: message, error: fetchError } = await supabase

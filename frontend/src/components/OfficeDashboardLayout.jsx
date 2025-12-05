@@ -24,7 +24,6 @@ export default function OfficeDashboardLayout({
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationFilter, setNotificationFilter] = useState("all");
   const notificationRef = useRef(null);
 
   // Fetch office dashboard data using React Query
