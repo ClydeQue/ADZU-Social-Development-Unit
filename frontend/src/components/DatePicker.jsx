@@ -93,7 +93,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between"
+        className="w-full px-2 py-1.5 border border-[#8180C9] rounded-[11px] text-xs text-[#040195] focus:border-[#5B5A9E] focus:outline-none bg-white text-left flex items-center justify-between cursor-pointer hover:border-[#5B5A9E] transition-colors"
       >
         <span className={value ? "" : "text-gray-400"}>
           {value ? formatDisplayDate(value) : "Select date"}
@@ -121,7 +121,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1 hover:bg-gray-100 rounded transition-colors"
+              className="p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4 text-[#040195]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -133,7 +133,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1 hover:bg-gray-100 rounded transition-colors"
+              className="p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4 text-[#040195]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -168,7 +168,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
                   key={day}
                   type="button"
                   onClick={() => selectDate(day)}
-                  className={`h-6 w-6 mx-auto text-[10px] rounded-full flex items-center justify-center transition-colors
+                  className={`h-6 w-6 mx-auto text-[10px] rounded-full flex items-center justify-center transition-colors cursor-pointer
                     ${isSelected(day) 
                       ? "bg-[#040195] text-white" 
                       : isToday(day)
@@ -191,7 +191,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
                 setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
                 selectDate(today.getDate());
               }}
-              className="w-full text-[10px] text-[#040195] hover:underline"
+              className="w-full text-[10px] text-[#040195] hover:underline cursor-pointer"
             >
               Today
             </button>

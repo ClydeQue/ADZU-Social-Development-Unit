@@ -1098,10 +1098,9 @@ export default function AddActivityForm({
                         }`}
                       >
                         <div 
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}
-                          style={{ backgroundColor: goal.color }}
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 bg-[#040195]"
                         >
-                          {goal.id}
+                          {goal.letter}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-[#040195] truncate">

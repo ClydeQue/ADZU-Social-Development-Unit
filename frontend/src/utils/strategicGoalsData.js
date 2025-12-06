@@ -1,11 +1,13 @@
 /**
  * AdZU Strategic Goals Data
  * The 4 strategic goals of Ateneo de Zamboanga University
+ * Ordered as A-D-Z-U
  */
 
 export const ADZU_STRATEGIC_GOALS = [
   {
     id: 1,
+    letter: "A",
     title: "Advancing Ignatian Spirituality",
     shortTitle: "Ignatian Spirituality",
     description: "Promoting and deepening Ignatian spiritual values and practices",
@@ -13,15 +15,8 @@ export const ADZU_STRATEGIC_GOALS = [
     icon: "🙏"
   },
   {
-    id: 2,
-    title: "United in purpose and action",
-    shortTitle: "United in Purpose",
-    description: "Fostering collaboration, unity, and collective action towards shared goals",
-    color: "#F59E0B", // Amber
-    icon: "🤝"
-  },
-  {
     id: 3,
+    letter: "D",
     title: "Dedicated to holistic growth and human flourishing",
     shortTitle: "Holistic Growth",
     description: "Supporting comprehensive development - intellectually, emotionally, spiritually, and physically",
@@ -30,11 +25,21 @@ export const ADZU_STRATEGIC_GOALS = [
   },
   {
     id: 4,
+    letter: "Z",
     title: "Zealous in charting global paths",
     shortTitle: "Global Paths",
     description: "Pursuing excellence and innovation in global engagement and outreach",
     color: "#3B82F6", // Blue
     icon: "🌍"
+  },
+  {
+    id: 2,
+    letter: "U",
+    title: "United in purpose and action",
+    shortTitle: "United in Purpose",
+    description: "Fostering collaboration, unity, and collective action towards shared goals",
+    color: "#F59E0B", // Amber
+    icon: "🤝"
   }
 ];
 
