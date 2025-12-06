@@ -14,27 +14,27 @@ export const ADZU_STRATEGIC_GOALS = [
   },
   {
     id: 2,
-    title: "Focusing on Holistic Growth",
+    title: "United in purpose and action",
+    shortTitle: "United in Purpose",
+    description: "Fostering collaboration, unity, and collective action towards shared goals",
+    color: "#F59E0B", // Amber
+    icon: "🤝"
+  },
+  {
+    id: 3,
+    title: "Dedicated to holistic growth and human flourishing",
     shortTitle: "Holistic Growth",
     description: "Supporting comprehensive development - intellectually, emotionally, spiritually, and physically",
     color: "#10B981", // Green
     icon: "🌱"
   },
   {
-    id: 3,
-    title: "Being Zealous in Charting Global Paths",
+    id: 4,
+    title: "Zealous in charting global paths",
     shortTitle: "Global Paths",
     description: "Pursuing excellence and innovation in global engagement and outreach",
     color: "#3B82F6", // Blue
     icon: "🌍"
-  },
-  {
-    id: 4,
-    title: "Being United in Purpose and Action",
-    shortTitle: "United in Purpose",
-    description: "Fostering collaboration, unity, and collective action towards shared goals",
-    color: "#F59E0B", // Amber
-    icon: "🤝"
   }
 ];
 

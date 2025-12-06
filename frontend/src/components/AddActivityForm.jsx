@@ -228,6 +228,20 @@ export default function AddActivityForm({
       return;
     }
 
+    // Validate inception date
+    if (!formData.initiation) {
+      setErrorMessage("Please select an Inception date.");
+      setShowErrorModal(true);
+      return;
+    }
+
+    // Validate implementation date
+    if (!formData.implementation) {
+      setErrorMessage("Please select an Implementation date.");
+      setShowErrorModal(true);
+      return;
+    }
+
     try {
       // Upload thumbnail if provided
       let thumbnailUrl = null;
@@ -598,7 +612,7 @@ export default function AddActivityForm({
             <div className="grid grid-cols-2 gap-1.5">
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  Inception <span className="text-gray-400 font-normal">(Optional)</span>
+                  Inception <span className="text-red-500">*</span>
                 </label>
                 <DatePicker
                   value={formData.initiation}
@@ -607,7 +621,7 @@ export default function AddActivityForm({
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#040195] mb-1">
-                  Implementation <span className="text-gray-400 font-normal">(Optional)</span>
+                  Implementation <span className="text-red-500">*</span>
                 </label>
                 <DatePicker
                   value={formData.implementation}
