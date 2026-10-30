@@ -5,12 +5,11 @@ const crypto = require("crypto");
 class JWTService {
   constructor() {
     // JWT secrets from environment
-    this.ACCESS_TOKEN_SECRET =
-      process.env.JWT_ACCESS_SECRET ||
-      "your-super-secure-access-secret-key-2024";
-    this.REFRESH_TOKEN_SECRET =
-      process.env.JWT_REFRESH_SECRET ||
-      "your-super-secure-refresh-secret-key-2024";
+    this.ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET;
+    this.REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET;
+    if (!this.ACCESS_TOKEN_SECRET?.trim() || !this.REFRESH_TOKEN_SECRET?.trim()) {
+      throw new Error("JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be configured");
+    }
 
     // Token expiration times
     this.ACCESS_TOKEN_EXPIRY = "15m"; // 15 minutes
@@ -67,7 +66,11 @@ class JWTService {
   // Verify Access Token
   verifyAccessToken(token) {
     try {
-      const decoded = jwt.verify(token, this.ACCESS_TOKEN_SECRET);
+      const decoded = jwt.verify(token, this.ACCESS_TOKEN_SECRET, {
+        algorithms: ["HS256"],
+        issuer: "adzu-sdu-api",
+        audience: "adzu-sdu-client",
+      });
       if (decoded.type !== "access") {
         throw new Error("Invalid token type");
       }
@@ -85,7 +88,11 @@ class JWTService {
         throw new Error("Refresh token not found");
       }
 
-      const decoded = jwt.verify(token, this.REFRESH_TOKEN_SECRET);
+      const decoded = jwt.verify(token, this.REFRESH_TOKEN_SECRET, {
+        algorithms: ["HS256"],
+        issuer: "adzu-sdu-api",
+        audience: "adzu-sdu-client",
+      });
       if (decoded.type !== "refresh") {
         throw new Error("Invalid token type");
       }

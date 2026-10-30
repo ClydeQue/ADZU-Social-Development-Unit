@@ -18,10 +18,14 @@ const REQUEST_DELAY = 500; // 0.5 seconds between requests (reduced from 1s)
  * Middleware to check login rate limit
  */
 const checkLoginRateLimit = (req, res, next) => {
-  const { username } = req.body;
+  const { username } = req.body || {};
 
   if (!username) {
     return next();
+  }
+
+  if (typeof username !== "string") {
+    return res.status(400).json({ success: false, message: "Username must be text." });
   }
 
   const normalizedUsername = username.trim().toLowerCase();
